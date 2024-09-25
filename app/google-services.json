@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "987197125676",
+    "project_id": "opsc7311-poe-group2",
+    "storage_bucket": "opsc7311-poe-group2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987197125676:android:e797769a6ac56049e70d89",
+        "android_client_info": {
+          "package_name": "com.example.opsc7311_sem2_2024"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFsawwXB5vj_lZV3jvREPYZfbvC5ul_ic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

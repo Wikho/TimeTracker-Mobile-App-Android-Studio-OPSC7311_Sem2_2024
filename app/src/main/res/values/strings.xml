@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">OPSC7311_Sem2_2024</string>
+    <string name="appName">TimeFlow</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="don_t_have_an_account">DON\'T HAVE AN ACCOUNT?</string>
+    <string name="register">REGISTER</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="slogan">Let’s make every minute count.</string>
+    <string name="log_in">Log in</string>
+    <string name="required">Required*</string>
+    <string name="have_a_account">HAVE A ACCOUNT?</string>
+    <string name="login">LOG IN</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Name</string>
 </resources>
