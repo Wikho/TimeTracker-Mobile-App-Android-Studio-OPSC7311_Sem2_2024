@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-        // Add a logout button or logic to handle user logout
+        // logout
         binding.btnLogOut.setOnClickListener {
             logOutUser()
         }

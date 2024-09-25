@@ -34,6 +34,14 @@ class LoginActivity : AppCompatActivity() {
         }
         // </editor-fold>
 
+        // <editor-fold desc="Register Click Listener">
+        binding.tvRegister.setOnClickListener {
+            // Navigate to the SignInActivity
+            val intent = Intent(this, SignInActivity::class.java)
+            startActivity(intent)
+        }
+        // </editor-fold>
+
         // <editor-fold desc="Login Button Click Listener">
         binding.btnLogIn.setOnClickListener {
             if (validateInputs()) {
