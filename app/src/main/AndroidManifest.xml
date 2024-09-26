@@ -16,7 +16,7 @@
             android:name=".ForgotPassword"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".HomeScreen"
             android:exported="false" />
         <activity
             android:name=".SignInActivity"

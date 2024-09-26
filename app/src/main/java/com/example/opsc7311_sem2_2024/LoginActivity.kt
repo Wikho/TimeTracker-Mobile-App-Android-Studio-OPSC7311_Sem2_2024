@@ -58,7 +58,7 @@ class LoginActivity : AppCompatActivity() {
 
                     if (success) {
                         saveLoginState(rememberMe) // Save login state based on Remember Me
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, HomeScreen::class.java)
                         startActivity(intent)
                         finish()
                     } else {
@@ -90,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
         val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
         if (isLoggedIn) {
             // Redirect to MainActivity if already logged in
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, HomeScreen::class.java)
             startActivity(intent)
             finish()
         }
