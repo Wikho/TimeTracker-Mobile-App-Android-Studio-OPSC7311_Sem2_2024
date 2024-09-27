@@ -4,7 +4,7 @@ import com.google.android.material.textfield.TextInputLayout
 
 class ValidationManager {
 
-    // Validate Name: should not be empty, no numbers or special characters, only a-z
+    // Validate Name
     fun validateName(nameInput: TextInputLayout): Boolean {
         val name = nameInput.editText?.text.toString().trim()
         val namePattern = "^[a-zA-Z]+(?: [a-zA-Z]+)*$" // Allows only letters and spaces between words
@@ -18,7 +18,7 @@ class ValidationManager {
         }
     }
 
-    // Validate Email: should be a valid email format
+    // Validate Email
     fun validateEmail(emailInput: TextInputLayout): Boolean {
         val email = emailInput.editText?.text.toString().trim()
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
@@ -31,7 +31,7 @@ class ValidationManager {
         }
     }
 
-    // Validate Password: should be at least 6 characters long
+    // Validate Password
     fun validatePassword(passwordInput: TextInputLayout): Boolean {
         val password = passwordInput.editText?.text.toString().trim()
         return if (password.length < 6) {

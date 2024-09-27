@@ -9,11 +9,16 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.opsc7311_sem2_2024.databinding.ActivityLogInBinding
 
 class LoginActivity : AppCompatActivity() {
-
+    // <editor-fold desc="Binding">
     private lateinit var binding: ActivityLogInBinding
-    private val validationManager = ValidationManager()
-    private val firebaseManager = FirebaseManager()
-    private lateinit var sharedPreferences: SharedPreferences
+    // </editor-fold>
+
+    // <editor-fold desc="Firebase and Validation">
+        private val validationManager = ValidationManager()
+        private val firebaseManager = FirebaseManager()
+        private lateinit var sharedPreferences: SharedPreferences
+    // </editor-fold>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
 
                     if (success) {
                         saveLoginState(rememberMe) // Save login state based on Remember Me
-                        val intent = Intent(this, HomeScreen::class.java)
+                        val intent = Intent(this, MainScreen::class.java)
                         startActivity(intent)
                         finish()
                     } else {
@@ -90,7 +95,7 @@ class LoginActivity : AppCompatActivity() {
         val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
         if (isLoggedIn) {
             // Redirect to MainActivity if already logged in
-            val intent = Intent(this, HomeScreen::class.java)
+            val intent = Intent(this, MainScreen::class.java)
             startActivity(intent)
             finish()
         }
