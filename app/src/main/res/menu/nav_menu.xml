@@ -52,7 +52,8 @@
             <item
             android:id="@+id/nvLogout"
             android:icon="@drawable/logout"
-            android:title="@string/log_out"/>
+            android:title="@string/log_out"
+            android:iconTint="@android:color/holo_red_dark"/>
 
         </menu>
 
