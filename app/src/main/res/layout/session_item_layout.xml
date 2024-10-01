@@ -3,35 +3,55 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp"
-    android:background="">
+    android:background="@color/gray">
 
-    <TextView
-        android:id="@+id/tv_StartTime"
-        android:layout_width="wrap_content"
+    <!-- Vertical layout for the text information -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Time Started: --:--"
-        android:textSize="14sp"/>
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_gravity="center">
 
-    <TextView
-        android:id="@+id/tv_EndTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Time Ended: --:--"
-        android:textSize="14sp"/>
+        <TextView
+            android:id="@+id/tv_SessionStartDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: --/--/----"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/tv_SessionDuration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Session Duration: --:--"
-        android:textSize="14sp"/>
+        <TextView
+            android:id="@+id/tv_StartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time Started: --:--"
+            android:textSize="15sp"/>
 
+        <TextView
+            android:id="@+id/tv_EndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time Ended: --:--"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:id="@+id/tv_SessionDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Session Duration: --:--"
+            android:textSize="15sp"/>
+    </LinearLayout>
+
+    <!-- ImageView for the session image, placed in the right box -->
     <ImageView
         android:id="@+id/iv_SessionImage"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src=""/>
+        android:src="@drawable/image"/>
+
 </LinearLayout>

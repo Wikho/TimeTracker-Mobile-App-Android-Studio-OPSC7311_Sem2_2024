@@ -4,13 +4,104 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TasksFragment">
+    android:paddingBottom="5dp"
+    android:paddingTop ="5dp"
+    android:paddingHorizontal="5dp">
 
-
- <androidx.recyclerview.widget.RecyclerView
+ <!-- ScrollView with task sections -->
+ <androidx.core.widget.NestedScrollView
+     android:id="@+id/scrollViewTasks"
      android:layout_width="match_parent"
-     android:layout_height="match_parent"
-     android:id="@+id/rvTasks"
-     android:layout_margin="20dp"/>
+     android:layout_height="wrap_content"
+     android:layout_above="@id/btnArchivedTasks"
+     android:fillViewport="true">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:id="@+id/parentLinearLayout"
+      android:padding="16dp">
+
+   <!-- Section for TODAY tasks -->
+   <TextView
+       android:id="@+id/tvToday"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/today"
+       android:textSize="18sp"
+       android:textStyle="bold"
+       android:layout_marginBottom="8dp" />
+
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/rvToday"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginBottom="16dp"
+       />
+
+   <!-- Section for THIS WEEK tasks -->
+   <TextView
+       android:id="@+id/tvThisWeek"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/this_week"
+       android:textSize="18sp"
+       android:textStyle="bold"
+       android:layout_marginBottom="8dp" />
+
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/rvThisWeek"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginBottom="16dp" />
+
+   <!-- Section for UPCOMING tasks -->
+   <TextView
+       android:id="@+id/tvUpcoming"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/upcoming"
+       android:textSize="18sp"
+       android:textStyle="bold"
+       android:layout_marginBottom="8dp" />
+
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/rvUpcoming"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginBottom="16dp" />
+
+  </LinearLayout>
+
+ </androidx.core.widget.NestedScrollView>
+
+ <!-- Archived Tasks Button at the bottom -->
+ <Button
+     android:id="@+id/btnArchivedTasks"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:layout_alignParentBottom="true"
+
+     android:text="@string/archived_tasks"
+     android:textColor="@color/black"
+     android:textStyle="bold"
+     tools:ignore="TextContrastCheck"
+     android:gravity="center"
+     android:backgroundTint="@color/red"/>
+
+ <!-- Floating Action Button -->
+ <com.google.android.material.floatingactionbutton.FloatingActionButton
+     android:id="@+id/fabAddTask"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_alignParentBottom="true"
+     android:layout_alignParentEnd="true"
+     android:layout_marginBottom="60dp"
+     android:layout_marginRight="15dp"
+     android:src="@drawable/add"
+     android:contentDescription="Add Task"
+     android:tint="@android:color/white"
+     android:backgroundTint="@color/purple"/>
 
 </RelativeLayout>

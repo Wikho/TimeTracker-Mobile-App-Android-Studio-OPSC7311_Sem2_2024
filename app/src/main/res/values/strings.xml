@@ -30,6 +30,10 @@
     <string name="notes">NOTES</string>
     <string name="pomodoro">POMODORO</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="this_week">This Week</string>
+    <string name="today">Today</string>
+    <string name="category">Category</string>
 
 
 </resources>
