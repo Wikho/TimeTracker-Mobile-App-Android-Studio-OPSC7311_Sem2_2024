@@ -34,6 +34,15 @@
     <string name="this_week">This Week</string>
     <string name="today">Today</string>
     <string name="category">Category</string>
+    <string name="create_task">CREATE TASK</string>
+    <string name="cover_image">Cover Image</string>
+    <string name="task_title">Task Title</string>
+    <string name="date">Date</string>
+    <string name="min_hours">Min Hours</string>
+    <string name="max_hours">Max Hours</string>
+    <string name="add_category">Add Category</string>
+    <string name="add">Add</string>
+    <string name="task_time">Task Time</string>
 
 
 </resources>

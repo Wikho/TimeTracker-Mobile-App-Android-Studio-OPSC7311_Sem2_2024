@@ -5,55 +5,45 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.opsc7311_sem2_2024.databinding.TaskItemLayoutBinding
 
-class TaskAdapter(
-    private val taskList: MutableList<TaskItem>,
-    private val listener: TaskActionListener
-) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
-    // Define the TaskActionListener interface
     interface TaskActionListener {
-        fun onStartClick(task: TaskItem)
-        fun onStopClick(task: TaskItem)
-        fun onArchiveClick(task: TaskItem)
-        fun onImageClick(task: TaskItem)
+        fun onTaskClick(task: TaskItem)
+        fun onTaskDelete(task: TaskItem)
     }
 
-    class TaskViewHolder(val binding: TaskItemLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+    private val taskList = mutableListOf<TaskItem>()
+
+    fun submitList(tasks: List<TaskItem>) {
+        taskList.clear()
+        taskList.addAll(tasks)
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
+        // Use the correct binding class: TaskItemLayoutBinding
         val binding = TaskItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TaskViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
-
-        // Bind task data to the views in task_item_layout.xml
-        holder.binding.tvTaskTileTitle.text = task.title
-        holder.binding.tvTaskTileTag.text = task.category
-        holder.binding.tvTaskTileTime.text = task.time
-
-        // Set button click listeners
-        holder.binding.btnTaskTileStart.setOnClickListener { listener.onStartClick(task) }
-        holder.binding.btnTaskTileStop.setOnClickListener { listener.onStopClick(task) }
-        holder.binding.fabBtnTaskTileArchive.setOnClickListener { listener.onArchiveClick(task) }
-        holder.binding.fabBtnTaskTileImage.setOnClickListener { listener.onImageClick(task) }
-
-        // Enable/Disable the stop button based on whether the task is started
-        holder.binding.btnTaskTileStop.isEnabled = task.isStarted
+        holder.bind(task)
     }
 
-    override fun getItemCount(): Int = taskList.size
-
-    // Function to add multiple tasks
-    fun addTasks(tasks: List<TaskItem>) {
-        taskList.addAll(tasks)
-        notifyDataSetChanged()
+    override fun getItemCount(): Int {
+        return taskList.size
     }
 
-    // Function to add a single task
-    fun addTask(task: TaskItem) {
-        taskList.add(task)
-        notifyItemInserted(taskList.size - 1)
+    class TaskViewHolder(private val binding: TaskItemLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(task: TaskItem) {
+            // Bind data to the views
+            binding.tvTaskTileTitle.text = task.title
+            binding.tvTaskTileTag.text = task.category
+            binding.tvTaskTileTime.text = task.time
+
+            // Handle other views like buttons and FABs as needed
+        }
     }
 }
