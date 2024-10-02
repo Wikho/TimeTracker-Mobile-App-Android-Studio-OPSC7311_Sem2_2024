@@ -17,7 +17,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="10dp"
+        android:paddingVertical="15dp"
         android:orientation="horizontal"
         android:gravity="center_horizontal">
 
@@ -26,29 +26,27 @@
             android:id="@+id/btnDayFilter"
             android:text="day"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="38dp"
             android:layout_marginHorizontal="6dp"
-            app:cornerRadius="7dp">
-
+            app:cornerRadius="20dp">
         </Button>
 
         <Button
             android:id="@+id/btnWeekFilter"
             android:text="week"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="38dp"
             android:layout_marginHorizontal="6dp"
-            app:cornerRadius="7dp">
-
+            app:cornerRadius="20dp">
         </Button>
 
         <Button
             android:id="@+id/btnMonthFilter"
             android:text="month"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="38dp"
             android:layout_marginHorizontal="6dp"
-            app:cornerRadius="7dp">
+            app:cornerRadius="20dp">
         </Button>
 
     </LinearLayout>
@@ -81,11 +79,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingVertical="6dp">
+
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
                 android:text="TASKS COMPLETED"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
             </TextView>
 
@@ -93,8 +92,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="-/-"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
+
             </TextView>
         </LinearLayout>
 
@@ -103,19 +103,23 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingVertical="6dp">
+
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
                 android:text="TIME TRACKED"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
+
             </TextView>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="--:--:--"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
+
             </TextView>
         </LinearLayout>
 
@@ -124,19 +128,23 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingVertical="6dp">
+
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
                 android:text="AVERAGE TASK DURATION"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
+
             </TextView>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="--:--:--"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
+
             </TextView>
         </LinearLayout>
 
@@ -145,18 +153,20 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingVertical="6dp">
+
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
                 android:text="MINIMUM TASK DURATION"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
             </TextView>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="--:--:--"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
             </TextView>
         </LinearLayout>
@@ -166,18 +176,20 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingVertical="6dp">
+
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
                 android:text="MAXIMUM TASK DURATION"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
             </TextView>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="--:--:--"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textStyle="bold">
             </TextView>
 
