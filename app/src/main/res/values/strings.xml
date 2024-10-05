@@ -34,6 +34,10 @@
     <string name="this_week">This Week</string>
     <string name="today">Today</string>
     <string name="category">Category</string>
+    <string name="chip">chip</string>
+    <string name="title">title</string>
+    <string name="disable">Disable</string>
+    <string name="enable">Enable</string>
 
 
 </resources>
