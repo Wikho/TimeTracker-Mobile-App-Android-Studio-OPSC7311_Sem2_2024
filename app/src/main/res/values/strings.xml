@@ -43,6 +43,11 @@
     <string name="add_category">Add Category</string>
     <string name="add">Add</string>
     <string name="task_time">Task Time</string>
+    <string name="task_date">Task Date</string>
+    <string name="archive_task">ARCHIVE TASK</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="task_history">Task History</string>
 
 
 </resources>

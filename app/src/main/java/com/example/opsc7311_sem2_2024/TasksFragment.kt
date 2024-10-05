@@ -58,19 +58,19 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private fun setupRecyclerViews() {
         // Setup RecyclerViews for today, this week, and upcoming
-        todayAdapter = TaskAdapter()
+        todayAdapter = TaskAdapter(this)
         binding.rvToday.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = todayAdapter
         }
 
-        thisWeekAdapter = TaskAdapter()
+        thisWeekAdapter = TaskAdapter(this)
         binding.rvThisWeek.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = thisWeekAdapter
         }
 
-        upcomingAdapter = TaskAdapter()
+        upcomingAdapter = TaskAdapter(this)
         binding.rvUpcoming.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = upcomingAdapter
@@ -132,15 +132,27 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         return weekRange
     }
 
-    override fun onTaskClick(task: TaskItem) {
-        // Handle task click here (e.g., open task details)
-        Toast.makeText(context, "Task clicked: ${task.title}", Toast.LENGTH_SHORT).show()
+    override fun onTaskLongPressed(task: TaskItem) {
+        // Create a bundle to pass task details
+        val bundle = Bundle().apply {
+            putString("taskTitle", task.title)
+            putString("taskCategory", task.category)
+            putString("taskTime", task.time)
+        }
+
+        // Create the TaskInfoFragment and pass the task data
+        val taskInfoFragment = TaskInfoFragment().apply {
+            arguments = bundle
+        }
+
+        // Replace the current fragment with TaskInfoFragment
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, taskInfoFragment) // Use your container ID
+            .addToBackStack(null)
+            .commit()
     }
 
-    override fun onTaskDelete(task: TaskItem) {
-        // Handle task deletion here
-        Toast.makeText(context, "Task deleted: ${task.title}", Toast.LENGTH_SHORT).show()
-    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

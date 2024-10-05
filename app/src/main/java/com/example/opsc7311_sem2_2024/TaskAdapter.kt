@@ -5,14 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.opsc7311_sem2_2024.databinding.TaskItemLayoutBinding
 
-class TaskAdapter : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
-
-    interface TaskActionListener {
-        fun onTaskClick(task: TaskItem)
-        fun onTaskDelete(task: TaskItem)
-    }
+class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     private val taskList = mutableListOf<TaskItem>()
+
+    interface OnTaskListener {
+        fun onTaskLongPressed(task: TaskItem)
+    }
 
     fun submitList(tasks: List<TaskItem>) {
         taskList.clear()
@@ -29,13 +28,15 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.bind(task)
+
+
     }
 
     override fun getItemCount(): Int {
         return taskList.size
     }
 
-    class TaskViewHolder(private val binding: TaskItemLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class TaskViewHolder(private val binding: TaskItemLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(task: TaskItem) {
             // Bind data to the views
@@ -43,7 +44,18 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
             binding.tvTaskTileTag.text = task.category
             binding.tvTaskTileTime.text = task.time
 
-            // Handle other views like buttons and FABs as needed
+            // Handle long press
+            binding.root.setOnLongClickListener {
+                listener.onTaskLongPressed(task)
+                true // Indicate that the long press event was handled
+            }
         }
     }
+
+
+
+    interface TaskActionListener {
+        fun onTaskLongPressed(task: TaskItem)
+    }
+
 }
