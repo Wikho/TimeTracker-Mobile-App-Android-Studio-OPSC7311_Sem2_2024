@@ -10,10 +10,10 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
         repository.insertTask(task)
     }
 
-    fun updateTask(task: TaskItem) = viewModelScope.launch {
+    fun updateTask(task: TaskItem, callback: () -> Unit) = viewModelScope.launch {
         repository.updateTask(task)
+        callback()
     }
-
     fun deleteTask(task: TaskItem) = viewModelScope.launch {
         repository.deleteTask(task)
     }
