@@ -1,0 +1,179 @@
+package com.example.opsc7311_sem2_2024
+
+import android.app.Activity
+import android.app.DatePickerDialog
+import android.os.Bundle
+import android.view.View
+import android.widget.DatePicker
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.example.opsc7311_sem2_2024.databinding.ActivityEditTaskBinding
+import java.util.Calendar
+
+class EditTaskActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityEditTaskBinding
+
+    // Variables for task data
+    private var taskId: String? = null
+    private lateinit var taskViewModel: TaskViewModel
+    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskDatabase: TaskDatabase
+    private var currentTask: TaskItem? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Initialize View Binding
+        binding = ActivityEditTaskBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Retrieve the taskId from the intent
+        taskId = intent.getStringExtra("taskId")
+
+        // Initialize the database, DAO, repository, and ViewModel
+        taskDatabase = TaskDatabase.getDatabase(this)
+        val taskDao = taskDatabase.taskItemDao()
+        taskRepository = TaskRepository(taskDao)
+        val factory = TaskViewModelFactory(taskRepository)
+        taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
+
+        // Fetch task data
+        taskId?.let { id ->
+            taskViewModel.getTaskById(id) { task ->
+                if (task != null) {
+                    currentTask = task
+                    populateUI(task)
+                } else {
+                    Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Set up the Back button
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
+        // Set up the Add Chip button
+        binding.btnAddChip.setOnClickListener {
+            val tagText = binding.etAddChip.text.toString()
+            if (tagText.isNotEmpty()) {
+                addChipToGroup(tagText, binding.chipGroupCategory)
+                binding.etAddChip.text?.clear()
+            }
+        }
+
+        //Show DatePicker Pop Up
+        binding.etDatePicker.setOnClickListener {
+            showDatePicker(it)
+        }
+
+        //Save button
+        binding.btnSaveTask.setOnClickListener {
+            saveTask()
+        }
+
+    }
+
+    // Function to populate UI with task data
+    private fun populateUI(task: TaskItem) {
+        // Set task title
+        binding.etTaskTitleEdit.setText(task.title)
+
+        // Populate category chips
+        binding.chipGroupCategory.removeAllViews()
+        val categories = task.category.split(",")
+        categories.forEach { category ->
+            addChipToGroup(category.trim(), binding.chipGroupCategory)
+        }
+
+        // Set task date
+        binding.etDatePicker.setText(task.startDate)
+
+        // Set task time
+        val timeNumber = task.time.substringAfter("Time: ").trim()
+        binding.etTaskTime.setText(timeNumber)
+
+        // Set min and max target hours
+        binding.etMinHours.setText(task.minTargetHours.toString())
+        binding.etMaxHours.setText(task.maxTargetHours.toString())
+
+        // Set other fields if necessary
+    }
+
+    // Function to create and add a new Chip to the ChipGroup
+    private fun addChipToGroup(tagText: String, chipGroup: ChipGroup) {
+        val chip = Chip(this).apply {
+            text = tagText
+            isCloseIconVisible = true  // Show a close icon to allow removal
+            setOnCloseIconClickListener { chipGroup.removeView(this) }  // Remove chip on close icon click
+        }
+        chipGroup.addView(chip)
+    }
+
+    //OnCLick event for DatePicker
+    private fun showDatePicker(view: View) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                val dateStr = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                when (view.id) {
+                    R.id.etDatePicker -> {
+                        binding.etDatePicker.setText(dateStr)
+                    }
+                    // Handle other IDs if necessary
+                }
+            },
+            year,
+            month,
+            day
+        )
+        datePickerDialog.show()
+    }
+
+    private fun saveTask() {
+        // Get updated task data from UI elements
+        val title = binding.etTaskTitleEdit.text.toString()
+
+        // Collect category chips
+        val chipTexts = mutableListOf<String>()
+        for (i in 0 until binding.chipGroupCategory.childCount) {
+            val chip = binding.chipGroupCategory.getChildAt(i) as Chip
+            chipTexts.add(chip.text.toString())
+        }
+        val category = chipTexts.joinToString(separator = ",")
+
+        val startDate = binding.etDatePicker.text.toString()
+        val taskTime = binding.etTaskTime.text.toString()
+        val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
+        val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
+
+        // Update the currentTask object
+        currentTask?.let { task ->
+            task.title = title
+            task.category = category
+            task.startDate = startDate
+            task.time = taskTime
+            task.minTargetHours = minTargetHours
+            task.maxTargetHours = maxTargetHours
+
+            // Update the task in the database
+            taskViewModel.updateTask(task) {
+                // Notify the user
+                Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                // Close the activity
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+        }
+    }
+
+}

@@ -48,6 +48,8 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="task_history">Task History</string>
+    <string name="placeholder">placeHolder</string>
+    <string name="save">Save</string>
 
 
 </resources>

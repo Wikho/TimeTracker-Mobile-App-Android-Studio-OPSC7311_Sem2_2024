@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="10dp"
+    android:paddingRight="5dp"
+    android:paddingLeft="5dp"
+    android:background="@drawable/rounded_background_white"
+    android:padding="16dp"
+    android:gravity="center">
+
+
+    <!-- Title Layout with Back Button and Edit Button -->
+    <LinearLayout
+        android:id="@+id/titleLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:background="@drawable/rounded_background_gray">
+
+        <!-- Back Button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/back"
+            tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+        <!-- Task Title Text-->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTaskTitleEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/task_title"
+            app:endIconMode="clear_text"
+            android:background="@drawable/rounded_background_white">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTaskTitleEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/task_title"
+                tools:ignore="DuplicateSpeakableTextCheck,TextContrastCheck,VisualLintTextFieldSize" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+    </LinearLayout>
+
+
+
+
+
+    <!-- ScrollView for content to make it scrollable -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/titleLayout"
+        android:layout_above="@id/btnSaveTask"
+        android:fillViewport="true"
+        android:paddingTop="10dp">
+
+
+        <LinearLayout
+            android:id="@+id/contentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:background="@drawable/rounded_background_gray">
+
+
+            <!-- Task Title using TextInputLayout -->
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:gravity="center"
+                android:background="@drawable/rounded_background_white">
+
+                <!-- Category Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:text="@string/category"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <!-- ChipGroup for displaying categories -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.Material3.Chip.Filter.Elevated"
+                    android:layout_marginTop="8dp"
+                    app:singleSelection="false">
+
+
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- TextInputLayout for adding new tags -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Text input for tag entry -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilAddChip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/add_category">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAddChip"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Button to add new tag -->
+                    <Button
+                        android:id="@+id/btnAddChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/add"
+                        android:backgroundTint="@color/black"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Space -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <!-- Date Section -->
+
+
+            <!-- Task Date using TextInputLayout -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDatePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/task_date"
+                app:endIconMode="clear_text"
+                android:background="@drawable/rounded_background_white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDatePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_date"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:inputType="none"
+                    tools:ignore="DuplicateSpeakableTextCheck,TextContrastCheck,VisualLintTextFieldSize" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Space -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+
+            <!-- Date Section -->
+
+            <!-- Task Time using TextInputLayout -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilTaskTime"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/task_time"
+                app:endIconMode="clear_text"
+                android:background="@drawable/rounded_background_white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTaskTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_time"
+                    android:inputType="time"
+                    tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Space -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+
+            <!-- Date Section -->
+
+            <!-- Minimum Targeted Hours using TextInputLayout -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilMinHours"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/min_hours"
+                app:endIconMode="clear_text"
+                android:background="@drawable/rounded_background_white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etMinHours"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/min_hours"
+                    android:inputType="number"
+                    tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Space -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+
+            <!-- Date Section -->
+
+            <!-- Maximum Targeted Hours using TextInputLayout -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilMaxHours"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/max_hours"
+                app:endIconMode="clear_text"
+                android:background="@drawable/rounded_background_white">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etMaxHours"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/max_hours"
+                    android:inputType="number"
+                    tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Create Task Button at the bottom -->
+    <Button
+        android:id="@+id/btnSaveTask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/green"
+        android:text="@string/save"
+        android:textColor="@color/black"
+        tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />
+
+</RelativeLayout>

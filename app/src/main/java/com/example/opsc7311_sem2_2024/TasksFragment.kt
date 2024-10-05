@@ -26,6 +26,11 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTasksBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerViews()
 
@@ -34,8 +39,15 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             loadTasksFromDatabase()
         }
 
-        binding.fabAddTask.setOnClickListener(){
+        // Listen for 'taskCreated' fragment result to refresh the RecyclerView
+        parentFragmentManager.setFragmentResultListener("taskCreated", viewLifecycleOwner) { key, bundle ->
+            // Reload tasks from database
+            lifecycleScope.launch {
+                loadTasksFromDatabase()
+            }
+        }
 
+        binding.fabAddTask.setOnClickListener {
             // Create an instance of TaskCreationFragment
             val taskCreationFragment = TaskCreationFragment()
 
@@ -43,18 +55,17 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             val transaction = parentFragmentManager.beginTransaction()
 
             // Use add or replace to overlay the fragment
-            transaction.add(R.id.fragment_container, taskCreationFragment) // or replace if you want to replace the current fragment
+            transaction.add(R.id.fragment_container, taskCreationFragment)
 
             // Add the transaction to the back stack so the user can navigate back
             transaction.addToBackStack(null)
 
             // Commit the transaction
             transaction.commit()
-
         }
-
-        return binding.root
     }
+
+    // <editor-fold desc="RecyclerViews Setup">
 
     private fun setupRecyclerViews() {
         // Setup RecyclerViews for today, this week, and upcoming
@@ -109,6 +120,10 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         upcomingAdapter.submitList(upcomingTasks)
     }
 
+    // </editor-fold>
+
+    // <editor-fold desc="Task Press & Functions">
+
     // Get today's date in "yyyy-MM-dd" format
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -133,26 +148,24 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     }
 
     override fun onTaskLongPressed(task: TaskItem) {
-        // Create a bundle to pass task details
+        // Create a bundle to pass task ID
         val bundle = Bundle().apply {
-            putString("taskTitle", task.title)
-            putString("taskCategory", task.category)
-            putString("taskTime", task.time)
+            putString("taskId", task.id) // Pass the task ID
         }
 
-        // Create the TaskInfoFragment and pass the task data
+        // Create the TaskInfoFragment and pass the task ID
         val taskInfoFragment = TaskInfoFragment().apply {
             arguments = bundle
         }
 
         // Replace the current fragment with TaskInfoFragment
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, taskInfoFragment) // Use your container ID
+            .replace(R.id.fragment_container, taskInfoFragment)
             .addToBackStack(null)
             .commit()
     }
 
-
+    // </editor-fold>
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,6 +1,8 @@
 package com.example.opsc7311_sem2_2024
 
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import androidx.fragment.app.Fragment
@@ -8,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.ViewModelProvider
 import com.example.opsc7311_sem2_2024.databinding.FragmentTaskInfoBinding
 import com.google.android.material.chip.Chip
 import java.util.Calendar
@@ -20,36 +25,104 @@ class TaskInfoFragment : Fragment() {
     private val binding get() = _binding!!
     // </editor-fold>
 
+    // <editor-fold desc="Task Get Info Vars">
+
+    private lateinit var taskViewModel: TaskViewModel
+    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskDatabase: TaskDatabase
+
+    private var taskId: String? = null
+    private var currentTask: TaskItem? = null
+
+    // </editor-fold>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Retrieve the task ID from arguments
+        taskId = arguments?.getString("taskId")
+
+        // Initialize the database, DAO, repository, and ViewModel
+        taskDatabase = TaskDatabase.getDatabase(requireContext())
+        val taskDao = taskDatabase.taskItemDao()
+        taskRepository = TaskRepository(taskDao)
+        val factory = TaskViewModelFactory(taskRepository)
+        taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTaskInfoBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // Retrieve task details from arguments
-        val taskTitle = arguments?.getString("taskTitle")
+    // Fetch the task data in onViewCreated
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        // Update the UI with the task details
-        binding.tvTaskTitle.text = taskTitle
-
-        // Ensure taskCategory is not null, provide default empty string if it is null
-        val taskCategory = arguments?.getString("taskCategory") ?: ""
-        val tags = taskCategory.split(",")
-
-        tags.forEach { tag ->
-            val capitalizedTag = tag.trim().replaceFirstChar { it.uppercase() }
-            binding.chipGroupCategory.addView(createChip(capitalizedTag))
+        // Fetch task data
+        taskId?.let { id ->
+            taskViewModel.getTaskById(id) { task ->
+                if (task != null) {
+                    currentTask = task
+                    populateUI(task)
+                } else {
+                    Toast.makeText(requireContext(), "Task not found", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
-        // Ensure taskTime is not null, provide default empty string if it is null
-        val taskTime = arguments?.getString("taskTime") ?: ""
-        val timeNumber = taskTime.substringAfter("Time: ").trim()
+        // Click listener for the back button
+        binding.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
-        binding.etTaskTime.text = Editable.Factory.getInstance().newEditable(timeNumber)
-        binding.etFromDate.text = Editable.Factory.getInstance().newEditable(timeNumber)
-        binding.etToDate.text = Editable.Factory.getInstance().newEditable(timeNumber)
+        // Click listener for the edit button
+        binding.btnEditTask.setOnClickListener {
+            val intent = Intent(requireContext(), EditTaskActivity::class.java)
+            intent.putExtra("taskId", taskId)
+            editTaskLauncher.launch(intent)
+        }
 
-        return binding.root
+        // Set click listener for From Date
+        binding.etFromDate.setOnClickListener {
+            showDatePicker(binding.etFromDate)
+        }
+
+        // Set click listener for To Date
+        binding.etDToDate.setOnClickListener {
+            showDatePicker(binding.etDToDate)
+        }
+
+    }
+
+    private fun populateUI(task: TaskItem) {
+        // Populate the UI elements with task data
+
+        binding.tvTaskTitle.text = task.title
+
+        // Category chips
+        binding.chipGroupCategory.removeAllViews() // Clear existing chips
+        val categories = task.category.split(",")
+        categories.forEach { category ->
+            val chip = createChip(category.trim())
+            binding.chipGroupCategory.addView(chip)
+        }
+
+        // Task date
+        binding.tvTaskDate.setText(task.startDate)
+
+        // Task time
+        val timeNumber = task.time.substringAfter("Time: ").trim()
+        binding.tvTaskTime.setText(timeNumber)
+
+        // Min and Max Target Hours
+        binding.tvMinHours.setText(task.minTargetHours.toString())
+        binding.tvMaxHours.setText(task.maxTargetHours.toString())
+
+        // Set other fields if necessary
     }
 
     // Helper function to create a Chip for the category
@@ -57,26 +130,6 @@ class TaskInfoFragment : Fragment() {
         val chip = Chip(context)
         chip.text = category
         return chip
-    }
-
-    //Set Click events on buttons
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Set click listener for the task date picker
-        binding.etDatePicker.setOnClickListener {
-            showDatePicker(binding.etDatePicker) // Show the date picker when clicked
-        }
-
-        // Click listener for 'From Date'
-        binding.etFromDate.setOnClickListener {
-            showDatePicker(binding.etFromDate)
-        }
-
-        // Click listener for 'To Date'
-        binding.etToDate.setOnClickListener {
-            showDatePicker(binding.etToDate)
-        }
     }
 
     //OnCLick event for DatePicker
@@ -90,13 +143,39 @@ class TaskInfoFragment : Fragment() {
             val datePickerDialog = DatePickerDialog(
                 it,
                 { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                    binding.etDatePicker.setText("$selectedYear-${selectedMonth + 1}-$selectedDay")
+                    val dateStr = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                    when (view.id) {
+                        R.id.etFromDate -> {
+                            binding.etFromDate.setText(dateStr)
+                        }
+                        R.id.etDToDate -> {
+                            binding.etDToDate.setText(dateStr)
+                        }
+                        R.id.tvTaskDate -> {
+                            binding.tvTaskDate.text = dateStr
+                        }
+                        // Add more cases if needed
+                    }
                 },
                 year,
                 month,
                 day
             )
             datePickerDialog.show()
+        }
+    }
+
+    private val editTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Reload the task data
+            taskId?.let { id ->
+                taskViewModel.getTaskById(id) { task ->
+                    if (task != null) {
+                        currentTask = task
+                        populateUI(task)
+                    }
+                }
+            }
         }
     }
 
