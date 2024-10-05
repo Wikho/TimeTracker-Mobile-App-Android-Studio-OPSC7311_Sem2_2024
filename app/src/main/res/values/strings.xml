@@ -48,6 +48,12 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="task_history">Task History</string>
+    <string name="placeholder">placeHolder</string>
+    <string name="save">Save</string>
+    <string name="title">title</string>
+    <string name="disable">disable\n</string>
+    <string name="chip">chip</string>
+    <string name="enable">enable</string>
 
 
 </resources>
