@@ -1,5 +1,7 @@
 package com.example.opsc7311_sem2_2024
 
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 class ValidationManager {
@@ -55,6 +57,123 @@ class ValidationManager {
             false
         } else {
             confirmPasswordInput.error = null
+            true
+        }
+    }
+
+    //Check if input is not null
+    fun isTextNotEmpty(input: TextInputEditText, inputLayout: TextInputLayout): Boolean {
+        val text = input.text.toString().trim()
+        return if (text.isEmpty()) {
+            inputLayout.error = "Field cannot be empty"
+            false
+        } else {
+            inputLayout.error = null  // Clear the error
+            true
+        }
+    }
+
+
+    // Validate Min Hours considering Max Hours
+    fun validateMinHours(input: TextInputEditText, inputLayout: TextInputLayout, maxInput: TextInputEditText): Boolean {
+        val hoursText = input.text.toString().trim()
+        val maxHoursText = maxInput.text.toString().trim()
+
+        return if (hoursText.isEmpty()) {
+            inputLayout.error = "Field cannot be empty"
+            false
+        } else {
+            val minHours = hoursText.toInt()
+            val maxHours = if (maxHoursText.isNotEmpty()) maxHoursText.toInt() else Int.MAX_VALUE // Default large value if maxHours is empty
+
+            when {
+                minHours < 1 -> {
+                    inputLayout.error = "More"
+                    false
+                }
+                minHours > 8 -> {
+                    inputLayout.error = "Less"
+                    false
+                }
+                minHours >= maxHours -> {
+                    inputLayout.error = "Increase Max"
+                    false
+                }
+                else -> {
+                    inputLayout.error = null  // Clear the error
+                    true
+                }
+            }
+        }
+    }
+
+    // Validate Max Hours considering Min Hours
+    fun validateMaxHours(input: TextInputEditText, inputLayout: TextInputLayout, minInput: TextInputEditText): Boolean {
+        val hoursText = input.text.toString().trim()
+        val minHoursText = minInput.text.toString().trim()
+
+        return if (hoursText.isEmpty()) {
+            inputLayout.error = "Field cannot be empty"
+            false
+        } else {
+            val maxHours = hoursText.toInt()
+            val minHours = if (minHoursText.isNotEmpty()) minHoursText.toInt() else Int.MIN_VALUE // Default small value if minHours is empty
+
+            when {
+                maxHours < 1 -> {
+                    inputLayout.error = "More"
+                    false
+                }
+                maxHours > 8 -> {
+                    inputLayout.error = "Less"
+                    false
+                }
+                maxHours <= minHours -> {
+                    inputLayout.error = "Decrease Min"
+                    false
+                }
+                else -> {
+                    inputLayout.error = null  // Clear the error
+                    true
+                }
+            }
+        }
+    }
+
+    // Validate Task Time
+    fun validateTaskTime(input: TextInputEditText, inputLayout: TextInputLayout): Boolean {
+        val timeText = input.text.toString().trim()
+
+        return if (timeText.isEmpty()) {
+            inputLayout.error = "Task time cannot be empty"
+            false
+        } else {
+            val time = timeText.toIntOrNull()
+
+            if (time == null) {
+                inputLayout.error = "Invalid time format"
+                false
+            } else if (time < 1) {
+                inputLayout.error = "Task time must be at least 1"
+                false
+            } else if (time > 9) {
+                inputLayout.error = "Task time cannot exceed 9"
+                false
+            } else {
+                inputLayout.error = null  // Clear the error
+                true
+            }
+        }
+    }
+
+
+
+    fun isChipGroupNotEmpty(chipGroup: ChipGroup, inputLayout: TextInputLayout): Boolean {
+        return if (chipGroup.childCount == 0) {
+            inputLayout.error = "Please select at least one category"
+            false
+        } else {
+            inputLayout.error = null  // Clear the error if there is at least one chip
             true
         }
     }
