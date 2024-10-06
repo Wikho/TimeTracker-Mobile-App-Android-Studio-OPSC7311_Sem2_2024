@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.mpandroid.chart)
     implementation(libs.firebase.database)
     implementation(libs.firebase.auth)
     testImplementation(libs.junit)
