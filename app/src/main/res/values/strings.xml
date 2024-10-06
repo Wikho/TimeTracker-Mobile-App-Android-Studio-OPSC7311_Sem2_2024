@@ -58,6 +58,8 @@
     <string name="ok">OK</string>
     <string name="hour_min_you_want_to_spend_on_your_project">Hour/Min to spend project</string>
     <string name="are_you_sure_you_want_to_delete_the_task">Are you sure you want to delete the task?</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
 
 
 </resources>

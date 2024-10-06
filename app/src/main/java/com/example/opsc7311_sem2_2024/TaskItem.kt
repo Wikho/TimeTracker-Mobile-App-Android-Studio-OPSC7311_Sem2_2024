@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import java.util.UUID
 
+//Sir this is the main and driving variables that we use for our Task asd Session i hope the comment help with each var use case
 
 @Entity(tableName = "task_items")
 
@@ -27,9 +28,12 @@ data class TaskItem(
 
 // Data class for each session of a task
 data class TaskSession(
-    val sessionStartDate: String= UUID.randomUUID().toString(),     // Date when the session started
-    val startTime: String,            // Time when the session started
-    var endTime: String = "",         // Time when the session ended
-    var sessionDuration: String = "", // Calculated duration of the session
-    var imagePath: String = ""        // Path to the image captured during the session
+    var id: String = UUID.randomUUID().toString(), // Unique identifier for the session
+    var sessionDescription: String = "",           // Date when the session started
+    var sessionStartDate: String = "",             // Description of the session
+    val startTime: String,                         // Time when the session started
+    var endTime: String? = null,                   // Time when the session ended
+    var sessionDuration: String? = null,           // Calculated duration of the session
+    var imagePath: String? = null                  // Path to the image captured during the session
+
 )

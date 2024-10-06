@@ -32,7 +32,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Task Title"
+                            android:text="@string/task_title"
                             android:textSize="20sp"
                             android:textColor="@android:color/black"/>
 
@@ -65,37 +65,14 @@
                     android:gravity="center"
                     android:padding="2dp">
 
-                        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                            android:id="@+id/fabBtn_TaskTile_Archive"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center"
-                            android:layout_marginEnd="0dp"
-                            android:backgroundTint="@color/gray"
-                            android:src="@drawable/archive"
-                            app:fabCustomSize="40dp"
-                            app:maxImageSize="35dp"
-                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                            android:id="@+id/fabBtn_TaskTile_Image"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="4dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/image"
-                            app:fabCustomSize="40dp"
-                            app:maxImageSize="35dp"
-                            android:backgroundTint="@android:color/darker_gray"
-                            tools:ignore="ContentDescription,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
                         <Button
                             android:id="@+id/btn_TaskTile_Start"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="0dp"
+                            android:layout_marginEnd="4dp"
                             android:backgroundTint="@android:color/holo_blue_dark"
-                            android:text="START"
+                            android:text="@string/start"
                             android:textColor="@android:color/white"
                             tools:ignore="TextContrastCheck" />
 
@@ -103,11 +80,9 @@
                             android:id="@+id/btn_TaskTile_Stop"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="STOP"
-                            android:layout_marginStart="0dp"
+                            android:text="@string/stop"
                             android:backgroundTint="@android:color/holo_red_dark"
-                            android:textColor="@android:color/white"
-                            android:enabled="false"/>
+                            android:textColor="@android:color/white" />
                 </LinearLayout>
         </LinearLayout>
 

@@ -124,6 +124,8 @@ class TaskInfoFragment : Fragment() {
 
     }
 
+    // <editor-fold desc="Function for display UI">
+
     private fun populateUI(task: TaskItem) {
         // Populate the UI elements with task data
 
@@ -191,6 +193,9 @@ class TaskInfoFragment : Fragment() {
         }
     }
 
+    // </editor-fold>
+
+    // check if task was deleted or updated
     private val editTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val taskDeleted = result.data?.getBooleanExtra("taskDeleted", false) ?: false
@@ -211,13 +216,14 @@ class TaskInfoFragment : Fragment() {
         }
     }
 
-
     //Added This might need it later (Wikho)
     private fun openEditTaskActivity() {
         val intent = Intent(requireContext(), EditTaskActivity::class.java)
         intent.putExtra("taskId", taskId)
         editTaskLauncher.launch(intent)
     }
+
+    // <editor-fold desc="Archive/Un-Archive">
 
     private fun archiveTask() {
         currentTask?.let { task ->
@@ -240,5 +246,7 @@ class TaskInfoFragment : Fragment() {
             }
         }
     }
+
+    // </editor-fold>
 
 }

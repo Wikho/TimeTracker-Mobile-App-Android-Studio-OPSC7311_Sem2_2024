@@ -81,7 +81,7 @@
                     android:id="@+id/etTaskTitle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    tools:ignore="VisualLintTextFieldSize,TextContrastCheck" />
+                    tools:ignore="VisualLintTextFieldSize,TextContrastCheck,TouchTargetSizeCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Space -->
@@ -101,7 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="Category"
+                    android:text="@string/category"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -139,7 +139,8 @@
                             android:id="@+id/etAddChip"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text" />
+                            android:inputType="text"
+                            tools:ignore="VisualLintTextFieldSize" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Button to add new tag -->
@@ -202,7 +203,8 @@
                         android:clickable="true"
                         android:focusable="false"
                         android:inputType="none"
-                        android:hint="@string/task_time" />
+                        android:hint="@string/task_time"
+                        tools:ignore="VisualLintTextFieldSize" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Min and Max Hours using LinearLayout -->
