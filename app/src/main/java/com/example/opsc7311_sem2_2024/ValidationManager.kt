@@ -141,28 +141,37 @@ class ValidationManager {
     }
 
     // Validate Task Time
-    fun validateTaskTime(input: TextInputEditText, inputLayout: TextInputLayout): Boolean {
-        val timeText = input.text.toString().trim()
+    fun validateTaskTime(taskTimeInput: TextInputEditText, taskTimeLayout: TextInputLayout): Boolean {
+        val taskTime = taskTimeInput.text.toString()
 
-        return if (timeText.isEmpty()) {
-            inputLayout.error = "Task time cannot be empty"
-            false
-        } else {
-            val time = timeText.toIntOrNull()
+        // Check if the input is empty
+        if (taskTime.isEmpty()) {
+            taskTimeLayout.error = "Please enter task time"
+            return false
+        }
 
-            if (time == null) {
-                inputLayout.error = "Invalid time format"
-                false
-            } else if (time < 1) {
-                inputLayout.error = "Task time must be at least 1"
-                false
-            } else if (time > 9) {
-                inputLayout.error = "Task time cannot exceed 9"
-                false
-            } else {
-                inputLayout.error = null  // Clear the error
-                true
+        try {
+            // Split the input into hours and minutes
+            val (hours, minutes) = taskTime.split(":").map { it.toInt() }
+
+            // Validate the hours and minutes
+            when {
+                hours > 9 || (hours == 9 && minutes > 0) -> {
+                    taskTimeLayout.error = "Task time cannot exceed 9 hours"
+                    return false
+                }
+                hours == 0 && minutes < 30 -> {
+                    taskTimeLayout.error = "Task time must be at least 30 minutes"
+                    return false
+                }
+                else -> {
+                    taskTimeLayout.error = null // Clear error if valid
+                    return true
+                }
             }
+        } catch (e: Exception) {
+            taskTimeLayout.error = "Invalid time format"
+            return false
         }
     }
 

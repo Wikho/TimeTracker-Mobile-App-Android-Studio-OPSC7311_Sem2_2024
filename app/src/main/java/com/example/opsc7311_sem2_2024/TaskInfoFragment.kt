@@ -1,15 +1,19 @@
 package com.example.opsc7311_sem2_2024
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.DatePicker
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
@@ -167,16 +171,30 @@ class TaskInfoFragment : Fragment() {
 
     private val editTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Reload the task data
-            taskId?.let { id ->
-                taskViewModel.getTaskById(id) { task ->
-                    if (task != null) {
-                        currentTask = task
-                        populateUI(task)
+            val taskDeleted = result.data?.getBooleanExtra("taskDeleted", false) ?: false
+            if (taskDeleted) {
+                // Task was deleted, pop this fragment
+                parentFragmentManager.popBackStack()
+            } else {
+                // Task was updated, refresh the UI
+                taskId?.let { id ->
+                    taskViewModel.getTaskById(id) { task ->
+                        if (task != null) {
+                            currentTask = task
+                            populateUI(task)
+                        }
                     }
                 }
             }
         }
+    }
+
+
+    //Added This might need it later (Wikho)
+    private fun openEditTaskActivity() {
+        val intent = Intent(requireContext(), EditTaskActivity::class.java)
+        intent.putExtra("taskId", taskId)
+        editTaskLauncher.launch(intent)
     }
 
 }

@@ -1,5 +1,7 @@
 package com.example.opsc7311_sem2_2024
 
+import android.app.AlertDialog
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,6 +9,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.opsc7311_sem2_2024.databinding.FragmentTaskCreationBinding
@@ -48,6 +52,30 @@ class TaskCreationFragment : Fragment() {
                 addChipEditText.text?.clear()  // Clear the text input after adding the chip
             }
         }
+
+        // </editor-fold>
+
+        // <editor-fold desc="Time Selector">
+
+        binding.etTaskTime.setOnClickListener {
+            showTimePicker { selectedTime ->
+                binding.etTaskTime.setText(selectedTime)
+            }
+        }
+
+        binding.etTaskTime.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // No use case, Sir
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // No use case, Sir
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Validate task time after text change
+                validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
+            }
+        })
 
         // </editor-fold>
 
@@ -135,7 +163,7 @@ class TaskCreationFragment : Fragment() {
                 val startDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
 
                 // Get Min and Max Hours and Task Time
-                val taskTime = "Time: " + binding.etTaskTime.text.toString() +":00"
+                val taskTime = "Time: " + binding.etTaskTime.text.toString()
                 val minTargetHours = binding.etMinHours.text.toString().toInt()
                 val maxTargetHours = binding.etMaxHours.text.toString().toInt()
 
@@ -181,7 +209,6 @@ class TaskCreationFragment : Fragment() {
         }
 
 
-
         // </editor-fold>
 
         return binding.root
@@ -201,6 +228,50 @@ class TaskCreationFragment : Fragment() {
         }
         chipGroup.addView(chip)
     }
+
+    private fun showTimePicker(onTimeSelected: (String) -> Unit) {
+        // Inflate the dialog's custom view
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_time_picker, null)
+        val timePicker = dialogView.findViewById<TimePicker>(R.id.timePicker)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+        // Initialize the TimePicker
+        timePicker.setIs24HourView(false) // Set to true if you prefer 24-hour format
+
+        // Create the AlertDialog
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // Handle Cancel button click
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Handle OK button click
+        btnOk.setOnClickListener {
+            val hour = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                timePicker.hour
+            } else {
+                timePicker.currentHour
+            }
+
+            val minute = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                timePicker.minute
+            } else {
+                timePicker.currentMinute
+            }
+
+            val timeString = String.format("%d:%02d", hour, minute)
+            onTimeSelected(timeString)
+            dialog.dismiss()
+        }
+
+        // Show the dialog
+        dialog.show()
+    }
+
 
 }
 

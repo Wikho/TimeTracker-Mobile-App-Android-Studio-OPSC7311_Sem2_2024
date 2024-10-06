@@ -11,7 +11,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.example.opsc7311_sem2_2024.databinding.ActivityEditTaskBinding
+import com.example.opsc7311_sem2_2024.databinding.DeleteConfirmationBinding
 import java.util.Calendar
+import android.app.AlertDialog
+import android.content.Intent
+import android.os.Build
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.TimePicker
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class EditTaskActivity : AppCompatActivity() {
 
@@ -76,6 +85,19 @@ class EditTaskActivity : AppCompatActivity() {
             saveTask()
         }
 
+        binding.etTaskTime.setOnClickListener {
+            showTimePicker { selectedTime ->
+                binding.etTaskTime.setText(selectedTime)
+            }
+        }
+
+        binding.btnDeleteTask.setOnClickListener {
+            showDeleteConfirmation {
+                // Call your delete function here to delete the task
+                deleteTask(taskId.toString())
+            }
+        }
+
     }
 
     // Function to populate UI with task data
@@ -101,7 +123,6 @@ class EditTaskActivity : AppCompatActivity() {
         binding.etMinHours.setText(task.minTargetHours.toString())
         binding.etMaxHours.setText(task.maxTargetHours.toString())
 
-        // Set other fields if necessary
     }
 
     // Function to create and add a new Chip to the ChipGroup
@@ -152,7 +173,7 @@ class EditTaskActivity : AppCompatActivity() {
         val category = chipTexts.joinToString(separator = ",")
 
         val startDate = binding.etDatePicker.text.toString()
-        val taskTime = binding.etTaskTime.text.toString()
+        val taskTime = "Time: " + binding.etTaskTime.text.toString()
         val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
         val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
 
@@ -169,10 +190,93 @@ class EditTaskActivity : AppCompatActivity() {
             taskViewModel.updateTask(task) {
                 // Notify the user
                 Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
+
                 // Close the activity
                 setResult(Activity.RESULT_OK)
                 finish()
             }
+        }
+    }
+
+    private fun showTimePicker(onTimeSelected: (String) -> Unit) {
+        // Inflate the dialog's custom view
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_time_picker, null)
+        val timePicker = dialogView.findViewById<TimePicker>(R.id.timePicker)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+        // Initialize the TimePicker
+        timePicker.setIs24HourView(false) // Set to true if you prefer 24-hour format
+
+        // Create the AlertDialog
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        // Handle Cancel button click
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Handle OK button click
+        btnOk.setOnClickListener {
+            val hour = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                timePicker.hour
+            } else {
+                timePicker.currentHour
+            }
+
+            val minute = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                timePicker.minute
+            } else {
+                timePicker.currentMinute
+            }
+
+            val timeString = String.format("%d:%02d", hour, minute)
+            onTimeSelected(timeString)
+            dialog.dismiss()
+        }
+
+        // Show the dialog
+        dialog.show()
+    }
+
+    private fun showDeleteConfirmation(onDelete: () -> Unit) {
+        val builder = AlertDialog.Builder(this)
+
+        // Inflate the custom dialog layout with binding
+        val dialogBinding = DeleteConfirmationBinding.inflate(LayoutInflater.from(this))
+
+        builder.setView(dialogBinding.root)
+        val alertDialog = builder.create()
+
+        // Handle the Cancel button using binding
+        dialogBinding.btnCancel.setOnClickListener {
+            alertDialog.dismiss() // Close the dialog
+        }
+
+        // Handle the Delete button using binding
+        dialogBinding.btnDelete.setOnClickListener {
+            onDelete.invoke() // Call the delete callback
+            alertDialog.dismiss() // Close the dialog after the delete action
+        }
+
+        // Show the dialog
+        alertDialog.show()
+    }
+
+    private fun deleteTask(taskId: String) {
+        lifecycleScope.launch {
+            // Delete the task from the database
+            taskViewModel.deleteTask(taskId)
+
+            // Prepare the result intent
+            val resultIntent = Intent()
+            resultIntent.putExtra("taskDeleted", true)
+            setResult(Activity.RESULT_OK, resultIntent)
+
+            // Close the activity
+            finish()
         }
     }
 

@@ -14,6 +14,9 @@ interface TaskItemDao {
     @Delete
     suspend fun deleteTask(task: TaskItem)
 
+    @Query("DELETE FROM task_items WHERE id = :taskId")
+    suspend fun deleteTaskById(taskId: String)
+
     @Query("SELECT * FROM task_items WHERE id = :taskId")
     suspend fun getTaskById(taskId: String): TaskItem?
 

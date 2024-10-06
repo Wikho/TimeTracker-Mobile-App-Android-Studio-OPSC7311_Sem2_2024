@@ -14,8 +14,8 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
         repository.updateTask(task)
         callback()
     }
-    fun deleteTask(task: TaskItem) = viewModelScope.launch {
-        repository.deleteTask(task)
+    fun deleteTask(taskId: String) = viewModelScope.launch {
+        repository.deleteTask(taskId)
     }
 
     fun getTaskById(taskId: String, callback: (TaskItem?) -> Unit) = viewModelScope.launch {
