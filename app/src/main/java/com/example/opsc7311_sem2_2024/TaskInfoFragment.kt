@@ -37,6 +37,7 @@ class TaskInfoFragment : Fragment() {
 
     private var taskId: String? = null
     private var currentTask: TaskItem? = null
+    private var isArchived: Boolean = false
 
     // </editor-fold>
 
@@ -52,6 +53,9 @@ class TaskInfoFragment : Fragment() {
         taskRepository = TaskRepository(taskDao)
         val factory = TaskViewModelFactory(taskRepository)
         taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
+
+        //Button Change if Archived
+        isArchived = arguments?.getBoolean("isArchived", false) ?: false
     }
 
     override fun onCreateView(
@@ -98,6 +102,24 @@ class TaskInfoFragment : Fragment() {
         // Set click listener for To Date
         binding.etDToDate.setOnClickListener {
             showDatePicker(binding.etDToDate)
+        }
+
+        binding.btnCreateTaskPage.setOnClickListener {
+            archiveTask()
+        }
+
+
+        //Change btn based on isArchived Value
+        if (isArchived) {
+            binding.btnCreateTaskPage.text = "UN-ARCHIVE TASK"
+            binding.btnCreateTaskPage.setOnClickListener {
+                unarchiveTask()
+            }
+        } else {
+            binding.btnCreateTaskPage.text = "ARCHIVE TASK"
+            binding.btnCreateTaskPage.setOnClickListener {
+                archiveTask()
+            }
         }
 
     }
@@ -195,6 +217,28 @@ class TaskInfoFragment : Fragment() {
         val intent = Intent(requireContext(), EditTaskActivity::class.java)
         intent.putExtra("taskId", taskId)
         editTaskLauncher.launch(intent)
+    }
+
+    private fun archiveTask() {
+        currentTask?.let { task ->
+            task.isArchived = true
+            taskViewModel.updateTask(task) {
+                // Notify the user
+                Toast.makeText(requireContext(), "Task archived", Toast.LENGTH_SHORT).show()
+                // Close TaskInfoFragment
+                parentFragmentManager.popBackStack()
+            }
+        }
+    }
+
+    private fun unarchiveTask() {
+        currentTask?.let { task ->
+            task.isArchived = false
+            taskViewModel.updateTask(task) {
+                Toast.makeText(requireContext(), "Task unarchived", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
+            }
+        }
     }
 
 }

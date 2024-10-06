@@ -5,55 +5,73 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.databinding.FragmentArchivedTasksBinding
+import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ArchivedTasksFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class ArchivedTasksFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _binding: FragmentArchivedTasksBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var archivedAdapter: TaskAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_archived_tasks, container, false)
+    ): View {
+        _binding = FragmentArchivedTasksBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ArchivedTasksFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ArchivedTasksFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+
+        // Load archived tasks
+        lifecycleScope.launch {
+            loadArchivedTasksFromDatabase()
+        }
     }
+
+    private fun setupRecyclerView() {
+        archivedAdapter = TaskAdapter(this)
+        binding.rvArchivedTasks.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = archivedAdapter
+        }
+    }
+
+    private suspend fun loadArchivedTasksFromDatabase() {
+        val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+        val taskDao = taskDatabase.taskItemDao()
+        val archivedTasks = taskDao.getArchivedTasks()
+        archivedAdapter.submitList(archivedTasks)
+    }
+
+    override fun onTaskLongPressed(task: TaskItem) {
+        // Open TaskInfoFragment for the archived task
+        val bundle = Bundle().apply {
+            putString("taskId", task.id)
+            putBoolean("isArchived", true)
+        }
+
+        val taskInfoFragment = TaskInfoFragment().apply {
+            arguments = bundle
+        }
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, taskInfoFragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 }

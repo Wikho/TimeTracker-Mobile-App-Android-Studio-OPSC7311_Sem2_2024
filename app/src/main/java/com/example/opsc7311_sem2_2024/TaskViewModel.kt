@@ -2,7 +2,9 @@ package com.example.opsc7311_sem2_2024
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
 
@@ -12,8 +14,11 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
 
     fun updateTask(task: TaskItem, callback: () -> Unit) = viewModelScope.launch {
         repository.updateTask(task)
-        callback()
+        withContext(Dispatchers.Main) {
+            callback()
+        }
     }
+
     fun deleteTask(taskId: String) = viewModelScope.launch {
         repository.deleteTask(taskId)
     }

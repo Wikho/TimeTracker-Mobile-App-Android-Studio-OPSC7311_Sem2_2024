@@ -23,4 +23,8 @@ interface TaskItemDao {
     @Query("SELECT * FROM task_items")
     suspend fun getAllTasks(): List<TaskItem>
 
+    @Query("SELECT * FROM task_items WHERE isArchived = 1")
+    suspend fun getArchivedTasks(): List<TaskItem>
+
+
 }
