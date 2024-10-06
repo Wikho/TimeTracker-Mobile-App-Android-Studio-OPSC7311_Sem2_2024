@@ -26,5 +26,10 @@ interface TaskItemDao {
     @Query("SELECT * FROM task_items WHERE isArchived = 1")
     suspend fun getArchivedTasks(): List<TaskItem>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateCategoryStats(categoryStats: CategoryStats)
+
+    @Query("SELECT * FROM category_stats WHERE categoryName = :categoryName")
+    suspend fun getCategoryStats(categoryName: String): CategoryStats?
 
 }

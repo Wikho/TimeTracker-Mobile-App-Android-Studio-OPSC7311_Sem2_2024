@@ -2,7 +2,6 @@ package com.example.opsc7311_sem2_2024
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
 import java.util.UUID
 
 //Sir this is the main and driving variables that we use for our Task asd Session i hope the comment help with each var use case
@@ -22,9 +21,26 @@ data class TaskItem(
     var maxTargetHours: Int,                       // Maximum target hours for the task
     var isStarted: Boolean = false,                // Flag to track if the task is started
     var isArchived: Boolean = false,               // Flag to track if the task is archived
-    @TypeConverters(TaskSessionConverter::class)
     val sessionHistory: MutableList<TaskSession> = mutableListOf() // List of session histories
-)
+
+){
+    fun getTotalSessionDuration(): String {
+        var totalMinutes = 0
+        for (session in sessionHistory) {
+            session.sessionDuration?.let {
+                val parts = it.split(":")
+                if (parts.size == 2) {
+                    val hours = parts[0].toIntOrNull() ?: 0
+                    val minutes = parts[1].toIntOrNull() ?: 0
+                    totalMinutes += hours * 60 + minutes
+                }
+            }
+        }
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        return String.format("%d:%02d", hours, minutes)
+    }
+}
 
 // Data class for each session of a task
 data class TaskSession(

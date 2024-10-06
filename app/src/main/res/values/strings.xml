@@ -60,6 +60,9 @@
     <string name="are_you_sure_you_want_to_delete_the_task">Are you sure you want to delete the task?</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
+    <string name="select_photo">Select Photo</string>
+    <string name="enter_description">Enter description</string>
+    <string name="task_description">Task Description</string>
 
 
 </resources>

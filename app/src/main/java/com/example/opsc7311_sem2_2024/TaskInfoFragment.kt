@@ -1,25 +1,26 @@
 package com.example.opsc7311_sem2_2024
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.DatePicker
-import android.widget.TimePicker
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.opsc7311_sem2_2024.databinding.FragmentTaskInfoBinding
 import com.google.android.material.chip.Chip
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 
 class TaskInfoFragment : Fragment() {
@@ -38,6 +39,8 @@ class TaskInfoFragment : Fragment() {
     private var taskId: String? = null
     private var currentTask: TaskItem? = null
     private var isArchived: Boolean = false
+
+    private lateinit var sessionAdapter: TaskSessionAdapter
 
     // </editor-fold>
 
@@ -63,6 +66,13 @@ class TaskInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTaskInfoBinding.inflate(inflater, container, false)
+
+        binding.etFromDate.addTextChangedListener(dateFilterWatcher)
+        binding.etToDate.addTextChangedListener(dateFilterWatcher)
+        binding.seekBarMinDuration.setOnSeekBarChangeListener(durationFilterListener)
+        binding.seekBarMaxDuration.setOnSeekBarChangeListener(durationFilterListener)
+
+
         return binding.root
     }
 
@@ -82,6 +92,9 @@ class TaskInfoFragment : Fragment() {
             }
         }
 
+        //Recycler view to Show Session History
+        setupRecyclerView()
+
         // Click listener for the back button
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -100,12 +113,20 @@ class TaskInfoFragment : Fragment() {
         }
 
         // Set click listener for To Date
-        binding.etDToDate.setOnClickListener {
-            showDatePicker(binding.etDToDate)
+        binding.etToDate.setOnClickListener {
+            showDatePicker(binding.etToDate)
         }
 
         binding.btnCreateTaskPage.setOnClickListener {
             archiveTask()
+        }
+
+        binding.btnResetFilters.setOnClickListener {
+            binding.etFromDate.text?.clear()
+            binding.etToDate.text?.clear()
+            binding.seekBarMinDuration.progress = 0
+            binding.seekBarMaxDuration.progress = 24
+            applyFilters()
         }
 
 
@@ -150,7 +171,8 @@ class TaskInfoFragment : Fragment() {
         binding.tvMinHours.setText(task.minTargetHours.toString())
         binding.tvMaxHours.setText(task.maxTargetHours.toString())
 
-        // Set other fields if necessary
+        // Load sessions
+        sessionAdapter.submitList(task.sessionHistory)
     }
 
     // Helper function to create a Chip for the category
@@ -176,8 +198,8 @@ class TaskInfoFragment : Fragment() {
                         R.id.etFromDate -> {
                             binding.etFromDate.setText(dateStr)
                         }
-                        R.id.etDToDate -> {
-                            binding.etDToDate.setText(dateStr)
+                        R.id.etToDate -> {
+                            binding.etToDate.setText(dateStr)
                         }
                         R.id.tvTaskDate -> {
                             binding.tvTaskDate.text = dateStr
@@ -248,5 +270,57 @@ class TaskInfoFragment : Fragment() {
     }
 
     // </editor-fold>
+
+    private fun setupRecyclerView() {
+        sessionAdapter = TaskSessionAdapter()
+        binding.rvTaskHistory.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = sessionAdapter
+        }
+    }
+
+    private val dateFilterWatcher = object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+            applyFilters()
+        }
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+    }
+
+    private fun applyFilters() {
+        val fromDateStr = binding.etFromDate.text.toString()
+        val toDateStr = binding.etToDate.text.toString()
+        val minDuration = binding.seekBarMinDuration.progress
+        val maxDuration = binding.seekBarMaxDuration.progress
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val filteredSessions = currentTask?.sessionHistory?.filter { session ->
+            val sessionDate = dateFormat.parse(session.sessionStartDate)
+            val fromDate = if (fromDateStr.isNotEmpty()) dateFormat.parse(fromDateStr) else null
+            val toDate = if (toDateStr.isNotEmpty()) dateFormat.parse(toDateStr) else null
+
+            val afterFrom = fromDate?.let { sessionDate >= it } ?: true
+            val beforeTo = toDate?.let { sessionDate <= it } ?: true
+
+            // Duration condition
+            val sessionDurationHours = session.sessionDuration?.split(":")?.get(0)?.toIntOrNull() ?: 0
+            val meetsDuration = sessionDurationHours in minDuration..maxDuration
+
+            afterFrom && beforeTo && meetsDuration
+        } ?: emptyList()
+
+        sessionAdapter.submitList(filteredSessions)
+    }
+
+    private val durationFilterListener = object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            applyFilters()
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+    }
+
 
 }

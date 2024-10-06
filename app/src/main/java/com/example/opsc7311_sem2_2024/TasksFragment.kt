@@ -1,14 +1,19 @@
 package com.example.opsc7311_sem2_2024
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.opsc7311_sem2_2024.databinding.FragmentTasksBinding
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,6 +26,8 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private lateinit var todayAdapter: TaskAdapter
     private lateinit var thisWeekAdapter: TaskAdapter
     private lateinit var upcomingAdapter: TaskAdapter
+
+    private var selectedImagePath: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -164,6 +171,166 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             .addToBackStack(null)
             .commit()
     }
+
+    override fun onStartButtonClicked(task: TaskItem) {
+        showSessionDialog(task)
+    }
+
+    override fun onStopButtonClicked(task: TaskItem) {
+        stopSession(task)
+    }
+
+    private fun showSessionDialog(task: TaskItem) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_description, null)
+        val etSessionDescription = dialogView.findViewById<TextInputEditText>(R.id.etSessionDescription)
+        val btnSelectPhoto = dialogView.findViewById<Button>(R.id.btnSelectPhoto)
+        val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelSession)
+        val btnDone = dialogView.findViewById<Button>(R.id.btnDoneSession)
+
+        // Set the dialog title with the task name
+        tvDialogTitle.text = "${task.title} Description for Next Session"
+
+        // Handle Select Photo button
+        btnSelectPhoto.setOnClickListener {
+            selectImageFromGallery()
+        }
+
+        // Create the AlertDialog
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        // Handle Cancel button
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Handle Done button
+        btnDone.setOnClickListener {
+            val description = etSessionDescription.text.toString()
+            startSession(task, description, selectedImagePath)
+            dialog.dismiss()
+        }
+
+        // Show the dialog
+        dialog.show()
+    }
+
+    private fun startSession(task: TaskItem, description: String, imagePath: String?) {
+        val currentTime = System.currentTimeMillis()
+        val sessionStartDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTime))
+        val startTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentTime))
+
+        val newSession = TaskSession(
+            sessionDescription = description,
+            sessionStartDate = sessionStartDate,
+            startTime = startTime,
+            imagePath = imagePath ?: "default_image_path" // Use default if null
+        )
+
+        // Update the task
+        task.sessionHistory.add(newSession)
+        task.isStarted = true
+
+        // Update the database
+        lifecycleScope.launch {
+            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+            val taskDao = taskDatabase.taskItemDao()
+            taskDao.updateTask(task)
+
+            // Refresh the list
+            loadTasksFromDatabase()
+        }
+    }
+
+    private fun stopSession(task: TaskItem) {
+        val currentTime = System.currentTimeMillis()
+        val endTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentTime))
+
+        // Find the active session
+        val activeSession = task.sessionHistory.lastOrNull { it.endTime == null }
+        if (activeSession != null) {
+            activeSession.endTime = endTime
+
+            // Calculate session duration
+            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val startDate = format.parse(activeSession.startTime)
+            val endDate = format.parse(endTime)
+            val difference = endDate.time - startDate.time
+            val minutes = (difference / (1000 * 60)).toInt()
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            activeSession.sessionDuration = String.format("%d:%02d", hours, remainingMinutes)
+        }
+
+        task.isStarted = false
+
+        // Update the database
+        lifecycleScope.launch {
+            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+            val taskDao = taskDatabase.taskItemDao()
+            taskDao.updateTask(task)
+
+            // Refresh the list
+            loadTasksFromDatabase()
+        }
+
+        // Update category stats
+        // Update the database
+        lifecycleScope.launch {
+            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+            val taskDao = taskDatabase.taskItemDao()
+            taskDao.updateTask(task)
+
+            // Refresh the list
+            loadTasksFromDatabase()
+        }
+    }
+
+    private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            selectedImagePath = it.toString()
+        }
+    }
+
+    private fun selectImageFromGallery() {
+        selectImageLauncher.launch("image/*")
+    }
+
+    private fun updateCategoryStats(task: TaskItem, session: TaskSession) {
+        val categories = task.category.split(",").map { it.trim() }
+        val sessionDurationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
+
+        lifecycleScope.launch {
+            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+            val taskDao = taskDatabase.taskItemDao()
+
+            for (category in categories) {
+                var categoryStats = taskDao.getCategoryStats(category)
+                if (categoryStats == null) {
+                    categoryStats = CategoryStats(categoryName = category, totalMinutes = sessionDurationMinutes)
+                } else {
+                    categoryStats.totalMinutes += sessionDurationMinutes
+                }
+                taskDao.insertOrUpdateCategoryStats(categoryStats)
+            }
+        }
+    }
+
+    private fun calculateSessionDurationInMinutes(sessionDuration: String?): Int {
+        sessionDuration?.let {
+            val parts = it.split(":")
+            if (parts.size == 2) {
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                return hours * 60 + minutes
+            }
+        }
+        return 0
+    }
+
 
     // </editor-fold>
 

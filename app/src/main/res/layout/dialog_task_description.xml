@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Dialog Title -->
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/task_description"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp" />
+
+    <!-- Description Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSessionDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_description">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSessionDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Select Photo Button -->
+    <Button
+        android:id="@+id/btnSelectPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/select_photo"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp" />
+
+    <!-- Button Layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="24dp">
+
+        <!-- Cancel Button -->
+        <Button
+            android:id="@+id/btnCancelSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:backgroundTint="@color/red"/>
+
+        <!-- Spacer -->
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="wrap_content" />
+
+        <!-- Done Button -->
+        <Button
+            android:id="@+id/btnDoneSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ok" />
+    </LinearLayout>
+</LinearLayout>
