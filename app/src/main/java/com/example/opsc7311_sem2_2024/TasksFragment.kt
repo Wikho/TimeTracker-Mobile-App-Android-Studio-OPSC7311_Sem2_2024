@@ -7,14 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.opsc7311_sem2_2024.databinding.FragmentTasksBinding
+import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,6 +28,12 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private lateinit var todayAdapter: TaskAdapter
     private lateinit var thisWeekAdapter: TaskAdapter
     private lateinit var upcomingAdapter: TaskAdapter
+
+    private val allTasks = mutableListOf<TaskItem>()
+    private val todayTasks = mutableListOf<TaskItem>()
+    private val thisWeekTasks = mutableListOf<TaskItem>()
+    private val upcomingTasks = mutableListOf<TaskItem>()
+    private val allCategories = mutableSetOf<String>()
 
     private var selectedImagePath: String? = null
 
@@ -70,6 +78,23 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             // Commit the transaction
             transaction.commit()
         }
+
+        binding.btnToggleCategoryFilter.setOnClickListener {
+            val isFilterOff = binding.btnToggleCategoryFilter.text == getString(R.string.filter_by_category_off)
+            if (isFilterOff) {
+                // Turn on the filter
+                binding.categoryFilterContainer.visibility = View.VISIBLE
+                binding.btnToggleCategoryFilter.text = getString(R.string.filter_by_category_on)
+                // Apply category filter if any chips are selected
+                //applyCategoryFilter()
+            } else {
+                // Turn off the filter
+                binding.categoryFilterContainer.visibility = View.GONE
+                binding.btnToggleCategoryFilter.text = getString(R.string.filter_by_category_off)
+                // Show all tasks
+                //showAllTasks()
+            }
+        }
     }
 
     // <editor-fold desc="RecyclerViews Setup">
@@ -99,18 +124,26 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         // Fetch tasks from the database
         val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
         val taskDao = taskDatabase.taskItemDao()
-        val allTasks = taskDao.getAllTasks()
+        val tasksFromDb = taskDao.getAllTasks()
 
-        // Categorize tasks
-        val todayTasks = mutableListOf<TaskItem>()
-        val thisWeekTasks = mutableListOf<TaskItem>()
-        val upcomingTasks = mutableListOf<TaskItem>()
+        // Clear previous data
+        allTasks.clear()
+        todayTasks.clear()
+        thisWeekTasks.clear()
+        upcomingTasks.clear()
+        allCategories.clear()
 
         val currentDate = getCurrentDate()
         val currentWeekRange = getCurrentWeekRange()
 
-        for (task in allTasks) {
+        for (task in tasksFromDb) {
             if (task.isArchived) continue  // Skip archived tasks
+
+            allTasks.add(task)
+
+            // Collect categories
+            val categories = task.category.split(",").map { it.trim() }
+            allCategories.addAll(categories)
 
             val taskDate = task.startDate
 
@@ -121,11 +154,74 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             }
         }
 
-        // Update RecyclerViews with filtered tasks
-        todayAdapter.submitList(todayTasks)
-        thisWeekAdapter.submitList(thisWeekTasks)
-        upcomingAdapter.submitList(upcomingTasks)
+        // Update RecyclerViews with tasks
+        withContext(Dispatchers.Main) {
+            // Populate category chips
+            populateCategoryChips()
+
+            // Initially show all tasks
+            showAllTasks()
+        }
     }
+
+    private fun populateCategoryChips() {
+        binding.chipGroupCategoryFilter.removeAllViews()
+        for (category in allCategories) {
+            val chip = Chip(requireContext()).apply {
+                text = category
+                isCheckable = true
+                setOnCheckedChangeListener { _, _ ->
+                    if (binding.btnToggleCategoryFilter.text == getString(R.string.filter_by_category_on)) {
+                        applyCategoryFilter()
+                    }
+                }
+            }
+            binding.chipGroupCategoryFilter.addView(chip)
+        }
+    }
+
+
+    private fun applyCategoryFilter() {
+        val selectedCategories = binding.chipGroupCategoryFilter.checkedChipIds.map { id ->
+            val chip = binding.chipGroupCategoryFilter.findViewById<Chip>(id)
+            chip.text.toString()
+        }
+
+        // If no categories are selected, show all tasks
+        if (selectedCategories.isEmpty()) {
+            showAllTasks()
+            return
+        }
+
+        // Filter tasks based on selected categories
+        val filteredTodayTasks = todayTasks.filter { task ->
+            taskMatchesSelectedCategories(task, selectedCategories)
+        }
+        val filteredThisWeekTasks = thisWeekTasks.filter { task ->
+            taskMatchesSelectedCategories(task, selectedCategories)
+        }
+        val filteredUpcomingTasks = upcomingTasks.filter { task ->
+            taskMatchesSelectedCategories(task, selectedCategories)
+        }
+
+        // Update RecyclerViews
+        todayAdapter.submitList(filteredTodayTasks)
+        thisWeekAdapter.submitList(filteredThisWeekTasks)
+        upcomingAdapter.submitList(filteredUpcomingTasks)
+    }
+
+    private fun taskMatchesSelectedCategories(task: TaskItem, selectedCategories: List<String>): Boolean {
+        val taskCategories = task.category.split(",").map { it.trim() }
+        return taskCategories.any { it in selectedCategories }
+    }
+
+    private fun showAllTasks() {
+        todayAdapter.submitList(ArrayList(todayTasks))  // Create new lists to prevent issues
+        thisWeekAdapter.submitList(ArrayList(thisWeekTasks))
+        upcomingAdapter.submitList(ArrayList(upcomingTasks))
+    }
+
+
 
     // </editor-fold>
 

@@ -137,20 +137,14 @@ class TaskCreationFragment : Fragment() {
                 val title = binding.etTaskTitle.text.toString()
 
                 //Category/Chips
+// Collect category chips
                 val chipTexts = mutableListOf<String>()
                 for (i in 0 until binding.chipGroupCategory.childCount) {
                     val chip = binding.chipGroupCategory.getChildAt(i) as Chip
-
-                    //Add Chip
                     chipTexts.add(chip.text.toString().lowercase(Locale.getDefault()))
-
                 }
+                val category = chipTexts.joinToString(separator = ",")
 
-                val category = when {
-                    chipTexts.size == 1 -> chipTexts[0] // Only one chip, return its text
-                    chipTexts.size > 1 -> chipTexts.joinToString(separator = ",") // Multiple chips, join with commas
-                    else -> "Uncategorized" // No chips selected, default to "Uncategorized"
-                }
 
                 // Get current date and time
                 val currentTime = System.currentTimeMillis()
@@ -163,7 +157,7 @@ class TaskCreationFragment : Fragment() {
                 val startDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
 
                 // Get Min and Max Hours and Task Time
-                val taskTime = "Time: " + binding.etTaskTime.text.toString()
+                val taskTime = binding.etTaskTime.text.toString()
                 val minTargetHours = binding.etMinHours.text.toString().toInt()
                 val maxTargetHours = binding.etMaxHours.text.toString().toInt()
 

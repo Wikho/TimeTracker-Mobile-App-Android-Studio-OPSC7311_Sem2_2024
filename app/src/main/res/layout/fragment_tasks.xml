@@ -8,12 +8,43 @@
     android:paddingTop ="5dp"
     android:paddingHorizontal="5dp">
 
- <!-- ScrollView with task sections -->
+ <!-- Filter Container -->
+ <LinearLayout
+     android:id="@+id/categoryMainFilterContainer"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:orientation="vertical"
+     android:layout_alignParentTop="true">
+  <!-- Toggle Button -->
+  <Button
+      android:id="@+id/btnToggleCategoryFilter"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/filter_by_category_off" />
+
+  <!-- Category Filter Container -->
+  <LinearLayout
+      android:id="@+id/categoryFilterContainer"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="gone">
+
+   <!-- ChipGroup for Categories -->
+   <com.google.android.material.chip.ChipGroup
+       android:id="@+id/chipGroupCategoryFilter"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:background="@drawable/rounded_background_gray"/>
+  </LinearLayout>
+ </LinearLayout>
+
+ <!-- Task ScrollView -->
  <androidx.core.widget.NestedScrollView
      android:id="@+id/scrollViewTasks"
      android:layout_width="match_parent"
      android:layout_height="wrap_content"
-     android:layout_alignParentTop="true"
+     android:layout_below="@id/categoryMainFilterContainer"
      android:layout_above="@id/btnArchivedTasks"
      android:fillViewport="true">
 
@@ -97,13 +128,13 @@
      android:id="@+id/fabAddTask"
      android:layout_width="wrap_content"
      android:layout_height="wrap_content"
-     android:layout_alignParentBottom="true"
      android:layout_alignParentEnd="true"
+     android:layout_alignParentBottom="true"
+     android:layout_marginEnd="15dp"
      android:layout_marginBottom="60dp"
-     android:layout_marginRight="15dp"
+     android:backgroundTint="@color/purple"
      android:src="@drawable/add"
-     android:contentDescription="Add Task"
      android:tint="@android:color/white"
-     android:backgroundTint="@color/purple"/>
+     tools:ignore="SpeakableTextPresentCheck" />
 
 </RelativeLayout>

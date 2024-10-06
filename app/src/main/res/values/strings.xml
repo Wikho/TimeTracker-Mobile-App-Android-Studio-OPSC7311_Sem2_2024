@@ -63,6 +63,8 @@
     <string name="select_photo">Select Photo</string>
     <string name="enter_description">Enter description</string>
     <string name="task_description">Task Description</string>
+    <string name="filter_by_category_off">Filter by category : OFF</string>
+    <string name="filter_by_category_on">Filter by category : ON</string>
 
 
 </resources>

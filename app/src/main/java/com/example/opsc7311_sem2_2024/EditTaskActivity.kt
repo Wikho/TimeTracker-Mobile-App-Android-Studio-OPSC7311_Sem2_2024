@@ -21,6 +21,7 @@ import android.widget.Button
 import android.widget.TimePicker
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class EditTaskActivity : AppCompatActivity() {
 
@@ -164,11 +165,11 @@ class EditTaskActivity : AppCompatActivity() {
         // Get updated task data from UI elements
         val title = binding.etTaskTitleEdit.text.toString()
 
-        // Collect category chips
+// Collect category chips
         val chipTexts = mutableListOf<String>()
         for (i in 0 until binding.chipGroupCategory.childCount) {
             val chip = binding.chipGroupCategory.getChildAt(i) as Chip
-            chipTexts.add(chip.text.toString())
+            chipTexts.add(chip.text.toString().lowercase(Locale.getDefault()))
         }
         val category = chipTexts.joinToString(separator = ",")
 
