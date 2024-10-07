@@ -35,14 +35,18 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
         super.onViewCreated(view, savedInstanceState)
 
 
-
+        setUpRecycle()
 
 
     }
 
     private fun setUpRecycle(){
 
-        //sAdapater = SettingsDataClass()
+        sAdapater = SettingsAdapter(this)
+        binding.rvGeneralSettings.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = sAdapater
+        }
 
     }
 
