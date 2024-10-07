@@ -231,7 +231,7 @@ class TaskCreationFragment : Fragment() {
         val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
 
         // Initialize the TimePicker
-        timePicker.setIs24HourView(false) // Set to true if you prefer 24-hour format
+        timePicker.setIs24HourView(true)
 
         // Create the AlertDialog
         val dialog = AlertDialog.Builder(requireContext())
