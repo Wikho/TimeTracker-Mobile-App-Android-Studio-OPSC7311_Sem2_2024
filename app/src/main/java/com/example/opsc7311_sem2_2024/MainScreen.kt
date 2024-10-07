@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.opsc7311_sem2_2024.databinding.ActivityMainScreenBinding
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
@@ -121,10 +123,31 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val tvUserName = headerView.findViewById<TextView>(R.id.tvNavHeaderUserName)
         val tvUserEmail = headerView.findViewById<TextView>(R.id.tvNavHeaderUserEmail)
 
-        val userName = sharedPreferences.getString("user_name", "User Name")
-        val userEmail = sharedPreferences.getString("user_email", "user@example.com")
+        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        var userName = sharedPreferences.getString("user_name", null)
+        var userEmail = sharedPreferences.getString("user_email", null)
 
-        tvUserName.text = userName
-        tvUserEmail.text = userEmail
+        if (userName == null || userEmail == null) {
+            // Fetch from Firebase
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val userId = currentUser?.uid ?: return
+            val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+
+            databaseRef.get().addOnSuccessListener { dataSnapshot ->
+                userName = dataSnapshot.child("name").getValue(String::class.java) ?: "User Name"
+                userEmail = dataSnapshot.child("email").getValue(String::class.java) ?: "user@example.com"
+
+                tvUserName.text = userName
+                tvUserEmail.text = userEmail
+            }.addOnFailureListener { exception ->
+                // Handle failure
+                tvUserName.text = "User Name"
+                tvUserEmail.text = "user@example.com"
+            }
+        } else {
+            tvUserName.text = userName
+            tvUserEmail.text = userEmail
+        }
     }
+
 }
