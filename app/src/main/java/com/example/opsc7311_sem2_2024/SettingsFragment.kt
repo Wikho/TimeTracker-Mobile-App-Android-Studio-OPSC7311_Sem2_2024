@@ -37,6 +37,12 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
         settingsList.apply {
             add(SettingsDataClass("Enable Notifications", true))
             add(SettingsDataClass("Dark Mode", false))
+            add(SettingsDataClass("Add new task on top", true))
+            add(SettingsDataClass("Play completion sound", true))
+            add(SettingsDataClass("Confirm before deleting", true))
+            add(SettingsDataClass("Automatically delete entries once completed", false))
+            add(SettingsDataClass("Automatically archive completed tasks", true))
+            add(SettingsDataClass("Archive priority entries upon completion", false))
             // Add more settings as needed
         }
 
