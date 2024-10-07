@@ -34,11 +34,16 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         super.onViewCreated(view, savedInstanceState)
 
-
+        //  getData()
         setUpRecycle()
 
 
+
     }
+
+
+
+
 
     private fun setUpRecycle(){
 
@@ -60,26 +65,31 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
             "Fifth Setting"
         )
 
+
         binding.rvGeneralSettings.layoutManager = LinearLayoutManager(context)
         binding.rvGeneralSettings.adapter = sAdapater
-        binding.rvGeneralSettings.setHasFixedSize(true)
+
+
+       // binding.rvGeneralSettings.setHasFixedSize(true)
 
         dataListSF = arrayListOf()
-        getData()
+        //getData()
 
     }
 
 
 
-    private fun getData(){
-        for(i in titleList.indices){
-            val dataClass = SettingsDataClass(titleList[i])
-            dataListSF.add(dataClass)
-        }
-        recyclerView.adapter = SettingsAdapter(listener = this)
-
-
-    }
+//    private fun getData(){
+//        for(i in titleList.indices){
+//            val dataClass = SettingsDataClass(titleList[i])
+//            dataListSF.add(dataClass)
+//        }
+//        recyclerView.adapter = SettingsAdapter(listener = this)
+//
+//
+//
+//
+//    }
 
 
 
