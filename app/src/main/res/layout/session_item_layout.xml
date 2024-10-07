@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:background="@color/gray">
+    android:background="@drawable/rounded_background_gray"
+    android:layout_marginBottom="8dp">
 
     <!-- Vertical layout for the text information -->
     <LinearLayout
