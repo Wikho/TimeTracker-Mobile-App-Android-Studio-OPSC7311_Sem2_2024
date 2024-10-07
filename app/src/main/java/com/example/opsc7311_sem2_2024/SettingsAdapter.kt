@@ -1,52 +1,43 @@
 package com.example.opsc7311_sem2_2024
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.AsyncListDiffer.ListListener
 import androidx.recyclerview.widget.RecyclerView
 import com.example.opsc7311_sem2_2024.databinding.SettingsOptionsLayoutBinding
-import com.example.opsc7311_sem2_2024.databinding.TaskItemLayoutBinding
 
-class SettingsAdapter (private val listener: SettingsListener): RecyclerView.Adapter<SettingsAdapter.ViewHolderClass>()     {
-
-    private val dataList = mutableListOf<SettingsDataClass>()
+class SettingsAdapter(
+    private val settingsList: List<SettingsDataClass>,
+    private val listener: SettingsListener
+) : RecyclerView.Adapter<SettingsAdapter.ViewHolderClass>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
-        val itemView = SettingsOptionsLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolderClass(itemView)
-
+        val binding = SettingsOptionsLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolderClass(binding)
     }
-
-
 
     override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
-        val currentItem = dataList[position]
+        val currentItem = settingsList[position]
         holder.bind(currentItem)
-
-
-    }
-    override fun getItemCount(): Int {
-
-        return dataList.size
-
     }
 
-    inner class ViewHolderClass(private val binding: SettingsOptionsLayoutBinding): RecyclerView.ViewHolder(binding.root){
+    override fun getItemCount(): Int = settingsList.size
 
-        //val tvSettingsTitle: TextView = textView.findViewById(R.id.tv_SettingsTitle)
-        fun bind(setting: SettingsDataClass){
+    inner class ViewHolderClass(private val binding: SettingsOptionsLayoutBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
+        fun bind(setting: SettingsDataClass) {
             binding.tvSettingsTitle.text = setting.settingsTitle
+            binding.switchToggleSetting.isChecked = setting.isEnabled
 
+            // Set up listener for the switch
+            binding.switchToggleSetting.setOnCheckedChangeListener { _, isChecked ->
+                setting.isEnabled = isChecked
+                listener.onSettingsChanged(setting)
+            }
         }
-
-
     }
 
     interface SettingsListener {
-        fun onSettingsListener(setting: SettingsDataClass)
+        fun onSettingsChanged(setting: SettingsDataClass)
     }
-
 }
