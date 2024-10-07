@@ -1,5 +1,6 @@
 package com.example.opsc7311_sem2_2024
 
+import android.app.DatePickerDialog
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -20,6 +21,9 @@ import com.github.mikephil.charting.utils.MPPointF
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class AnalyticsFragment : Fragment() {
 
@@ -28,6 +32,9 @@ class AnalyticsFragment : Fragment() {
 
     private lateinit var pieChart: PieChart
     private lateinit var taskDatabase: TaskDatabase
+
+    private var fromDate: String? = null
+    private var toDate: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -49,6 +56,58 @@ class AnalyticsFragment : Fragment() {
             }
             updatePieChart(categoryData)
         }
+
+        // <editor-fold desc="Forgot Password Click Listener">
+
+        binding.btnToggleFilters.setOnClickListener {
+            val isFilterOff = binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)
+            if (isFilterOff) {
+                binding.filterContainer.visibility = View.VISIBLE
+                binding.btnToggleFilters.text = getString(R.string.filter_by_category_on)
+            } else {
+                binding.filterContainer.visibility = View.GONE
+                binding.btnToggleFilters.text = getString(R.string.filter_by_category_off)
+                // Reset filters
+                fromDate = null
+                toDate = null
+                loadDataAndUpdateChart()
+            }
+        }
+
+        // Date Pickers
+        binding.etFromDate.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                binding.etFromDate.setText(date)
+                loadDataAndUpdateChart()
+            }
+        }
+
+        binding.etToDate.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                binding.etToDate.setText(date)
+                loadDataAndUpdateChart()
+            }
+        }
+
+        // Day, Week, Month Buttons
+        binding.btnDayFilter.setOnClickListener {
+            setDateRangeForPeriod("day")
+            loadDataAndUpdateChart()
+        }
+
+        binding.btnWeekFilter.setOnClickListener {
+            setDateRangeForPeriod("week")
+            loadDataAndUpdateChart()
+        }
+
+        binding.btnMonthFilter.setOnClickListener {
+            setDateRangeForPeriod("month")
+            loadDataAndUpdateChart()
+        }
+
+        // </editor-fold>
 
         return view
     }
@@ -87,14 +146,25 @@ class AnalyticsFragment : Fragment() {
         val taskDao = taskDatabase.taskItemDao()
         val tasks = taskDao.getAllTasks()
         val categoryTimeMap = mutableMapOf<String, Int>()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val fromDateParsed = fromDate?.let { dateFormat.parse(it) }
+        val toDateParsed = toDate?.let { dateFormat.parse(it) }
 
         for (task in tasks) {
-            val categories = task.category.split(",").map { it.trim() }
             for (session in task.sessionHistory) {
-                val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
-                for (category in categories) {
-                    val total = categoryTimeMap.getOrDefault(category, 0)
-                    categoryTimeMap[category] = total + durationMinutes
+                val sessionDate = dateFormat.parse(session.sessionStartDate)
+                // Apply date filters
+                val isAfterFromDate = fromDateParsed?.let { sessionDate >= it } ?: true
+                val isBeforeToDate = toDateParsed?.let { sessionDate <= it } ?: true
+
+                if (isAfterFromDate && isBeforeToDate) {
+                    val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
+                    val categories = task.category.split(",").map { it.trim() }
+                    for (category in categories) {
+                        val total = categoryTimeMap.getOrDefault(category, 0)
+                        categoryTimeMap[category] = total + durationMinutes
+                    }
                 }
             }
         }
@@ -175,6 +245,73 @@ class AnalyticsFragment : Fragment() {
         } else {
             String.format("%d min", minutes)
         }
+    }
+
+    private fun showDatePicker(onDateSelected: (String) -> Unit) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val dateStr = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                onDateSelected(dateStr)
+            },
+            year,
+            month,
+            day
+        )
+        datePickerDialog.show()
+    }
+
+    private fun setDateRangeForPeriod(period: String) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        val today = dateFormat.format(calendar.time)
+
+        when (period) {
+            "day" -> {
+                fromDate = today
+                toDate = today
+            }
+            "week" -> {
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+                fromDate = dateFormat.format(calendar.time)
+                calendar.add(Calendar.DAY_OF_WEEK, 6)
+                toDate = dateFormat.format(calendar.time)
+            }
+            "month" -> {
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                fromDate = dateFormat.format(calendar.time)
+                calendar.add(Calendar.MONTH, 1)
+                calendar.add(Calendar.DAY_OF_MONTH, -1)
+                toDate = dateFormat.format(calendar.time)
+            }
+        }
+        binding.etFromDate.setText(fromDate)
+        binding.etToDate.setText(toDate)
+    }
+
+    private fun loadDataAndUpdateChart() {
+        lifecycleScope.launch {
+            val categoryData = withContext(Dispatchers.IO) {
+                aggregateCategoryData()
+            }
+            updatePieChart(categoryData)
+            updateStatistics(categoryData)
+        }
+    }
+
+    private fun updateStatistics(categoryData: Map<String, Int>) {
+        // Calculate and update Task Completed, Time Tracked, etc.
+        // For example:
+        val totalTimeTracked = categoryData.values.sum()
+        val totalHours = totalTimeTracked / 60
+        val totalMinutes = totalTimeTracked % 60
+        binding.tvTimeTracked.text = String.format("%d:%02d", totalHours, totalMinutes)
+        // Implement calculations for other statistics similarly
     }
 
 

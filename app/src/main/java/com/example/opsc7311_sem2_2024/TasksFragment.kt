@@ -358,7 +358,6 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         val activeSession = task.sessionHistory.lastOrNull { it.endTime == null }
         if (activeSession != null) {
             activeSession.endTime = endTime
-
             // Calculate session duration
             val format = SimpleDateFormat("HH:mm", Locale.getDefault())
             val startDate = format.parse(activeSession.startTime)
@@ -368,31 +367,55 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             val hours = minutes / 60
             val remainingMinutes = minutes % 60
             activeSession.sessionDuration = String.format("%d:%02d", hours, remainingMinutes)
-        }
 
-        task.isStarted = false
+            task.isStarted = false
 
-        // Update the database
-        lifecycleScope.launch {
-            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-            val taskDao = taskDatabase.taskItemDao()
-            taskDao.updateTask(task)
+            // Update the database
+            lifecycleScope.launch {
+                val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
+                val taskDao = taskDatabase.taskItemDao()
+                taskDao.updateTask(task)
+                // Refresh the list
+                loadTasksFromDatabase()
 
-            // Refresh the list
-            loadTasksFromDatabase()
-        }
-
-        // Update category stats
-        // Update the database
-        lifecycleScope.launch {
-            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-            val taskDao = taskDatabase.taskItemDao()
-            taskDao.updateTask(task)
-
-            // Refresh the list
-            loadTasksFromDatabase()
+                // Show session info dialog
+                showSessionInfoDialog(task, activeSession)
+            }
         }
     }
+
+    private fun showSessionInfoDialog(task: TaskItem, session: TaskSession) {
+        val sessionDurationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
+        val sessionDurationStr = session.sessionDuration
+
+        val minTargetMinutes = task.minTargetHours * 60
+        val maxTargetMinutes = task.maxTargetHours * 60
+
+        val message = StringBuilder()
+        message.append("You worked $sessionDurationStr total on the project.\n")
+
+        if (sessionDurationMinutes >= minTargetMinutes) {
+            message.append("Well done! You completed your minimum daily goal hours in this session.")
+        } else {
+            message.append("You didn't meet your minimum daily goal hours.")
+        }
+
+        if (sessionDurationMinutes > maxTargetMinutes) {
+            message.append("\nYou went over your maximum daily goal hours.")
+        }
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Session Info")
+            .setMessage(message.toString())
+            .setPositiveButton("OK") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
+
 
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {

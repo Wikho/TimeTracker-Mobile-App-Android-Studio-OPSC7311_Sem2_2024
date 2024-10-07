@@ -1,215 +1,240 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/analyticsLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="40dp"
+    android:paddingHorizontal="20dp"
     android:paddingVertical="16dp"
     android:gravity="center">
 
-    <!--    &lt;!&ndash; TODO: Update blank fragment layout &ndash;&gt;-->
-    <!--    <TextView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:text="@string/hello_blank_fragment" />-->
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="15dp"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal">
-
-
-        <Button
-            android:id="@+id/btnDayFilter"
-            android:text="day"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginHorizontal="6dp"
-            app:cornerRadius="20dp">
-        </Button>
-
-        <Button
-            android:id="@+id/btnWeekFilter"
-            android:text="week"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginHorizontal="6dp"
-            app:cornerRadius="20dp">
-        </Button>
-
-        <Button
-            android:id="@+id/btnMonthFilter"
-            android:text="month"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginHorizontal="6dp"
-            app:cornerRadius="20dp">
-        </Button>
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-<!--        <RelativeLayout-->
-<!--            xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--            xmlns:tools="http://schemas.android.com/tools"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:fillViewport="true"-->
-<!--            android:orientation="vertical"-->
-<!--            tools:context=".MainActivity">-->
-
-            <com.github.mikephil.charting.charts.PieChart
-                android:id="@+id/pieChart"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="40dp" />
-
-<!--        </RelativeLayout>-->
-    </LinearLayout>
-
-    <View
+    <!-- Toggle Filters Button -->
+    <Button
+        android:id="@+id/btnToggleFilters"
         android:layout_width="wrap_content"
-        android:layout_height="40dp">
-    </View>
+        android:layout_height="wrap_content"
+        android:text="@string/filter_by_category_off"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true" />
 
+    <!-- Filters Container -->
     <LinearLayout
+        android:id="@+id/filterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="8dp"
+        android:layout_below="@id/btnToggleFilters">
 
+        <!-- From and To Date Selectors -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="From" />
+
+        <EditText
+            android:id="@+id/etFromDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="To" />
+
+        <EditText
+            android:id="@+id/etToDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <!-- Buttons for Day, Week, Month -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingVertical="6dp">
+            android:gravity="center_horizontal">
 
-            <TextView
-                android:layout_width="250dp"
-                android:layout_height="match_parent"
-                android:text="TASKS COMPLETED"
-                android:textSize="15sp"
-                android:textStyle="bold">
-            </TextView>
+            <Button
+                android:id="@+id/btnDayFilter"
+                android:text="Day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="-/-"
-                android:textSize="15sp"
-                android:textStyle="bold">
+            <Button
+                android:id="@+id/btnWeekFilter"
+                android:text="Week"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp" />
 
-            </TextView>
+            <Button
+                android:id="@+id/btnMonthFilter"
+                android:text="Month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp" />
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingVertical="6dp">
-
-            <TextView
-                android:layout_width="250dp"
-                android:layout_height="match_parent"
-                android:text="TIME TRACKED"
-                android:textSize="15sp"
-                android:textStyle="bold">
-
-            </TextView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="--:--:--"
-                android:textSize="15sp"
-                android:textStyle="bold">
-
-            </TextView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingVertical="6dp">
-
-            <TextView
-                android:layout_width="250dp"
-                android:layout_height="match_parent"
-                android:text="AVERAGE TASK DURATION"
-                android:textSize="15sp"
-                android:textStyle="bold">
-
-            </TextView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="--:--:--"
-                android:textSize="15sp"
-                android:textStyle="bold">
-
-            </TextView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingVertical="6dp">
-
-            <TextView
-                android:layout_width="250dp"
-                android:layout_height="match_parent"
-                android:text="MINIMUM TASK DURATION"
-                android:textSize="15sp"
-                android:textStyle="bold">
-            </TextView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="--:--:--"
-                android:textSize="15sp"
-                android:textStyle="bold">
-            </TextView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingVertical="6dp">
-
-            <TextView
-                android:layout_width="250dp"
-                android:layout_height="match_parent"
-                android:text="MAXIMUM TASK DURATION"
-                android:textSize="15sp"
-                android:textStyle="bold">
-            </TextView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="--:--:--"
-                android:textSize="15sp"
-                android:textStyle="bold">
-            </TextView>
-
-
-        </LinearLayout>
-
-
     </LinearLayout>
 
+    <!-- NestedScrollView containing the rest of the content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/filterContainer"
+        android:fillViewport="true">
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Pie Chart -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginTop="40dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="40dp" />
+
+            <!-- Statistics -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Tasks Completed -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="250dp"
+                        android:layout_height="match_parent"
+                        android:text="TASKS COMPLETED"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTasksCompleted"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="-/-"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Time Tracked -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="250dp"
+                        android:layout_height="match_parent"
+                        android:text="TIME TRACKED"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTimeTracked"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="--:--:--"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Average Task Duration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="250dp"
+                        android:layout_height="match_parent"
+                        android:text="AVERAGE TASK DURATION"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAverageTaskDuration"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="--:--:--"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Minimum Task Duration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="250dp"
+                        android:layout_height="match_parent"
+                        android:text="MINIMUM TASK DURATION"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvMinTaskDuration"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="--:--:--"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Maximum Task Duration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="250dp"
+                        android:layout_height="match_parent"
+                        android:text="MAXIMUM TASK DURATION"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvMaxTaskDuration"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="--:--:--"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</RelativeLayout>
