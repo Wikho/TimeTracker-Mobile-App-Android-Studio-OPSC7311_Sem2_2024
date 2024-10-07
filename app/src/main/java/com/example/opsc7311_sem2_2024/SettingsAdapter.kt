@@ -1,41 +1,52 @@
 package com.example.opsc7311_sem2_2024
 
 import android.view.LayoutInflater
-import android.widget.TextView
-import  android.view.View
+import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.menu.MenuView.ItemView
+import android.widget.TextView
+import androidx.recyclerview.widget.AsyncListDiffer.ListListener
 import androidx.recyclerview.widget.RecyclerView
+import com.example.opsc7311_sem2_2024.databinding.SettingsOptionsLayoutBinding
+import com.example.opsc7311_sem2_2024.databinding.TaskItemLayoutBinding
 
-class SettingsAdapter (private val dataList: ArrayList<SettingsDataClass>): RecyclerView.Adapter<SettingsAdapter.ViewHolderClass>()     {
+class SettingsAdapter (private val listener: SettingsListener): RecyclerView.Adapter<SettingsAdapter.ViewHolderClass>()     {
 
-
+    private val dataList = mutableListOf<SettingsDataClass>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.settings_options_layout, parent, false)
+        val itemView = SettingsOptionsLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolderClass(itemView)
 
     }
 
+
+
+    override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
+        val currentItem = dataList[position]
+        holder.bind(currentItem)
+
+
+    }
     override fun getItemCount(): Int {
 
         return dataList.size
 
     }
 
-    override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
-        val currentItem = dataList[position]
-        holder.tvSettingsTitle.setText(currentItem.settingsTitle)
+    inner class ViewHolderClass(private val binding: SettingsOptionsLayoutBinding): RecyclerView.ViewHolder(binding.root){
+
+        //val tvSettingsTitle: TextView = textView.findViewById(R.id.tv_SettingsTitle)
+        fun bind(setting: SettingsDataClass){
+
+            binding.tvSettingsTitle.text = setting.settingsTitle
+
+        }
 
 
     }
 
-
-    class ViewHolderClass(itemView: View): RecyclerView.ViewHolder(itemView){
-
-        val tvSettingsTitle: TextView = itemView.findViewById(R.id.tv_SettingsTitle)
-
-
+    interface SettingsListener {
+        fun onSettingsListener(setting: SettingsDataClass)
     }
 
 }

@@ -1,23 +1,22 @@
 package com.example.opsc7311_sem2_2024
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.opsc7311_sem2_2024.databinding.FragmentSettingsBinding
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
 
     // Declare the binding variable
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var dataList: ArrayList<SettingsDataClass>
+    private lateinit var dataListSF: ArrayList<SettingsDataClass>
     lateinit var titleList: Array<String>
 
     private lateinit var sAdapater: SettingsAdapter
@@ -25,34 +24,55 @@ class SettingsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?){
+        super.onViewCreated(view, savedInstanceState)
 
 
 
+
+
+    }
+
+    private fun setUpRecycle(){
+
+        //sAdapater = SettingsDataClass()
+
+    }
+
+
+    override fun onSettingsListener(setting: SettingsDataClass){
         titleList = arrayOf(
             "First Setting",
             "Second Setting",
             "Third Setting",
             "Fourth Setting",
-            "Fifth Setting")
+            "Fifth Setting"
+        )
 
         binding.rvGeneralSettings.layoutManager = LinearLayoutManager(context)
         binding.rvGeneralSettings.adapter = sAdapater
+        binding.rvGeneralSettings.setHasFixedSize(true)
 
-        dataList = arrayListOf<SettingsDataClass>()
+        dataListSF = arrayListOf()
         getData()
 
-        return binding.root
     }
+
+
 
     private fun getData(){
         for(i in titleList.indices){
             val dataClass = SettingsDataClass(titleList[i])
-            dataList.add(dataClass)
+            dataListSF.add(dataClass)
         }
-        recyclerView.adapter = SettingsAdapter(dataList)
+        recyclerView.adapter = SettingsAdapter(listener = this)
 
 
     }
