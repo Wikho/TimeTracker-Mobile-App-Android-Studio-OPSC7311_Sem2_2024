@@ -16,7 +16,7 @@
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/tvUserName"
+        android:id="@+id/tvNavHeaderUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text = "Wikho"
@@ -27,7 +27,7 @@
         android:paddingBottom="5dp"/>
 
     <TextView
-        android:id="@+id/tvUserEmail"
+        android:id="@+id/tvNavHeaderUserEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text = "wikho.doman@gmail.com"

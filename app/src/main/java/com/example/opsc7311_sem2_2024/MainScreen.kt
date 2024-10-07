@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -31,12 +32,6 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding = ActivityMainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-        //    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        //    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-        //    insets
-        //}
-
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
 
@@ -59,6 +54,9 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             replaceFragment(TasksFragment())
             navigationView.setCheckedItem(R.id.nvTask)
         }
+
+        // Populate nav_header with user info
+        populateNavHeader()
 
         // </editor-fold>
 
@@ -115,5 +113,18 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun populateNavHeader() {
+        val navigationView = binding.navView
+        val headerView = navigationView.getHeaderView(0)
+        val tvUserName = headerView.findViewById<TextView>(R.id.tvNavHeaderUserName)
+        val tvUserEmail = headerView.findViewById<TextView>(R.id.tvNavHeaderUserEmail)
+
+        val userName = sharedPreferences.getString("user_name", "User Name")
+        val userEmail = sharedPreferences.getString("user_email", "user@example.com")
+
+        tvUserName.text = userName
+        tvUserEmail.text = userEmail
     }
 }

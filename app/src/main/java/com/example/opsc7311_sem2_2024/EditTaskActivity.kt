@@ -16,6 +16,8 @@ import java.util.Calendar
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.TimePicker
@@ -26,6 +28,8 @@ import java.util.Locale
 class EditTaskActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditTaskBinding
+    private val validationManager = ValidationManager()
+
 
     // Variables for task data
     private var taskId: String? = null
@@ -61,6 +65,44 @@ class EditTaskActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // <editor-fold desc="OnChange Listeners for validation">
+
+        // Add TextWatchers for validation
+        binding.etTaskTitleEdit.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.etTaskTime.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.etMinHours.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.etMaxHours.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        // </editor-fold>
+
 
         // Set up the Back button
         binding.btnBack.setOnClickListener {
@@ -162,41 +204,54 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun saveTask() {
-        // Get updated task data from UI elements
-        val title = binding.etTaskTitleEdit.text.toString()
 
-// Collect category chips
-        val chipTexts = mutableListOf<String>()
-        for (i in 0 until binding.chipGroupCategory.childCount) {
-            val chip = binding.chipGroupCategory.getChildAt(i) as Chip
-            chipTexts.add(chip.text.toString().lowercase(Locale.getDefault()))
-        }
-        val category = chipTexts.joinToString(separator = ",")
+        // Validate inputs
+        val isTitleValid = validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
+        val isCategoryValid = validationManager.isChipGroupNotEmpty(binding.chipGroupCategory, binding.tilAddChip)
+        val isMinHoursValid = validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
+        val isMaxHoursValid = validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
+        val isTaskTimeValid = validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
 
-        val startDate = binding.etDatePicker.text.toString()
-        val taskTime = "Time: " + binding.etTaskTime.text.toString()
-        val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
-        val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
+        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid) {
 
-        // Update the currentTask object
-        currentTask?.let { task ->
-            task.title = title
-            task.category = category
-            task.startDate = startDate
-            task.time = taskTime
-            task.minTargetHours = minTargetHours
-            task.maxTargetHours = maxTargetHours
+            // Get updated task data from UI elements
+            val title = binding.etTaskTitleEdit.text.toString()
 
-            // Update the task in the database
-            taskViewModel.updateTask(task) {
-                // Notify the user
-                Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
-
-                // Close the activity
-                setResult(Activity.RESULT_OK)
-                finish()
+            // Collect category chips
+            val chipTexts = mutableListOf<String>()
+            for (i in 0 until binding.chipGroupCategory.childCount) {
+                val chip = binding.chipGroupCategory.getChildAt(i) as Chip
+                chipTexts.add(chip.text.toString().lowercase(Locale.getDefault()))
             }
+            val category = chipTexts.joinToString(separator = ",")
+
+            val startDate = binding.etDatePicker.text.toString()
+            val taskTime = "Time: " + binding.etTaskTime.text.toString()
+            val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
+            val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
+
+            // Update the currentTask object
+            currentTask?.let { task ->
+                task.title = title
+                task.category = category
+                task.startDate = startDate
+                task.time = taskTime
+                task.minTargetHours = minTargetHours
+                task.maxTargetHours = maxTargetHours
+
+                // Update the task in the database
+                taskViewModel.updateTask(task) {
+                    // Notify the user
+                    Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
+
+                    // Close the activity
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+            }
+
         }
+
     }
 
     private fun showTimePicker(onTimeSelected: (String) -> Unit) {

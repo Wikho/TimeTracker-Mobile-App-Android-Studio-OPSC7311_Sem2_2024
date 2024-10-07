@@ -1,8 +1,5 @@
 package com.example.opsc7311_sem2_2024
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.database.FirebaseDatabase
@@ -75,7 +72,7 @@ class FirebaseManager{
             }
     }
 
-    // <editor-fold desc="Reset Password">
+    // Reset Password
     fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
@@ -86,8 +83,28 @@ class FirebaseManager{
                 }
             }
     }
-    // </editor-fold>
 
+    // Search if email exist
+    @Suppress("DEPRECATION")
+    fun doesEmailExist(email: String, callback: (Boolean) -> Unit) {
+        val firebaseAuth = FirebaseAuth.getInstance()
 
+        firebaseAuth.fetchSignInMethodsForEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val signInMethods = task.result?.signInMethods
+                    if (!signInMethods.isNullOrEmpty()) {
+                        // Email exists
+                        callback(true)
+                    } else {
+                        // Email does not exist
+                        callback(false)
+                    }
+                } else {
+                    // Task failed, assume email does not exist
+                    callback(false)
+                }
+            }
+    }
 
 }

@@ -129,6 +129,18 @@ class TaskInfoFragment : Fragment() {
             applyFilters()
         }
 
+        // Toggle Filters Button
+        binding.btnToggleFilters.setOnClickListener {
+            val isFilterOff = binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)
+            if (isFilterOff) {
+                binding.filterContainer.visibility = View.VISIBLE
+                binding.btnToggleFilters.text = getString(R.string.filter_by_category_on)
+            } else {
+                binding.filterContainer.visibility = View.GONE
+                binding.btnToggleFilters.text = getString(R.string.filter_by_category_off)
+            }
+        }
+
 
         //Change btn based on isArchived Value
         if (isArchived) {
@@ -238,7 +250,6 @@ class TaskInfoFragment : Fragment() {
         }
     }
 
-    //Added This might need it later (Wikho)
     private fun openEditTaskActivity() {
         val intent = Intent(requireContext(), EditTaskActivity::class.java)
         intent.putExtra("taskId", taskId)

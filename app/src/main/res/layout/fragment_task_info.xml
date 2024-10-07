@@ -262,12 +262,22 @@
                     android:orientation="vertical"
                     android:padding="10dp">
 
+                    <Button
+                        android:id="@+id/btnToggleFilters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/filter_by_category_off"
+                        android:layout_marginTop="8dp"
+                        android:layout_gravity="start" />
+
                     <!-- From and To Date Selectors -->
                     <LinearLayout
+                        android:id="@+id/filterContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="16dp"
+                        android:visibility="gone">
 
                         <!-- From Date Label -->
                         <TextView
@@ -356,7 +366,8 @@
                             android:id="@+id/btnResetFilters"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="View All Sessions" />
+                            android:text="@string/reset"
+                            android:layout_gravity="center"/>
 
                     </LinearLayout>
 

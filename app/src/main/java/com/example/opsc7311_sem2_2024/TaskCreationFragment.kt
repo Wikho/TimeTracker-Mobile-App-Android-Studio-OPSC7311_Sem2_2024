@@ -163,7 +163,7 @@ class TaskCreationFragment : Fragment() {
 
                 // Set isStarted and isArchived flags
                 val isStarted = false
-                val isArchived = false
+                val isArchived = false 
 
                 // Initialize sessionHistory as an empty list for now
                 val sessionHistory: MutableList<TaskSession> = mutableListOf()

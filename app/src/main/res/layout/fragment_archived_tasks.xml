@@ -47,5 +47,20 @@
 
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Archived Tasks Button at the bottom -->
+    <Button
+        android:id="@+id/btnGoToTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+
+        android:text="@string/task"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        tools:ignore="TextContrastCheck"
+        android:gravity="center"
+        android:backgroundTint="@color/green"/>
+
+
 
 </RelativeLayout>

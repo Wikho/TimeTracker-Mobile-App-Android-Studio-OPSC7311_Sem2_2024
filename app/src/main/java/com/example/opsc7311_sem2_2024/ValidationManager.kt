@@ -6,6 +6,7 @@ import com.google.android.material.textfield.TextInputLayout
 
 class ValidationManager {
 
+
     // Validate Name
     fun validateName(nameInput: TextInputLayout): Boolean {
         val name = nameInput.editText?.text.toString().trim()
@@ -46,10 +47,7 @@ class ValidationManager {
     }
 
     // Validate Confirm Password: should match the password
-    fun validateConfirmPassword(
-        passwordInput: TextInputLayout,
-        confirmPasswordInput: TextInputLayout
-    ): Boolean {
+    fun validateConfirmPassword( passwordInput: TextInputLayout,  confirmPasswordInput: TextInputLayout ): Boolean {
         val password = passwordInput.editText?.text.toString().trim()
         val confirmPassword = confirmPasswordInput.editText?.text.toString().trim()
         return if (confirmPassword != password) {
@@ -72,7 +70,6 @@ class ValidationManager {
             true
         }
     }
-
 
     // Validate Min Hours considering Max Hours
     fun validateMinHours(input: TextInputEditText, inputLayout: TextInputLayout, maxInput: TextInputEditText): Boolean {
@@ -175,8 +172,7 @@ class ValidationManager {
         }
     }
 
-
-
+    //Check if ChipGroup have Chips
     fun isChipGroupNotEmpty(chipGroup: ChipGroup, inputLayout: TextInputLayout): Boolean {
         return if (chipGroup.childCount == 0) {
             inputLayout.error = "Please select at least one category"

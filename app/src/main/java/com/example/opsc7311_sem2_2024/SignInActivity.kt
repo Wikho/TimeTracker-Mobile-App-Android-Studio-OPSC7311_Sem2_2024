@@ -2,8 +2,11 @@ package com.example.opsc7311_sem2_2024
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -45,6 +48,7 @@ class SignInActivity : AppCompatActivity() {
 
         //Btn go to SignIn Page
         binding.btnSignUp.setOnClickListener {
+
             if (validateInputs()) {
                 // Set button text to "Loading"
                 binding.btnSignUp.text = getString(R.string.loading)
@@ -61,13 +65,7 @@ class SignInActivity : AppCompatActivity() {
                     binding.btnSignUp.isEnabled = true
 
                     if (success) {
-                        Toast.makeText(this, "Registration successful! Please verify your email address.", Toast.LENGTH_LONG).show()
-
-                        // Navigate to LoginActivity and pass the email
-                        val intent = Intent(this, LoginActivity::class.java)
-                        intent.putExtra("email", email) // Pass the email to LoginActivity
-                        startActivity(intent)
-                        finish()
+                        showVerificationDialog()
 
                     } else {
                         if (message == "email_exists") {
@@ -101,4 +99,27 @@ class SignInActivity : AppCompatActivity() {
         return isNameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid
     }
     // </editor-fold>
+
+    private fun showVerificationDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_verification, null)
+        val builder = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+
+        val alertDialog = builder.create()
+
+        // Set the OK button click listener
+        dialogView.findViewById<Button>(R.id.btnOk).setOnClickListener {
+            alertDialog.dismiss()
+
+            // After dismissing the dialog, redirect to LoginActivity and pass the email
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.putExtra("email", binding.etEmail.text.toString())  // Pass the email
+            startActivity(intent)
+            finish()  // Close the sign-up activity
+        }
+
+        alertDialog.show()
+    }
+
 }

@@ -95,6 +95,15 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
                 //showAllTasks()
             }
         }
+
+        binding.btnArchivedTasks.setOnClickListener {
+            // Open ArchiveTasksFragment
+            val archiveTasksFragment = ArchivedTasksFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, archiveTasksFragment)
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     // <editor-fold desc="RecyclerViews Setup">

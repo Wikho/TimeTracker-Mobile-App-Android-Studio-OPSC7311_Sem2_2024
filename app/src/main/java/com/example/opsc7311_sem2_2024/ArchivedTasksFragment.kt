@@ -36,6 +36,15 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         lifecycleScope.launch {
             loadArchivedTasksFromDatabase()
         }
+
+        binding.btnGoToTasks.setOnClickListener {
+            // Open ArchiveTasksFragment
+            val TasksFragment = TasksFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, TasksFragment)
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     private fun setupRecyclerView() {

@@ -18,13 +18,16 @@ class ForgotPassword : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // <editor-fold desc="Reset Password Button ">
+        // Initialize FirebaseManager
+        val firebaseManager = FirebaseManager()
+
         binding.btnReset.setOnClickListener {
-            if (validateEmail()) {
-                val email = binding.etEmail.text.toString().trim()
+            val email = binding.etEmail.text.toString().trim()
+            if (email.isNotEmpty()) {
                 firebaseManager.resetPassword(email) { success, message ->
                     if (success) {
                         Toast.makeText(
@@ -34,28 +37,18 @@ class ForgotPassword : AppCompatActivity() {
                         ).show()
                         finish() // Optional: Close ForgotPassword after sending the reset link
                     } else {
-                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, message ?: "Error sending reset email.", Toast.LENGTH_SHORT).show()
                     }
                 }
+            } else {
+                binding.tilEmail.error = "Email is required"
             }
         }
-        // </editor-fold>
 
-        // <editor-fold desc="Reset Password Button ">
-
+        //Back Button
         binding.fabtnBack.setOnClickListener {
             finish()
         }
 
-
-
-
-        // </editor-fold>
     }
-
-    // <editor-fold desc="Validate Email">
-    private fun validateEmail(): Boolean {
-        return validationManager.validateEmail(binding.tilEmail)
-    }
-    // </editor-fold>
 }
