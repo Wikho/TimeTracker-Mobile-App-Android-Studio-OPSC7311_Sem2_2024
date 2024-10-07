@@ -332,7 +332,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             sessionDescription = description,
             sessionStartDate = sessionStartDate,
             startTime = startTime,
-            imagePath = imagePath ?: "default_image_path" // Use default if null
+            imagePath = imagePath
         )
 
         // Update the task

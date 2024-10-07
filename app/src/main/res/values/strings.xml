@@ -66,6 +66,8 @@
     <string name="filter_by_category_off">Filter by category : OFF</string>
     <string name="filter_by_category_on">Filter by category : ON</string>
     <string name="a_link_has_been_sent_to_your_email_please_verify_it">A link has been sent to your email. Please verify it.</string>
+    <string name="minimum_duration_hours">Minimum Duration (Hours)</string>
+    <string name="maximum_duration_hours">Maximum Duration (Hours)</string>
 
 
 </resources>

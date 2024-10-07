@@ -60,5 +60,7 @@ dependencies {
     implementation (libs.androidx.room.ktx)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     kapt (libs.androidx.room.compiler)
+    implementation (libs.glide)
+    annotationProcessor (libs.compiler)
 
 }

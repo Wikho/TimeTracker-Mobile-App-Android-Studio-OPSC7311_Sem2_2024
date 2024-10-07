@@ -79,7 +79,7 @@ class AnalyticsFragment : Fragment() {
         // Disable legend
         pieChart.legend.isEnabled = false
 
-        pieChart.setEntryLabelColor(Color.WHITE)
+        pieChart.setEntryLabelColor(Color.BLACK)
         pieChart.setEntryLabelTextSize(12f)
     }
 
@@ -118,7 +118,9 @@ class AnalyticsFragment : Fragment() {
         val entries = ArrayList<PieEntry>()
         for ((category, totalMinutes) in categoryData) {
             if (totalMinutes > 0) {
-                entries.add(PieEntry(totalMinutes.toFloat(), category))
+                val timeStr = formatMinutesToHoursAndMinutes(totalMinutes)
+                val label = "$category: $timeStr"
+                entries.add(PieEntry(totalMinutes.toFloat(), label))
             }
         }
 
@@ -164,6 +166,17 @@ class AnalyticsFragment : Fragment() {
         pieChart.highlightValues(null)
         pieChart.invalidate()
     }
+
+    private fun formatMinutesToHoursAndMinutes(totalMinutes: Int): String {
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        return if (hours > 0) {
+            String.format("%d:%02d", hours, minutes)
+        } else {
+            String.format("%d min", minutes)
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

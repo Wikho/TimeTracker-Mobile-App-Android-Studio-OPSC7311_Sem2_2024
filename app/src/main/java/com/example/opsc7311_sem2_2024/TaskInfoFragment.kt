@@ -133,13 +133,20 @@ class TaskInfoFragment : Fragment() {
         binding.btnToggleFilters.setOnClickListener {
             val isFilterOff = binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)
             if (isFilterOff) {
+                // Turn on filters
                 binding.filterContainer.visibility = View.VISIBLE
                 binding.btnToggleFilters.text = getString(R.string.filter_by_category_on)
+                // Apply filters
+                applyFilters()
             } else {
+                // Turn off filters
                 binding.filterContainer.visibility = View.GONE
                 binding.btnToggleFilters.text = getString(R.string.filter_by_category_off)
+                // Show all sessions
+                showAllSessions()
             }
         }
+
 
 
         //Change btn based on isArchived Value
@@ -299,6 +306,13 @@ class TaskInfoFragment : Fragment() {
     }
 
     private fun applyFilters() {
+
+        if (binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)) {
+            // Filters are off, show all sessions
+            showAllSessions()
+            return
+        }
+
         val fromDateStr = binding.etFromDate.text.toString()
         val toDateStr = binding.etToDate.text.toString()
         val minDuration = binding.seekBarMinDuration.progress
@@ -333,5 +347,8 @@ class TaskInfoFragment : Fragment() {
         override fun onStopTrackingTouch(seekBar: SeekBar?) {}
     }
 
+    private fun showAllSessions() {
+        sessionAdapter.submitList(currentTask?.sessionHistory ?: emptyList())
+    }
 
 }

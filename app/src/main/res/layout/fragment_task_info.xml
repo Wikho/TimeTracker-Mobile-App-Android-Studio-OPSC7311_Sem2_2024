@@ -88,13 +88,13 @@
             <!-- ChipGroup for displaying categories -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupCategory"
+                style="@style/Widget.Material3.Chip.Filter.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material3.Chip.Filter.Elevated"
-                android:background="@drawable/rounded_background_gray"
                 android:layout_marginTop="8dp"
-                app:singleSelection="false">
-            </com.google.android.material.chip.ChipGroup>
+                android:background="@drawable/rounded_background_gray"
+                app:singleSelection="false"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"></com.google.android.material.chip.ChipGroup>
 
         </LinearLayout>
 
@@ -344,7 +344,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Minimum Duration (Hours)" />
+                            android:text="@string/minimum_duration_hours" />
+
                         <SeekBar
                             android:id="@+id/seekBarMinDuration"
                             android:layout_width="match_parent"
@@ -355,7 +356,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Maximum Duration (Hours)" />
+                            android:text="@string/maximum_duration_hours" />
+
                         <SeekBar
                             android:id="@+id/seekBarMaxDuration"
                             android:layout_width="match_parent"

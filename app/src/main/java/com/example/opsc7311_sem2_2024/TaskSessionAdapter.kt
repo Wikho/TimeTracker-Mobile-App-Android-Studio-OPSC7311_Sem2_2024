@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.opsc7311_sem2_2024.databinding.SessionItemLayoutBinding // Update the package path
 import java.io.File
 
@@ -33,14 +34,14 @@ class TaskSessionAdapter : RecyclerView.Adapter<TaskSessionAdapter.SessionViewHo
         holder.binding.tvSessionDescription.text = "Description: ${session.sessionDescription}"
 
         val imagePath = session.imagePath
-        val imgFile = File(imagePath)
 
-        if (imgFile.exists()) {
-            val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
-            holder.binding.ivSessionImage.setImageBitmap(bitmap)
-        }
-        else
-        {
+        if (imagePath != null && imagePath != "default_image_path") {
+            // Load image using Glide
+            Glide.with(holder.itemView.context)
+                .load(imagePath)
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(holder.binding.ivSessionImage)
+        } else {
             holder.binding.ivSessionImage.setImageResource(R.drawable.ic_launcher_background)
         }
 
