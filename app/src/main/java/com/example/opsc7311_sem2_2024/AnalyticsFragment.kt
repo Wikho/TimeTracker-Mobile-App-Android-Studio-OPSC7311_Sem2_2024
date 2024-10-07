@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.opsc7311_sem2_2024.databinding.FragmentAnalyticsBinding
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -15,30 +17,48 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.MPPointF
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AnalyticsFragment : Fragment() {
 
+    private var _binding: FragmentAnalyticsBinding? = null
+    private val binding get() = _binding!!
 
-    lateinit var pieChart: PieChart
-
-
+    private lateinit var pieChart: PieChart
+    private lateinit var taskDatabase: TaskDatabase
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_analytics, container, false)
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentAnalyticsBinding.inflate(inflater, container, false)
+        val view = binding.root
 
-        // Find PieChart
-        pieChart = view.findViewById(R.id.pieChart)
+        pieChart = binding.pieChart
+
+        setupPieChart()
+
+        // Initialize the database
+        taskDatabase = TaskDatabase.getDatabase(requireContext())
+
+        // Load data and update chart
+        lifecycleScope.launch {
+            val categoryData = withContext(Dispatchers.IO) {
+                aggregateCategoryData()
+            }
+            updatePieChart(categoryData)
+        }
+
+        return view
+    }
+
+    private fun setupPieChart() {
         pieChart.setUsePercentValues(true)
         pieChart.description.isEnabled = false
         pieChart.setExtraOffsets(5f, 10f, 5f, 5f)
 
-        // Allow dragging and chart appearance
-        pieChart.setDragDecelerationFrictionCoef(0.95f)
+        pieChart.dragDecelerationFrictionCoef = 0.95f
 
         pieChart.isDrawHoleEnabled = true
         pieChart.setHoleColor(Color.WHITE)
@@ -49,52 +69,104 @@ class AnalyticsFragment : Fragment() {
         pieChart.transparentCircleRadius = 61f
 
         pieChart.setDrawCenterText(true)
-        pieChart.setRotationAngle(0f)
+        pieChart.rotationAngle = 0f
         pieChart.isRotationEnabled = true
         pieChart.isHighlightPerTapEnabled = true
 
-        //Animation
+        // Animation
         pieChart.animateY(1400, Easing.EaseInOutQuad)
 
-        //Disable text/legend
+        // Disable legend
         pieChart.legend.isEnabled = false
+
         pieChart.setEntryLabelColor(Color.WHITE)
         pieChart.setEntryLabelTextSize(12f)
+    }
 
-        /////////////////////////PIE CHART DATA INSERTED HERE/////////////////////////
-        val entries: ArrayList<PieEntry> = ArrayList()
-        entries.add(PieEntry(70f, "Item 1"))
-        entries.add(PieEntry(20f, "Item 2"))
-        entries.add(PieEntry(10f, "Item 3"))
-        /////////////////////////////////////////////////////////////////////////////
+    private suspend fun aggregateCategoryData(): Map<String, Int> {
+        val taskDao = taskDatabase.taskItemDao()
+        val tasks = taskDao.getAllTasks()
+        val categoryTimeMap = mutableMapOf<String, Int>()
 
-        // Create dataSet
-        val dataSet = PieDataSet(entries, "Mobile OS")
+        for (task in tasks) {
+            val categories = task.category.split(",").map { it.trim() }
+            for (session in task.sessionHistory) {
+                val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
+                for (category in categories) {
+                    val total = categoryTimeMap.getOrDefault(category, 0)
+                    categoryTimeMap[category] = total + durationMinutes
+                }
+            }
+        }
 
+        return categoryTimeMap
+    }
+
+    private fun calculateSessionDurationInMinutes(sessionDuration: String?): Int {
+        sessionDuration?.let {
+            val parts = it.split(":")
+            if (parts.size == 2) {
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                return hours * 60 + minutes
+            }
+        }
+        return 0
+    }
+
+    private fun updatePieChart(categoryData: Map<String, Int>) {
+        val entries = ArrayList<PieEntry>()
+        for ((category, totalMinutes) in categoryData) {
+            if (totalMinutes > 0) {
+                entries.add(PieEntry(totalMinutes.toFloat(), category))
+            }
+        }
+
+        if (entries.isEmpty()) {
+            // No data available
+            pieChart.clear()
+            pieChart.setNoDataText("No data available")
+            pieChart.invalidate()
+            return
+        }
+
+        val dataSet = PieDataSet(entries, "Task Categories")
         dataSet.setDrawIcons(false)
         dataSet.sliceSpace = 3f
         dataSet.iconsOffset = MPPointF(0f, 40f)
         dataSet.selectionShift = 5f
 
+        // Set colors for the chart slices
         val colors: ArrayList<Int> = ArrayList()
-        colors.add(ContextCompat.getColor(requireContext(), R.color.purple))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.green))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.red))
+        val colorTemplates = listOf(
+            R.color.purple,
+            R.color.green,
+            R.color.red,
+            R.color.blue,
+            R.color.orange,
+            R.color.yellow,
+            R.color.teal
+        )
+
+        for (colorRes in colorTemplates) {
+            colors.add(ContextCompat.getColor(requireContext(), colorRes))
+        }
+
         dataSet.colors = colors
 
-        // Create Data and Set to chart
         val data = PieData(dataSet)
-        data.setValueFormatter(PercentFormatter())
+        data.setValueFormatter(PercentFormatter(pieChart))
         data.setValueTextSize(15f)
         data.setValueTypeface(Typeface.DEFAULT_BOLD)
         data.setValueTextColor(Color.WHITE)
-        pieChart.setData(data)
+
+        pieChart.data = data
         pieChart.highlightValues(null)
-
-        // Reload chart
         pieChart.invalidate()
-
-        return view
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

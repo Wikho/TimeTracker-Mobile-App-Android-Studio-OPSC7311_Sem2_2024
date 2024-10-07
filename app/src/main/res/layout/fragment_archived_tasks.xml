@@ -8,12 +8,45 @@
     android:paddingTop ="5dp"
     android:paddingHorizontal="5dp">
 
+    <!-- Category Filter Layout -->
+    <LinearLayout
+        android:id="@+id/categoryMainFilterContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true">
+
+        <!-- Toggle Button -->
+        <Button
+            android:id="@+id/btnToggleCategoryFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_by_category_off" />
+
+        <!-- Category Filter Container -->
+        <LinearLayout
+            android:id="@+id/categoryFilterContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- ChipGroup for Categories -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupCategoryFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+
     <!-- ScrollView with task sections -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollViewTasks"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/categoryMainFilterContainer"
+        android:layout_above="@id/btnGoToTasks"
         android:fillViewport="true">
 
         <LinearLayout

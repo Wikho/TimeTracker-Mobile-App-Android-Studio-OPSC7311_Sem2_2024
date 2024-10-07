@@ -86,13 +86,13 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
                 binding.categoryFilterContainer.visibility = View.VISIBLE
                 binding.btnToggleCategoryFilter.text = getString(R.string.filter_by_category_on)
                 // Apply category filter if any chips are selected
-                //applyCategoryFilter()
+                applyCategoryFilter()
             } else {
                 // Turn off the filter
                 binding.categoryFilterContainer.visibility = View.GONE
                 binding.btnToggleCategoryFilter.text = getString(R.string.filter_by_category_off)
                 // Show all tasks
-                //showAllTasks()
+                showAllTasks()
             }
         }
 

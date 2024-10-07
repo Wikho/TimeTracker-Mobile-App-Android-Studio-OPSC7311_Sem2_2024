@@ -6,4 +6,8 @@
     <color name="purple">#673AB7</color>
     <color name="gray">#A6A6A6</color>
     <color name="green">#8BC34A</color>
+    <color name="blue">#3F51B5</color>
+    <color name="orange">#FF5722</color>
+    <color name="yellow">#FFEB3B</color>
+    <color name="teal">#03A9F4</color>
 </resources>
