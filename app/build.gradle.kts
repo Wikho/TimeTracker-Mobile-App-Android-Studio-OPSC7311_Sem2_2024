@@ -45,7 +45,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.mpandroid.chart)
@@ -54,7 +53,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation (libs.material)
     implementation (libs.gson)
     implementation (libs.androidx.room.runtime)
     implementation (libs.androidx.room.ktx)
@@ -62,5 +60,11 @@ dependencies {
     kapt (libs.androidx.room.compiler)
     implementation (libs.glide)
     annotationProcessor (libs.compiler)
+    implementation(libs.material)
+    implementation (libs.material.calendarview)
 
+
+    implementation ((libs.material.calendarview)) {
+        exclude( ("com.android.support"),("support-compat"))
+    }
 }

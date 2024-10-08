@@ -53,3 +53,10 @@ data class TaskSession(
     var imagePath: String? = null                  // Path to the image captured during the session
 
 )
+
+// Data class for TaskNote
+data class TaskNote(
+    val id: String = UUID.randomUUID().toString(),
+    var content: String,
+    var isCompleted: Boolean = false
+)
