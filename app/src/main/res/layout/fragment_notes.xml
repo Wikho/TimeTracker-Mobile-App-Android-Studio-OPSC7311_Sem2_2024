@@ -1,46 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context=".NotesFragment">
-
+    android:padding="16dp">
+        <!-- Dropdown menu to select active task -->
         <Spinner
-            android:layout_width="200dp"
-            android:layout_height="48dp"
-            android:layout_marginVertical="25dp">
-                <!--android:background="@drawable/curved_rectangle_outline"-->
-
-        </Spinner>
-
-        <LinearLayout
+            android:id="@+id/spinnerSelectTask"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="25dp"
-            android:background="@color/gray"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:prompt="Select task"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_background_gray" />
 
-                <TextView
+        <!-- Task Title (if needed) -->
+        <TextView
+            android:id="@+id/tvTaskTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Task Title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:gravity="start" />
+
+        <!-- Scrollable area with RecyclerView and NestedScrollView -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Task Title"
-                    android:textSize="20sp"
-                    android:textStyle="bold">
+                    android:orientation="vertical">
 
-                </TextView>
+                        <!-- Notes List in RecyclerView -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvNotes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp" />
+                </LinearLayout>
+        </ScrollView>
 
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="20dp"
-                    android:background="@color/white">
+        <!-- New note input and submit -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/rounded_background_gray">
 
-                </ScrollView>
+                <!-- Text input for new note -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilNewNote"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:hint="New note">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNewNote"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="New note"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Submit button -->
+                <ImageButton
+                    android:id="@+id/btnSubmitNote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="63dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/add" />
         </LinearLayout>
+
 </LinearLayout>
