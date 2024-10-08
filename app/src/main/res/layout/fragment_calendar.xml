@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -6,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <!-- Toggle Category Filter Button -->
     <Button
         android:id="@+id/btnToggleCategoryFilter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Filter by Category: OFF"
+        android:text="@string/filter_by_category_off"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textStyle="bold" />
 
     <!-- Category Filter Container -->
     <LinearLayout
@@ -32,19 +31,23 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- MaterialCalendarView -->
-    <!--
-    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+    <!-- DatePicker for normal calendar selection -->
+    <DatePicker
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/categoryFilterContainer" />
-        -->
+        android:layout_below="@id/categoryFilterContainer"
+        android:calendarViewShown="true"
+        android:spinnersShown="false"
+        android:datePickerMode="calendar"
+        android:layout_centerHorizontal="true"
+        android:padding="25dp"/>
 
     <!-- Tasks RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTasks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/calendarView" />
+        android:layout_below="@id/calendarView"
+        android:padding="16dp" />
 </RelativeLayout>

@@ -75,6 +75,8 @@
     <string name="enter_pomodoro_minutes">Enter Pomodoro Minutes</string>
     <string name="_00_00_00">00:00:00</string>
     <string name="pause">Pause</string>
+    <string name="new_note">New note</string>
+    <string name="add_note">Add note</string>
 
 
 </resources>
