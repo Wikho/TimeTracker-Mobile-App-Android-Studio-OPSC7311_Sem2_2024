@@ -46,7 +46,7 @@
                     android:id="@+id/tilNewNote"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="8"
                     android:hint="@string/new_note">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -60,9 +60,10 @@
                 <ImageButton
                     android:id="@+id/btnSubmitNote"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/add"
-                    android:contentDescription="@string/add_note" />
+                    android:contentDescription="@string/add_note"
+                    android:src="@drawable/add" />
         </LinearLayout>
 </LinearLayout>
