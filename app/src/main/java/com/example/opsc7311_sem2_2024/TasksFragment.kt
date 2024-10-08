@@ -1,13 +1,26 @@
 package com.example.opsc7311_sem2_2024
 
 import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +49,19 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private val allCategories = mutableSetOf<String>()
 
     private var selectedImagePath: String? = null
+
+    // Timer variables
+    private var timerHandler: Handler = Handler(Looper.getMainLooper())
+    private var timerRunnable: Runnable? = null
+    private var elapsedTimeInSeconds = 0
+    private var isTimerRunning = false
+    private var isPaused = false
+
+    private val CHANNEL_ID = "task_channel_id"
+    private val NOTIFICATION_ID = 1
+    // class-level variable
+    private var currentTask: TaskItem? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -278,12 +304,22 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     }
 
     override fun onStartButtonClicked(task: TaskItem) {
-        showSessionDialog(task)
+        // Start the session
+        startSession(task)
+
+        // Store the current task
+        currentTask = task
+
+        // Show the timer dialog
+        showTimerDialog(task)
+
+        // Show notification
+        showTaskNotification(task)
     }
 
-    override fun onStopButtonClicked(task: TaskItem) {
-        stopSession(task)
-    }
+    //override fun onStopButtonClicked(task: TaskItem) {
+    //    stopSession(task)
+    //}
 
     private fun showSessionDialog(task: TaskItem) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_description, null)
@@ -323,7 +359,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         dialog.show()
     }
 
-    private fun startSession(task: TaskItem, description: String, imagePath: String?) {
+    private fun startSession(task: TaskItem, description: String = "", imagePath: String? = null) {
         val currentTime = System.currentTimeMillis()
         val sessionStartDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTime))
         val startTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentTime))
@@ -415,8 +451,6 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         dialog.show()
     }
 
-
-
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImagePath = it.toString()
@@ -459,13 +493,165 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         return 0
     }
 
-
     // </editor-fold>
+
+    private fun showTimerDialog(task: TaskItem) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_timer, null)
+        val tvElapsedTime = dialogView.findViewById<TextView>(R.id.tvElapsedTime)
+        val btnStop = dialogView.findViewById<Button>(R.id.btnStop)
+        val btnPauseResume = dialogView.findViewById<Button>(R.id.btnPauseResume)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        // Initialize timer variables
+        elapsedTimeInSeconds = 0
+        isTimerRunning = true
+        isPaused = false
+
+        // Update the elapsed time every second
+        timerRunnable = object : Runnable {
+            override fun run() {
+                if (isTimerRunning && !isPaused) {
+                    elapsedTimeInSeconds++
+                    val hours = elapsedTimeInSeconds / 3600
+                    val minutes = (elapsedTimeInSeconds % 3600) / 60
+                    val seconds = elapsedTimeInSeconds % 60
+                    val timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    tvElapsedTime.text = timeString
+                }
+                timerHandler.postDelayed(this, 1000)
+            }
+        }
+        timerHandler.post(timerRunnable!!)
+
+        btnStop.setOnClickListener {
+            // Stop the timer and session
+            isTimerRunning = false
+            timerHandler.removeCallbacks(timerRunnable!!)
+            dialog.dismiss()
+            stopSession(task)
+            // Dismiss notification
+            dismissTaskNotification()
+        }
+
+        btnPauseResume.setOnClickListener {
+            if (!isPaused) {
+                // Pause the timer
+                isPaused = true
+                btnPauseResume.text = "Resume"
+                // Show Pomodoro prompt
+                //showPomodoroPrompt()
+            } else {
+                // Resume the timer
+                isPaused = false
+                btnPauseResume.text = "Pause"
+            }
+        }
+
+        dialog.show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+    private fun showPomodoroPrompt() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Pomodoro Timer")
+            .setMessage("Do you want to open the Pomodoro Timer?")
+            .setPositiveButton("OK") { _, _ ->
+                // Open PomodoroFragment
+                val pomodoroFragment = PomodoroFragment()
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, pomodoroFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showTaskNotification(task: TaskItem) {
+        createNotificationChannel()
+
+        val stopIntent = Intent(requireContext(), TaskStopReceiver::class.java)
+        stopIntent.putExtra("taskId", task.id)
+        val stopPendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            0,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+            .setContentTitle("Task Running")
+            .setContentText("Task '${task.title}' is running")
+            .setSmallIcon(R.drawable.notification) // Ensure this icon exists in your drawable resources
+            .addAction(R.drawable.stop, "Stop", stopPendingIntent) // Ensure 'stop' icon exists
+            .setOngoing(true)
+            .build()
+
+        // Check for notification permission (Android 13 and above)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // Request the permission
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+                return
+            }
+        }
+
+        val notificationManager = NotificationManagerCompat.from(requireContext())
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+
+    private fun dismissTaskNotification() {
+        val notificationManager = NotificationManagerCompat.from(requireContext())
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Task Channel"
+            val descriptionText = "Channel for task notifications"
+            val importance = NotificationManager.IMPORTANCE_LOW
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun stopTaskFromNotification(taskId: String?) {
+        val task = allTasks.find { it.id == taskId }
+        task?.let {
+            stopSession(it)
+            dismissTaskNotification()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, you can proceed with showing the notification
+                currentTask?.let {
+                    showTaskNotification(it)
+                }
+            } else {
+                // Permission denied, handle accordingly
+                Toast.makeText(requireContext(), "Permission denied to post notifications", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
 }
+
+

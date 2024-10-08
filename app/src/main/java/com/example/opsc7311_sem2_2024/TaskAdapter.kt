@@ -42,7 +42,7 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
 
             // Set button states
             binding.btnTaskTileStart.isEnabled = !task.isStarted
-            binding.btnTaskTileStop.isEnabled = task.isStarted
+            //binding.btnTaskTileStop.isEnabled = task.isStarted
 
             // Extract the task time and session duration
             val taskTime = task.time
@@ -62,9 +62,9 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
             }
 
             // Handle Stop button click
-            binding.btnTaskTileStop.setOnClickListener {
-                listener.onStopButtonClicked(task)
-            }
+            //binding.btnTaskTileStop.setOnClickListener {
+            //    listener.onStopButtonClicked(task)
+            //}
 
         }
     }
@@ -72,8 +72,7 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
     interface TaskActionListener {
         fun onTaskLongPressed(task: TaskItem)
         fun onStartButtonClicked(task: TaskItem)
-        fun onStopButtonClicked(task: TaskItem)
-
+        //fun onStopButtonClicked(task: TaskItem)
     }
 
 }

@@ -177,9 +177,9 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         Toast.makeText(requireContext(),"Un-Archive Task First",Toast.LENGTH_LONG).show()
     }
 
-    override fun onStopButtonClicked(task: TaskItem) {
-        Toast.makeText(requireContext(),"Un-Archive Task First",Toast.LENGTH_LONG).show()
-    }
+    //override fun onStopButtonClicked(task: TaskItem) {
+    //    Toast.makeText(requireContext(),"Un-Archive Task First",Toast.LENGTH_LONG).show()
+    //}
 
     override fun onDestroyView() {
         super.onDestroyView()
