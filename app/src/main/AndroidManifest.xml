@@ -2,12 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Intnet permissions -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Notifications permissions on Android 13 and above -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -39,10 +33,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Declare your BroadcastReceiver here -->
-        <receiver android:name=".TaskStopReceiver" />
-
     </application>
 
 </manifest>

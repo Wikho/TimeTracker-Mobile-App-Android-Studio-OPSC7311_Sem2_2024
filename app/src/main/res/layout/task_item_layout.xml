@@ -50,7 +50,15 @@
                             android:paddingVertical="2dp"
                             android:layout_marginEnd="8dp" />
 
-
+                        <TextView
+                            android:id="@+id/tvTaskTileTime"
+                            style="?android:attr/buttonBarStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Time: 00:00 / 00:00"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            tools:ignore="HardcodedText" />
                 </LinearLayout>
 
                 <!-- Bottom Row: Archive, Image, Start, and Stop Buttons -->
@@ -59,20 +67,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="end"
+                    android:gravity="center"
                     android:padding="2dp">
 
-                        <TextView
-                            android:id="@+id/tvTaskTileTime"
-                            style="?android:attr/buttonBarStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Time: 00:00 / 00:00"
-                            android:textSize="18sp"
-                            android:layout_weight="5"
-                            android:gravity="start"
-                            android:textColor="@android:color/black"
-                            tools:ignore="HardcodedText" />
 
                         <Button
                             android:id="@+id/btnTaskTileStart"
@@ -82,13 +79,9 @@
                             android:layout_marginEnd="4dp"
                             android:backgroundTint="@android:color/holo_blue_dark"
                             android:text="@string/start"
-                            android:layout_weight="1"
                             android:textColor="@android:color/white"
                             tools:ignore="TextContrastCheck" />
 
-
-                        <!-- Removed the Stop button -->
-                        <!--
                         <Button
                             android:id="@+id/btnTaskTileStop"
                             style="?android:attr/buttonBarButtonStyle"
@@ -97,7 +90,6 @@
                             android:text="@string/stop"
                             android:backgroundTint="@android:color/holo_red_dark"
                             android:textColor="@android:color/white" />
-                        -->
                 </LinearLayout>
         </LinearLayout>
 
