@@ -60,11 +60,11 @@ dependencies {
     kapt (libs.androidx.room.compiler)
     implementation (libs.glide)
     annotationProcessor (libs.compiler)
-    implementation (libs.gson.v289)
-    implementation (libs.material.v190)
+    implementation(libs.material)
+    implementation (libs.material.calendarview)
 
-    implementation (libs.material.calendarview) {
-        exclude ("com.android.support", "support-v4")
-        exclude ("com.android.support", "support-compat")
+
+    implementation ((libs.material.calendarview)) {
+        exclude( ("com.android.support"),("support-compat"))
     }
 }

@@ -15,7 +15,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
-@Database(entities = [TaskItem::class, CategoryStats::class], version = 2, exportSchema = false)
+@Database(entities = [TaskItem::class, CategoryStats::class], version = 2)
 @TypeConverters(TaskSessionConverter::class)
 
 abstract class TaskDatabase : RoomDatabase() {

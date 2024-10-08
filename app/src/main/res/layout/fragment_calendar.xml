@@ -32,12 +32,13 @@
     </LinearLayout>
 
     <!-- MaterialCalendarView -->
-
+    <!--
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/categoryFilterContainer" />
+        -->
 
     <!-- Tasks RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView

@@ -12,6 +12,7 @@
         android:id="@+id/spinnerSelectTask"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:prompt="Select a Task"
         android:layout_marginBottom="16dp"
         android:padding="12dp"
         android:background="@drawable/rounded_background_gray"/>

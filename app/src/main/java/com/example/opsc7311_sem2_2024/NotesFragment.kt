@@ -91,7 +91,7 @@ class NotesFragment : Fragment(), TaskNoteAdapter.NoteActionListener {
 
     private fun displayNotesForSelectedTask() {
         selectedTask?.let { task ->
-           // taskNoteAdapter.submitList(ArrayList(task.notes))
+            taskNoteAdapter.submitList(ArrayList(task.notes))
         }
     }
 
@@ -109,7 +109,7 @@ class NotesFragment : Fragment(), TaskNoteAdapter.NoteActionListener {
                 content = noteContent,
                 isCompleted = false
             )
-            //task.notes.add(newNote)
+            task.notes.add(newNote)
 
             // Update task in the database
             val taskDatabase = TaskDatabase.getDatabase(requireContext())
@@ -141,7 +141,7 @@ class NotesFragment : Fragment(), TaskNoteAdapter.NoteActionListener {
 
     override fun onNoteDeleted(note: TaskNote) {
         selectedTask?.let { task ->
-            //task.notes.remove(note)
+            task.notes.remove(note)
             // Update task in the database
             val taskDatabase = TaskDatabase.getDatabase(requireContext())
             val taskDao = taskDatabase.taskItemDao()

@@ -2,7 +2,6 @@
 agp = "8.5.2"
 glide = "4.12.0"
 gson = "2.10.1"
-gsonVersion = "2.8.9"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -17,7 +16,6 @@ googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
 firebaseAuth = "23.0.0"
 materialCalendarview = "1.4.3"
-materialVersion = "1.9.0"
 roomRuntime = "2.6.1"
 mpAndroidChart = "3.1.0"
 
@@ -30,7 +28,6 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-gson-v289 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -41,7 +38,6 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 material-calendarview = { module = "com.prolificinteractive:material-calendarview", version.ref = "materialCalendarview" }
-material-v190 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 mpandroid-chart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpAndroidChart"}
 
 [plugins]
