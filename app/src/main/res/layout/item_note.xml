@@ -1,0 +1,8 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/noteItemLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="8dp">
+    <!--  Checkbox  -->
+    <CheckBox android:id="@+id/cbNoteCompleted" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <!--  Text View for Note Content  -->
+    <TextView android:id="@+id/tvNoteContent" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Note content" android:layout_marginStart="8dp" android:textSize="16sp"/>
+    <!--  Delete Icon  -->
+    <ImageButton android:id="@+id/btnDeleteNote" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="Delete note" android:src="@drawable/delete" android:layout_gravity="center"/>
+</LinearLayout>
