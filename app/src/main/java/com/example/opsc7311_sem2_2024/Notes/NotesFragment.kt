@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Notes
 
 import android.os.Bundle
 import android.text.TextUtils

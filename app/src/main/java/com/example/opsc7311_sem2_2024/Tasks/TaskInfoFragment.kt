@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -16,6 +16,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskRepository
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskSessionAdapter
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModel
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModelFactory
 import com.example.opsc7311_sem2_2024.databinding.FragmentTaskInfoBinding
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat

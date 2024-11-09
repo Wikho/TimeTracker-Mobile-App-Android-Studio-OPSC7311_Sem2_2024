@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.TaskClasses
 
 import android.content.Context
 import androidx.room.Database
@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.opsc7311_sem2_2024.CategoryStats
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {

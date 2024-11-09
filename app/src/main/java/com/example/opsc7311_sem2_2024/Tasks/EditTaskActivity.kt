@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -22,6 +22,13 @@ import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.TimePicker
 import androidx.lifecycle.lifecycleScope
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskRepository
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModel
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModelFactory
+import com.example.opsc7311_sem2_2024.ValidationManager
 import kotlinx.coroutines.launch
 import java.util.Locale
 

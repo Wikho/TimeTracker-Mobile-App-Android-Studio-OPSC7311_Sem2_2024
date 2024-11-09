@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Pomodoro
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import com.example.opsc7311_sem2_2024.R
 
 class PomodoroFragment : Fragment() {
     // Declaring Variables

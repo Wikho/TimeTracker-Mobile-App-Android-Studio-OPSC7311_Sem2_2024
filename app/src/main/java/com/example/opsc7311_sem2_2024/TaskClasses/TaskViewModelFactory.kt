@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.TaskClasses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

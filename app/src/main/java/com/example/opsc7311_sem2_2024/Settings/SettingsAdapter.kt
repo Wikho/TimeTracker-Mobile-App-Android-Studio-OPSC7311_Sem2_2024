@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Settings
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

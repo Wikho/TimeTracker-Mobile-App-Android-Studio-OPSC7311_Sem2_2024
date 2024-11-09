@@ -1,15 +1,13 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.TaskClasses
 
 // TaskSessionAdapter.kt
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.databinding.SessionItemLayoutBinding // Update the package path
-import java.io.File
 
 private val sessionList = mutableListOf<TaskSession>()
 

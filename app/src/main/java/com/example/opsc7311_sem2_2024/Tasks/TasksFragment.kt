@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -11,6 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.CategoryStats
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskCreationFragment
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
 import com.example.opsc7311_sem2_2024.databinding.FragmentTasksBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText

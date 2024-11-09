@@ -70,6 +70,7 @@
     <string name="maximum_duration_hours">Maximum Duration (Hours)</string>
     <string name="user_icon">User Icon</string>
     <string name="user_name">User Name</string>
+    <string name="user_email">user@example.com</string>
     <string name="manage_account">Manage Account</string>
     <string name="general">General</string>
     <string name="enter_pomodoro_minutes">Enter Pomodoro Minutes</string>

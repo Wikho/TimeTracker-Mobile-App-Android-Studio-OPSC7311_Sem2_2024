@@ -6,15 +6,19 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.example.opsc7311_sem2_2024.Analytic.AnalyticsFragment
+import com.example.opsc7311_sem2_2024.LogSignIn.LoginActivity
+import com.example.opsc7311_sem2_2024.Notes.NotesFragment
+import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment
+import com.example.opsc7311_sem2_2024.Settings.SettingsFragment
+import com.example.opsc7311_sem2_2024.Tasks.ArchivedTasksFragment
+import com.example.opsc7311_sem2_2024.Tasks.TasksFragment
 import com.example.opsc7311_sem2_2024.databinding.ActivityMainScreenBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -24,23 +28,19 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
     private lateinit var binding: ActivityMainScreenBinding
     private lateinit var sharedPreferences: SharedPreferences
-
     private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         binding = ActivityMainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-
         // <editor-fold desc="Burger Menu">
 
         drawerLayout = binding.drawerLayout
-
         val toolbar = binding.toolbar
         setSupportActionBar(toolbar)
 
@@ -50,7 +50,6 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val toggle = ActionBarDrawerToggle(this,drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-
 
         if (savedInstanceState == null){
             replaceFragment(TasksFragment())
@@ -62,7 +61,6 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         // </editor-fold>
 
-
     }
 
     // <editor-fold desc="Burger Menu Functions">
@@ -71,19 +69,6 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, fragment)                          //Sir i used R.id instead of binding because it the correct way of making it procedural.
         transaction.commit()
-    }
-
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                // Execute the default back action
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
-                isEnabled = true
-            }
-        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -108,8 +93,11 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private fun logOutUser() {
         // Clear login state
         val editor = sharedPreferences.edit()
-        editor.putBoolean("is_logged_in", false)
+        editor.clear()
         editor.apply()
+
+        // Sign out from FirebaseAuth
+        FirebaseAuth.getInstance().signOut()
 
         // Redirect to LoginActivity
         val intent = Intent(this, LoginActivity::class.java)
@@ -123,31 +111,22 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val tvUserName = headerView.findViewById<TextView>(R.id.tvNavHeaderUserName)
         val tvUserEmail = headerView.findViewById<TextView>(R.id.tvNavHeaderUserEmail)
 
-        val sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        var userName = sharedPreferences.getString("user_name", null)
-        var userEmail = sharedPreferences.getString("user_email", null)
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: return
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
 
-        if (userName == null || userEmail == null) {
-            // Fetch from Firebase
-            val currentUser = FirebaseAuth.getInstance().currentUser
-            val userId = currentUser?.uid ?: return
-            val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+        databaseRef.get().addOnSuccessListener { dataSnapshot ->
+            val userName = dataSnapshot.child("name").getValue(String::class.java) ?: getString(R.string.user_name)
+            val userEmail = dataSnapshot.child("email").getValue(String::class.java) ?: getString(R.string.user_email)
 
-            databaseRef.get().addOnSuccessListener { dataSnapshot ->
-                userName = dataSnapshot.child("name").getValue(String::class.java) ?: "User Name"
-                userEmail = dataSnapshot.child("email").getValue(String::class.java) ?: "user@example.com"
-
-                tvUserName.text = userName
-                tvUserEmail.text = userEmail
-            }.addOnFailureListener { exception ->
-                // Handle failure
-                tvUserName.text = "User Name"
-                tvUserEmail.text = "user@example.com"
-            }
-        } else {
             tvUserName.text = userName
             tvUserEmail.text = userEmail
+        }.addOnFailureListener { _ ->
+            // Handle failure
+            tvUserName.text = getString(R.string.user_name)
+            tvUserEmail.text = getString(R.string.user_email)
         }
     }
 
 }
+

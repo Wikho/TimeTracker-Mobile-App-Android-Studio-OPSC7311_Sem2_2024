@@ -1,8 +1,10 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.LogSignIn
 
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.opsc7311_sem2_2024.FirebaseManager
+import com.example.opsc7311_sem2_2024.ValidationManager
 import com.example.opsc7311_sem2_2024.databinding.ActivityForgotPasswordBinding
 
 class ForgotPassword : AppCompatActivity() {

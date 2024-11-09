@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Analytic
 
 import android.app.DatePickerDialog
 import android.graphics.Color
@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.databinding.FragmentAnalyticsBinding
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart

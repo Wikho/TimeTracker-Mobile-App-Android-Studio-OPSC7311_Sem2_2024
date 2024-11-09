@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.Tasks
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.databinding.FragmentArchivedTasksBinding
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers

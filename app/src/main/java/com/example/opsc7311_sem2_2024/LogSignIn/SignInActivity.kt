@@ -1,4 +1,4 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.LogSignIn
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +10,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.opsc7311_sem2_2024.FirebaseManager
+import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.ValidationManager
 import com.example.opsc7311_sem2_2024.databinding.ActivitySignInBinding
 
 class SignInActivity : AppCompatActivity() {

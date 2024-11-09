@@ -1,6 +1,7 @@
-package com.example.opsc7311_sem2_2024
+package com.example.opsc7311_sem2_2024.TaskClasses
 
 import androidx.room.*
+import com.example.opsc7311_sem2_2024.CategoryStats
 
 @Dao
 interface TaskItemDao {
