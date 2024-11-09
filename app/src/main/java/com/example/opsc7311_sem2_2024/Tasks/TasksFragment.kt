@@ -40,7 +40,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentTasksBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -154,23 +154,9 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-        // Get start of today
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val startOfToday = calendar.time
-
-        // Get start of the week
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-        val startOfWeek = calendar.time
-
-        // Get end of the week
-        val endOfWeekCalendar = calendar.clone() as Calendar
-        endOfWeekCalendar.add(Calendar.WEEK_OF_YEAR, 1)
-        endOfWeekCalendar.add(Calendar.MILLISECOND, -1)
-        val endOfWeek = endOfWeekCalendar.time
+        val startOfToday = getStartOfToday()
+        val startOfWeek = getStartOfWeek()
+        val endOfWeek = getEndOfWeek()
 
         for (task in tasks) {
             if (task.isArchived) continue  // Skip archived tasks
@@ -185,13 +171,14 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             val taskDate = dateFormat.parse(taskDateStr)
             if (taskDate == null) continue // Skip invalid dates
 
+
             when {
                 isSameDay(taskDate, startOfToday) -> todayTasks.add(task)
-                (taskDate.after(startOfWeek) || isSameDay(taskDate, startOfWeek)) &&
-                        (taskDate.before(endOfWeek) || isSameDay(taskDate, endOfWeek)) -> thisWeekTasks.add(task)
+                isDateBetween(taskDate, startOfToday, endOfWeek) -> thisWeekTasks.add(task)
                 taskDate.after(endOfWeek) -> upcomingTasks.add(task)
                 else -> {
-                    // Task is before start of week, can't happen
+                    // Task is before today
+                    // Handle if needed
                 }
             }
         }
@@ -206,7 +193,45 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         }
     }
 
-    // Helper function to check if two dates are on the same day
+    // <editor-fold desc="Helper function for RecyclerViews Setup">
+
+    private fun getStartOfToday(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
+    private fun getStartOfWeek(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        // Set to the first day of the week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        // Reset time to start of day
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
+    private fun getEndOfWeek(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        // Set to the first day of the week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        // Move to Sunday
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+        // Set time to end of day
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.time
+    }
+
     private fun isSameDay(date1: Date, date2: Date): Boolean {
         val cal1 = Calendar.getInstance()
         val cal2 = Calendar.getInstance()
@@ -215,6 +240,14 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
+
+    private fun isDateBetween(date: Date, startDate: Date, endDate: Date): Boolean {
+        return (date.after(startDate) || isSameDay(date, startDate)) &&
+                (date.before(endDate) || isSameDay(date, endDate))
+    }
+
+
+    // </editor-fold>
 
     private fun populateCategoryChips() {
         binding.chipGroupCategoryFilter.removeAllViews()

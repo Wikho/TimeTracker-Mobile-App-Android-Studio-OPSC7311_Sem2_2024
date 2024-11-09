@@ -10,4 +10,7 @@
     <color name="orange">#FF5722</color>
     <color name="yellow">#FFEB3B</color>
     <color name="teal">#03A9F4</color>
+    <color name="highImportance">#83B185</color>
+    <color name="mediumImportance">#A6BF89</color>
+    <color name="lowImportance">#D5DBA1</color>
 </resources>

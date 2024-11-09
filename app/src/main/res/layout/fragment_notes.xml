@@ -1,16 +1,161 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/notesFragmentLayout" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/notes" android:textStyle="bold" android:textSize="35sp" android:gravity="center" android:layout_gravity="center" android:paddingBottom="10dp"/>
-        <!--  Dropdown menu to select active task  -->
-        <Spinner android:id="@+id/spinnerSelectTask" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:padding="12dp" android:background="@drawable/rounded_background_gray"/>
-        <!--  Scrollable area with RecyclerView  -->
-        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvNotes" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="16dp"/>
-        <!--  New note input and submit  -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@drawable/rounded_background_gray">
-                <!--  Text input for new note  -->
-                <com.google.android.material.textfield.TextInputLayout android:id="@+id/tilNewNote" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="8" android:hint="@string/new_note">
-                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/etNewNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/new_note"/>
-                </com.google.android.material.textfield.TextInputLayout>
-                <!--  Submit button  -->
-                <ImageButton android:id="@+id/btnSubmitNote" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_weight="1" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/add_note" android:src="@drawable/add"/>
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/notesFragmentLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+        <!-- Notes Title -->
+        <TextView
+            android:id="@+id/tvNotesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notes"
+            android:textStyle="bold"
+            android:textSize="35sp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:paddingBottom="10dp"/>
+
+        <!-- Hidden Task Name Text -->
+        <TextView
+            android:id="@+id/tvTaskName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Task Name"
+            android:textSize="18sp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:paddingBottom="5dp"/>
+
+        <!-- LinearLayout for Filter and Spinner -->
+        <LinearLayout
+            android:id="@+id/llFilterAndSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+                <!-- Filter Toggle Button -->
+                <Button
+                    android:id="@+id/btnToggleFilter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter Off"
+                    android:backgroundTint="@color/black"
+                    android:textColor="@color/white"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Task Dropdown -->
+                <Spinner
+                    android:id="@+id/spinnerSelectTask"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:padding="16dp"
+                    android:background="@drawable/rounded_background_gray"
+                    android:layout_marginBottom="5dp"/>
         </LinearLayout>
+
+        <!-- Filter Container -->
+        <LinearLayout
+            android:id="@+id/filterContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:background="@drawable/rounded_background_gray">
+
+                <!-- Search Text Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilSearchTask"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search Task">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSearchTask"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Date Range Inputs -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                        <!-- From Date -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilFromDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="From Date">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFromDate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- To Date -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilToDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="To Date"
+                            android:layout_marginStart="8dp">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etToDate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+                <!-- Category Chips -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"/>
+        </LinearLayout>
+
+        <!-- Mode Button -->
+        <Button
+            android:id="@+id/btnMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mode: To Do"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNotes"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Add New Note Button -->
+        <Button
+            android:id="@+id/btnAddNewNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_new_note"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/white"/>
+
 </LinearLayout>

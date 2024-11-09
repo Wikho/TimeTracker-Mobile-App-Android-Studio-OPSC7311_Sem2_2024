@@ -79,6 +79,17 @@
     <string name="new_note">New note</string>
     <string name="add_note">Add note</string>
     <string name="task_duration">Task Duration</string>
+    <string name="to_do">To Do</string>
+    <string name="done">Done</string>
+    <string name="add_new_note">Add New Note</string>
+    <string name="create">Create</string>
+    <string name="description">Description</string>
+    <string name="note_title">Note Title</string>
+    <string name="high">High</string>
+    <string name="medium">Medium</string>
+    <string name="low">Low</string>
+    <string name="importance">Importance</string>
+    <string name="create_note">Create Note</string>
 
 
 </resources>

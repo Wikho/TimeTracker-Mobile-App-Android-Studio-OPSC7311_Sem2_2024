@@ -1,5 +1,6 @@
 package com.example.opsc7311_sem2_2024
 
+import com.example.opsc7311_sem2_2024.Notes.Note
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -262,6 +263,85 @@ class FirebaseManager{
                 onResult(listOf("UNDEFINED"))
             }
         })
+    }
+
+
+    // </editor-fold>
+
+    // <editor-fold desc="Notes Functions">
+
+    // Save Note under a Task
+    fun saveNote(
+        taskId: String,
+        note: Note,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val noteRef = database.getReference("Users")
+            .child(userId)
+            .child("tasks")
+            .child(taskId)
+            .child("Notes")
+            .child(note.id)
+
+        noteRef.setValue(note).addOnCompleteListener { taskResult ->
+            if (taskResult.isSuccessful) {
+                onComplete(true, null)
+            } else {
+                onComplete(false, taskResult.exception?.message)
+            }
+        }
+    }
+
+    // Fetch Notes for a Task
+    fun fetchNotes(
+        taskId: String,
+        onComplete: (List<Note>) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val notesRef = database.getReference("Users")
+            .child(userId)
+            .child("tasks")
+            .child(taskId)
+            .child("Notes")
+
+        notesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val notes = mutableListOf<Note>()
+                snapshot.children.forEach { noteSnapshot ->
+                    val note = noteSnapshot.getValue(Note::class.java)
+                    note?.let { notes.add(it) }
+                }
+                onComplete(notes)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onComplete(emptyList())
+            }
+        })
+    }
+
+    // Delete Note
+    fun deleteNote(
+        taskId: String,
+        noteId: String,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val noteRef = database.getReference("Users")
+            .child(userId)
+            .child("tasks")
+            .child(taskId)
+            .child("Notes")
+            .child(noteId)
+
+        noteRef.removeValue().addOnCompleteListener { taskResult ->
+            if (taskResult.isSuccessful) {
+                onComplete(true, null)
+            } else {
+                onComplete(false, taskResult.exception?.message)
+            }
+        }
     }
 
 

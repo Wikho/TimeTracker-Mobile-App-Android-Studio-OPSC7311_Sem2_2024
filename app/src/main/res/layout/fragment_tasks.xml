@@ -120,7 +120,7 @@
      android:text="@string/archived_tasks"
      android:textColor="@color/black"
      android:textStyle="bold"
-     tools:ignore="TextContrastCheck"
+     tools:ignore="TextContrastCheck,VisualLintButtonSize"
      android:gravity="center"
      android:backgroundTint="@color/red"/>
 
@@ -134,8 +134,9 @@
      android:layout_marginEnd="15dp"
      android:layout_marginBottom="60dp"
      android:backgroundTint="@color/purple"
+     android:importantForAccessibility="no"
      android:src="@drawable/add"
      android:tint="@android:color/white"
-     tools:ignore="SpeakableTextPresentCheck" />
+     tools:ignore="RelativeOverlap,SpeakableTextPresentCheck" />
 
 </RelativeLayout>
