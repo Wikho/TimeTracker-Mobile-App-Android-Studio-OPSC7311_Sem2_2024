@@ -13,6 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.opsc7311_sem2_2024.Analytic.AnalyticsFragment
+import com.example.opsc7311_sem2_2024.Calender.CalendarFragment
 import com.example.opsc7311_sem2_2024.LogSignIn.LoginActivity
 import com.example.opsc7311_sem2_2024.Notes.NotesFragment
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment
@@ -29,12 +30,15 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private lateinit var binding: ActivityMainScreenBinding
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var drawerLayout: DrawerLayout
+    private val firebaseManager = FirebaseManager()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
 
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
@@ -115,16 +119,14 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val userId = currentUser?.uid ?: return
         val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
 
-        databaseRef.get().addOnSuccessListener { dataSnapshot ->
-            val userName = dataSnapshot.child("name").getValue(String::class.java) ?: getString(R.string.user_name)
-            val userEmail = dataSnapshot.child("email").getValue(String::class.java) ?: getString(R.string.user_email)
+        // Fetch and set the user's name
+        firebaseManager.getUserName { userName ->
+            tvUserName.text = userName ?: getString(R.string.user_name)
+        }
 
-            tvUserName.text = userName
-            tvUserEmail.text = userEmail
-        }.addOnFailureListener { _ ->
-            // Handle failure
-            tvUserName.text = getString(R.string.user_name)
-            tvUserEmail.text = getString(R.string.user_email)
+        // Fetch and set the user's email
+        firebaseManager.getUserEmail { userEmail ->
+            tvUserEmail.text = userEmail ?: getString(R.string.user_email)
         }
     }
 

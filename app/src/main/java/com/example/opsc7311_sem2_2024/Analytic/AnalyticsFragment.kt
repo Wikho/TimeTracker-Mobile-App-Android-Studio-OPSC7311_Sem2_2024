@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.opsc7311_sem2_2024.R
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.databinding.FragmentAnalyticsBinding
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
@@ -33,7 +32,6 @@ class AnalyticsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var pieChart: PieChart
-    private lateinit var taskDatabase: TaskDatabase
 
     private var fromDate: String? = null
     private var toDate: String? = null
@@ -48,8 +46,6 @@ class AnalyticsFragment : Fragment() {
 
         setupPieChart()
 
-        // Initialize the database
-        taskDatabase = TaskDatabase.getDatabase(requireContext())
 
         // Load data and update chart
         lifecycleScope.launch {
@@ -145,31 +141,31 @@ class AnalyticsFragment : Fragment() {
     }
 
     private suspend fun aggregateCategoryData(): Map<String, Int> {
-        val taskDao = taskDatabase.taskItemDao()
-        val tasks = taskDao.getAllTasks()
+        //val taskDao = taskDatabase.taskItemDao()
+        //val tasks = taskDao.getAllTasks()
         val categoryTimeMap = mutableMapOf<String, Int>()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         val fromDateParsed = fromDate?.let { dateFormat.parse(it) }
         val toDateParsed = toDate?.let { dateFormat.parse(it) }
 
-        for (task in tasks) {
-            for (session in task.sessionHistory) {
-                val sessionDate = dateFormat.parse(session.sessionStartDate)
-                // Apply date filters
-                val isAfterFromDate = fromDateParsed?.let { sessionDate >= it } ?: true
-                val isBeforeToDate = toDateParsed?.let { sessionDate <= it } ?: true
-
-                if (isAfterFromDate && isBeforeToDate) {
-                    val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
-                    val categories = task.category.split(",").map { it.trim() }
-                    for (category in categories) {
-                        val total = categoryTimeMap.getOrDefault(category, 0)
-                        categoryTimeMap[category] = total + durationMinutes
-                    }
-                }
-            }
-        }
+       // for (task in tasks) {
+       //     for (session in task.sessionHistory) {
+       //         val sessionDate = dateFormat.parse(session.sessionStartDate)
+       //         // Apply date filters
+       //         val isAfterFromDate = fromDateParsed?.let { sessionDate >= it } ?: true
+        //        val isBeforeToDate = toDateParsed?.let { sessionDate <= it } ?: true
+//
+        //        if (isAfterFromDate && isBeforeToDate) {
+       ////             val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
+       //             //val categories = task.category.split(",").map { it.trim() }
+        //            //for (category in categories) {
+        //            //    val total = categoryTimeMap.getOrDefault(category, 0)
+        //           //     categoryTimeMap[category] = total + durationMinutes
+        //            //}
+        //        }
+        //    }
+        //}
 
         return categoryTimeMap
     }

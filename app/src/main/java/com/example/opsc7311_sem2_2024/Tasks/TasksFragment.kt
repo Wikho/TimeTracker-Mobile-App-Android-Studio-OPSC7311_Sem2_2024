@@ -2,28 +2,21 @@ package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.opsc7311_sem2_2024.CategoryStats
+import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskCreationFragment
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
 import com.example.opsc7311_sem2_2024.databinding.FragmentTasksBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,6 +24,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
+    private val firebaseManager = FirebaseManager()
 
     private lateinit var todayAdapter: TaskAdapter
     private lateinit var thisWeekAdapter: TaskAdapter
@@ -46,27 +40,19 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         _binding = FragmentTasksBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerViews()
-
-        // Load tasks from the database in a coroutine
-        lifecycleScope.launch {
-            loadTasksFromDatabase()
-        }
+        loadTasksFromFirebase()
 
         // Listen for 'taskCreated' fragment result to refresh the RecyclerView
-        parentFragmentManager.setFragmentResultListener("taskCreated", viewLifecycleOwner) { key, bundle ->
-            // Reload tasks from database
-            lifecycleScope.launch {
-                loadTasksFromDatabase()
-            }
+        parentFragmentManager.setFragmentResultListener("taskCreated", viewLifecycleOwner) { _, _ ->
+            // Reload tasks from Firebase
+            loadTasksFromFirebase()
         }
 
         binding.fabAddTask.setOnClickListener {
@@ -136,12 +122,29 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         }
     }
 
-    private suspend fun loadTasksFromDatabase() {
-        // Fetch tasks from the database
-        val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-        val taskDao = taskDatabase.taskItemDao()
-        val tasksFromDb = taskDao.getAllTasks()
+    private fun loadTasksFromFirebase() {
+        firebaseManager.fetchTasks { tasks ->
+            if (tasks.isNotEmpty()) {
+                processTasks(tasks)
+            } else {
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "No tasks found", Toast.LENGTH_SHORT).show()
+                    // Clear previous data
+                    allTasks.clear()
+                    todayTasks.clear()
+                    thisWeekTasks.clear()
+                    upcomingTasks.clear()
+                    allCategories.clear()
 
+                    // Update UI
+                    populateCategoryChips()
+                    showAllTasks()
+                }
+            }
+        }
+    }
+
+    private fun processTasks(tasks: List<TaskItem>) {
         // Clear previous data
         allTasks.clear()
         todayTasks.clear()
@@ -152,7 +155,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         val currentDate = getCurrentDate()
         val currentWeekRange = getCurrentWeekRange()
 
-        for (task in tasksFromDb) {
+        for (task in tasks) {
             if (task.isArchived) continue  // Skip archived tasks
 
             allTasks.add(task)
@@ -170,8 +173,8 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             }
         }
 
-        // Update RecyclerViews with tasks
-        withContext(Dispatchers.Main) {
+        // Update RecyclerViews with tasks on the main thread
+        activity?.runOnUiThread {
             // Populate category chips
             populateCategoryChips()
 
@@ -195,7 +198,6 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             binding.chipGroupCategoryFilter.addView(chip)
         }
     }
-
 
     private fun applyCategoryFilter() {
         val selectedCategories = binding.chipGroupCategoryFilter.checkedChipIds.map { id ->
@@ -237,8 +239,6 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         upcomingAdapter.submitList(ArrayList(upcomingTasks))
     }
 
-
-
     // </editor-fold>
 
     // <editor-fold desc="Task Press & Functions">
@@ -252,10 +252,11 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     // Get the date range for the current week
     private fun getCurrentWeekRange(): List<String> {
         val calendar = Calendar.getInstance()
+        // Adjust the calendar to the start of the week (Sunday or Monday based on locale)
+        calendar.firstDayOfWeek = Calendar.MONDAY
         calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-        val startOfWeek = calendar.time
         val weekRange = mutableListOf<String>()
 
         for (i in 0..6) {
@@ -294,14 +295,14 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private fun showSessionDialog(task: TaskItem) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_description, null)
-        val etSessionDescription = dialogView.findViewById<TextInputEditText>(R.id.etSessionDescription)
+        val etSessionDescription = dialogView.findViewById<EditText>(R.id.etSessionDescription)
         val btnSelectPhoto = dialogView.findViewById<Button>(R.id.btnSelectPhoto)
         val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelSession)
         val btnDone = dialogView.findViewById<Button>(R.id.btnDoneSession)
 
         // Set the dialog title with the task name
-        tvDialogTitle.text = "${task.title} Description for Next Session"
+        tvDialogTitle.text = "${task.title} - Description for Next Session"
 
         // Handle Select Photo button
         btnSelectPhoto.setOnClickListener {
@@ -346,14 +347,14 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         task.sessionHistory.add(newSession)
         task.isStarted = true
 
-        // Update the database
-        lifecycleScope.launch {
-            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-            val taskDao = taskDatabase.taskItemDao()
-            taskDao.updateTask(task)
-
-            // Refresh the list
-            loadTasksFromDatabase()
+        // Update the task in Firebase
+        firebaseManager.updateTask(task) { success, message ->
+            if (success) {
+                // Refresh the list
+                loadTasksFromFirebase()
+            } else {
+                Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -377,16 +378,17 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
             task.isStarted = false
 
-            // Update the database
-            lifecycleScope.launch {
-                val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-                val taskDao = taskDatabase.taskItemDao()
-                taskDao.updateTask(task)
-                // Refresh the list
-                loadTasksFromDatabase()
+            // Update the task in Firebase
+            firebaseManager.updateTask(task) { success, message ->
+                if (success) {
+                    // Refresh the list
+                    loadTasksFromFirebase()
 
-                // Show session info dialog
-                showSessionInfoDialog(task, activeSession)
+                    // Show session info dialog
+                    showSessionInfoDialog(task, activeSession)
+                } else {
+                    Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -422,8 +424,6 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         dialog.show()
     }
 
-
-
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImagePath = it.toString()
@@ -438,20 +438,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         val categories = task.category.split(",").map { it.trim() }
         val sessionDurationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
 
-        lifecycleScope.launch {
-            val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-            val taskDao = taskDatabase.taskItemDao()
-
-            for (category in categories) {
-                var categoryStats = taskDao.getCategoryStats(category)
-                if (categoryStats == null) {
-                    categoryStats = CategoryStats(categoryName = category, totalMinutes = sessionDurationMinutes)
-                } else {
-                    categoryStats.totalMinutes += sessionDurationMinutes
-                }
-                taskDao.insertOrUpdateCategoryStats(categoryStats)
-            }
-        }
+        // Implement logic to update category statistics in Firebase if needed
     }
 
     private fun calculateSessionDurationInMinutes(sessionDuration: String?): Int {
@@ -466,13 +453,10 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         return 0
     }
 
-
     // </editor-fold>
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-
 }

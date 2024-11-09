@@ -1,49 +1,35 @@
 package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.Activity
-import android.app.DatePickerDialog
-import android.os.Bundle
-import android.view.View
-import android.widget.DatePicker
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
-import com.example.opsc7311_sem2_2024.databinding.ActivityEditTaskBinding
-import com.example.opsc7311_sem2_2024.databinding.DeleteConfirmationBinding
-import java.util.Calendar
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.Intent
-import android.os.Build
+import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.TimePicker
-import androidx.lifecycle.lifecycleScope
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskRepository
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModel
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModelFactory
 import com.example.opsc7311_sem2_2024.ValidationManager
-import kotlinx.coroutines.launch
-import java.util.Locale
+import com.example.opsc7311_sem2_2024.databinding.ActivityEditTaskBinding
+import com.example.opsc7311_sem2_2024.databinding.DeleteConfirmationBinding
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import java.util.*
 
 class EditTaskActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditTaskBinding
     private val validationManager = ValidationManager()
-
+    private val firebaseManager = FirebaseManager()
 
     // Variables for task data
     private var taskId: String? = null
-    private lateinit var taskViewModel: TaskViewModel
-    private lateinit var taskRepository: TaskRepository
-    private lateinit var taskDatabase: TaskDatabase
     private var currentTask: TaskItem? = null
+    private val selectedCategories = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,39 +40,28 @@ class EditTaskActivity : AppCompatActivity() {
         // Retrieve the taskId from the intent
         taskId = intent.getStringExtra("taskId")
 
-        // Initialize the database, DAO, repository, and ViewModel
-        taskDatabase = TaskDatabase.getDatabase(this)
-        val taskDao = taskDatabase.taskItemDao()
-        taskRepository = TaskRepository(taskDao)
-        val factory = TaskViewModelFactory(taskRepository)
-        taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
-
-        // Fetch task data
+        // Fetch task from Firebase
         taskId?.let { id ->
-            taskViewModel.getTaskById(id) { task ->
-                if (task != null) {
-                    currentTask = task
+            firebaseManager.fetchTasks { tasks ->
+                currentTask = tasks.find { it.id == id }
+                currentTask?.let { task ->
                     populateUI(task)
-                } else {
+                } ?: run {
                     Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
             }
         }
 
-        // <editor-fold desc="OnChange Listeners for validation">
+        // Set up listeners and validations
+        setupListeners()
+    }
 
-        // Add TextWatchers for validation
+    private fun setupListeners() {
+        // Validation TextWatchers
         binding.etTaskTitleEdit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-        binding.etTaskTime.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -108,46 +83,46 @@ class EditTaskActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // </editor-fold>
-
-
-        // Set up the Back button
-        binding.btnBack.setOnClickListener {
-            finish()
-        }
-
-        // Set up the Add Chip button
-        binding.btnAddChip.setOnClickListener {
-            val tagText = binding.etAddChip.text.toString()
-            if (tagText.isNotEmpty()) {
-                addChipToGroup(tagText, binding.chipGroupCategory)
-                binding.etAddChip.text?.clear()
-            }
-        }
-
-        //Show DatePicker Pop Up
-        binding.etDatePicker.setOnClickListener {
-            showDatePicker(it)
-        }
-
-        //Save button
-        binding.btnSaveTask.setOnClickListener {
-            saveTask()
-        }
-
+        // Time Picker
         binding.etTaskTime.setOnClickListener {
             showTimePicker { selectedTime ->
                 binding.etTaskTime.setText(selectedTime)
             }
         }
 
-        binding.btnDeleteTask.setOnClickListener {
-            showDeleteConfirmation {
-                // Call your delete function here to delete the task
-                deleteTask(taskId.toString())
+        // Date Picker
+        binding.etDatePicker.setOnClickListener {
+            showDatePicker()
+        }
+
+        // Add Chip Button
+        binding.btnAddChip.setOnClickListener {
+            val tagText = binding.etAddChip.text.toString().trim()
+            if (tagText.isNotEmpty()) {
+                addChipToGroup(tagText, binding.chipGroupCategory)
+                binding.etAddChip.text?.clear()
+                selectedCategories.add(tagText)
+                // Save new category under the user
+                firebaseManager.saveCategories(selectedCategories.toList())
             }
         }
 
+        // Back Button
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
+        // Save Task Button
+        binding.btnSaveTask.setOnClickListener {
+            saveTask()
+        }
+
+        // Delete Task Button
+        binding.btnDeleteTask.setOnClickListener {
+            showDeleteConfirmation {
+                deleteTask()
+            }
+        }
     }
 
     // Function to populate UI with task data
@@ -155,11 +130,16 @@ class EditTaskActivity : AppCompatActivity() {
         // Set task title
         binding.etTaskTitleEdit.setText(task.title)
 
-        // Populate category chips
-        binding.chipGroupCategory.removeAllViews()
-        val categories = task.category.split(",")
-        categories.forEach { category ->
-            addChipToGroup(category.trim(), binding.chipGroupCategory)
+        // Fetch categories for this task
+        firebaseManager.fetchCategoriesByTaskId(task.id) { categories ->
+            runOnUiThread {
+                // Populate category chips
+                binding.chipGroupCategory.removeAllViews()
+                categories.forEach { category ->
+                    addChipToGroup(category, binding.chipGroupCategory)
+                    selectedCategories.add(category)
+                }
+            }
         }
 
         // Set task date
@@ -172,7 +152,6 @@ class EditTaskActivity : AppCompatActivity() {
         // Set min and max target hours
         binding.etMinHours.setText(task.minTargetHours.toString())
         binding.etMaxHours.setText(task.maxTargetHours.toString())
-
     }
 
     // Function to create and add a new Chip to the ChipGroup
@@ -180,85 +159,28 @@ class EditTaskActivity : AppCompatActivity() {
         val chip = Chip(this).apply {
             text = tagText
             isCloseIconVisible = true  // Show a close icon to allow removal
-            setOnCloseIconClickListener { chipGroup.removeView(this) }  // Remove chip on close icon click
+            setOnCloseIconClickListener {
+                chipGroup.removeView(this)
+                selectedCategories.remove(tagText)
+            }  // Remove chip on close icon click
         }
         chipGroup.addView(chip)
     }
 
-    //OnCLick event for DatePicker
-    private fun showDatePicker(view: View) {
+    private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
         val datePickerDialog = DatePickerDialog(
             this,
-            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+            { _, selectedYear, selectedMonth, selectedDay ->
                 val dateStr = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                when (view.id) {
-                    R.id.etDatePicker -> {
-                        binding.etDatePicker.setText(dateStr)
-                    }
-                    // Handle other IDs if necessary
-                }
+                binding.etDatePicker.setText(dateStr)
             },
-            year,
-            month,
-            day
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
         )
         datePickerDialog.show()
-    }
-
-    private fun saveTask() {
-
-        // Validate inputs
-        val isTitleValid = validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
-        val isCategoryValid = validationManager.isChipGroupNotEmpty(binding.chipGroupCategory, binding.tilAddChip)
-        val isMinHoursValid = validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
-        val isMaxHoursValid = validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
-        val isTaskTimeValid = validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
-
-        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid) {
-
-            // Get updated task data from UI elements
-            val title = binding.etTaskTitleEdit.text.toString()
-
-            // Collect category chips
-            val chipTexts = mutableListOf<String>()
-            for (i in 0 until binding.chipGroupCategory.childCount) {
-                val chip = binding.chipGroupCategory.getChildAt(i) as Chip
-                chipTexts.add(chip.text.toString().lowercase(Locale.getDefault()))
-            }
-            val category = chipTexts.joinToString(separator = ",")
-
-            val startDate = binding.etDatePicker.text.toString()
-            val taskTime = "Time: " + binding.etTaskTime.text.toString()
-            val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
-            val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
-
-            // Update the currentTask object
-            currentTask?.let { task ->
-                task.title = title
-                task.category = category
-                task.startDate = startDate
-                task.time = taskTime
-                task.minTargetHours = minTargetHours
-                task.maxTargetHours = maxTargetHours
-
-                // Update the task in the database
-                taskViewModel.updateTask(task) {
-                    // Notify the user
-                    Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
-
-                    // Close the activity
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
-            }
-
-        }
-
     }
 
     private fun showTimePicker(onTimeSelected: (String) -> Unit) {
@@ -283,25 +205,75 @@ class EditTaskActivity : AppCompatActivity() {
 
         // Handle OK button click
         btnOk.setOnClickListener {
-            val hour = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val hour = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 timePicker.hour
             } else {
                 timePicker.currentHour
             }
 
-            val minute = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val minute = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 timePicker.minute
             } else {
                 timePicker.currentMinute
             }
 
-            val timeString = String.format("%d:%02d", hour, minute)
+            val timeString = String.format("%02d:%02d", hour, minute)
             onTimeSelected(timeString)
             dialog.dismiss()
         }
 
         // Show the dialog
         dialog.show()
+    }
+
+    private fun saveTask() {
+        // Validate inputs
+        val isTitleValid = validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
+        val isCategoryValid = validationManager.isChipGroupNotEmpty(binding.chipGroupCategory, binding.tilAddChip)
+        val isMinHoursValid = validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
+        val isMaxHoursValid = validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
+        val isTaskTimeValid = validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
+
+        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid) {
+            // Get updated task data from UI elements
+            val title = binding.etTaskTitleEdit.text.toString()
+            val category = selectedCategories.joinToString(",")
+
+            val startDate = binding.etDatePicker.text.toString()
+            val taskTime = "Time: " + binding.etTaskTime.text.toString()
+            val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
+            val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
+
+            // Update the currentTask object
+            currentTask?.let { task ->
+                task.title = title
+                task.category = category
+                task.startDate = startDate
+                task.time = taskTime
+                task.minTargetHours = minTargetHours
+                task.maxTargetHours = maxTargetHours
+
+                // Save categories under user
+                firebaseManager.saveCategories(selectedCategories.toList())
+
+                // Update the task in Firebase
+                firebaseManager.updateTask(task) { success, message ->
+                    if (success) {
+                        // Notify the user
+                        Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show()
+
+                        // Save categories under user
+                        firebaseManager.saveCategories(selectedCategories.toList())
+
+                        // Close the activity
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Error: $message", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun showDeleteConfirmation(onDelete: () -> Unit) {
@@ -328,19 +300,19 @@ class EditTaskActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
-    private fun deleteTask(taskId: String) {
-        lifecycleScope.launch {
-            // Delete the task from the database
-            taskViewModel.deleteTask(taskId)
-
-            // Prepare the result intent
-            val resultIntent = Intent()
-            resultIntent.putExtra("taskDeleted", true)
-            setResult(Activity.RESULT_OK, resultIntent)
-
-            // Close the activity
-            finish()
+    private fun deleteTask() {
+        currentTask?.let { task ->
+            firebaseManager.deleteTask(task.id) { success, message ->
+                if (success) {
+                    Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show()
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("taskDeleted", true)
+                    setResult(Activity.RESULT_OK, resultIntent)
+                    finish()
+                } else {
+                    Toast.makeText(this, "Error: $message", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
-
 }

@@ -1,47 +1,32 @@
 package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.Activity
+import androidx.activity.result.ActivityResult
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.DatePicker
-import android.widget.SeekBar
-import android.widget.Toast
+import android.view.*
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskRepository
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskSessionAdapter
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModel
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskViewModelFactory
 import com.example.opsc7311_sem2_2024.databinding.FragmentTaskInfoBinding
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-
+import java.util.*
 
 class TaskInfoFragment : Fragment() {
 
-    // <editor-fold desc="Binding">
+    // Binding
     private var _binding: FragmentTaskInfoBinding? = null
     private val binding get() = _binding!!
-    // </editor-fold>
-
-    // <editor-fold desc="Task Get Info Vars">
-
-    private lateinit var taskViewModel: TaskViewModel
-    private lateinit var taskRepository: TaskRepository
-    private lateinit var taskDatabase: TaskDatabase
+    private val firebaseManager = FirebaseManager()
 
     private var taskId: String? = null
     private var currentTask: TaskItem? = null
@@ -49,57 +34,35 @@ class TaskInfoFragment : Fragment() {
 
     private lateinit var sessionAdapter: TaskSessionAdapter
 
-    // </editor-fold>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Retrieve the task ID from arguments
         taskId = arguments?.getString("taskId")
-
-        // Initialize the database, DAO, repository, and ViewModel
-        taskDatabase = TaskDatabase.getDatabase(requireContext())
-        val taskDao = taskDatabase.taskItemDao()
-        taskRepository = TaskRepository(taskDao)
-        val factory = TaskViewModelFactory(taskRepository)
-        taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
-
-        //Button Change if Archived
         isArchived = arguments?.getBoolean("isArchived", false) ?: false
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTaskInfoBinding.inflate(inflater, container, false)
-
-        binding.etFromDate.addTextChangedListener(dateFilterWatcher)
-        binding.etToDate.addTextChangedListener(dateFilterWatcher)
-        binding.seekBarMinDuration.setOnSeekBarChangeListener(durationFilterListener)
-        binding.seekBarMaxDuration.setOnSeekBarChangeListener(durationFilterListener)
-
-
         return binding.root
     }
 
     // Fetch the task data in onViewCreated
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         // Fetch task data
         taskId?.let { id ->
-            taskViewModel.getTaskById(id) { task ->
-                if (task != null) {
-                    currentTask = task
+            firebaseManager.fetchTasks { tasks ->
+                currentTask = tasks.find { it.id == id }
+                currentTask?.let { task ->
                     populateUI(task)
-                } else {
+                } ?: run {
                     Toast.makeText(requireContext(), "Task not found", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
                 }
             }
         }
 
-        //Recycler view to Show Session History
+        // Recycler view to Show Session History
         setupRecyclerView()
 
         // Click listener for the back button
@@ -109,9 +72,7 @@ class TaskInfoFragment : Fragment() {
 
         // Click listener for the edit button
         binding.btnEditTask.setOnClickListener {
-            val intent = Intent(requireContext(), EditTaskActivity::class.java)
-            intent.putExtra("taskId", taskId)
-            editTaskLauncher.launch(intent)
+            openEditTaskActivity()
         }
 
         // Set click listener for From Date
@@ -125,7 +86,11 @@ class TaskInfoFragment : Fragment() {
         }
 
         binding.btnCreateTaskPage.setOnClickListener {
-            archiveTask()
+            if (isArchived) {
+                unarchiveTask()
+            } else {
+                archiveTask()
+            }
         }
 
         binding.btnResetFilters.setOnClickListener {
@@ -154,28 +119,22 @@ class TaskInfoFragment : Fragment() {
             }
         }
 
-
-
-        //Change btn based on isArchived Value
+        // Change btn based on isArchived Value
         if (isArchived) {
             binding.btnCreateTaskPage.text = "UN-ARCHIVE TASK"
-            binding.btnCreateTaskPage.setOnClickListener {
-                unarchiveTask()
-            }
         } else {
             binding.btnCreateTaskPage.text = "ARCHIVE TASK"
-            binding.btnCreateTaskPage.setOnClickListener {
-                archiveTask()
-            }
         }
 
+        // Add TextWatchers for filters
+        binding.etFromDate.addTextChangedListener(dateFilterWatcher)
+        binding.etToDate.addTextChangedListener(dateFilterWatcher)
+        binding.seekBarMinDuration.setOnSeekBarChangeListener(durationFilterListener)
+        binding.seekBarMaxDuration.setOnSeekBarChangeListener(durationFilterListener)
     }
-
-    // <editor-fold desc="Function for display UI">
 
     private fun populateUI(task: TaskItem) {
         // Populate the UI elements with task data
-
         binding.tvTaskTitle.text = task.title
 
         // Category chips
@@ -187,64 +146,44 @@ class TaskInfoFragment : Fragment() {
         }
 
         // Task date
-        binding.tvTaskDate.setText(task.startDate)
+        binding.tvTaskDate.text = task.startDate
 
         // Task time
         val timeNumber = task.time.substringAfter("Time: ").trim()
-        binding.tvTaskTime.setText(timeNumber)
+        binding.tvTaskTime.text = timeNumber
 
         // Min and Max Target Hours
-        binding.tvMinHours.setText(task.minTargetHours.toString())
-        binding.tvMaxHours.setText(task.maxTargetHours.toString())
+        binding.tvMinHours.text = task.minTargetHours.toString()
+        binding.tvMaxHours.text = task.maxTargetHours.toString()
 
         // Load sessions
         sessionAdapter.submitList(task.sessionHistory)
     }
 
-    // Helper function to create a Chip for the category
     private fun createChip(category: String?): Chip {
         val chip = Chip(context)
         chip.text = category
         return chip
     }
 
-    //OnCLick event for DatePicker
-    private fun showDatePicker(view: View) {
+    private fun showDatePicker(editText: EditText) {
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
         activity?.let {
             val datePickerDialog = DatePickerDialog(
                 it,
-                { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                { _, selectedYear, selectedMonth, selectedDay ->
                     val dateStr = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                    when (view.id) {
-                        R.id.etFromDate -> {
-                            binding.etFromDate.setText(dateStr)
-                        }
-                        R.id.etToDate -> {
-                            binding.etToDate.setText(dateStr)
-                        }
-                        R.id.tvTaskDate -> {
-                            binding.tvTaskDate.text = dateStr
-                        }
-                        // Add more cases if needed
-                    }
+                    editText.setText(dateStr)
                 },
-                year,
-                month,
-                day
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
             )
             datePickerDialog.show()
         }
     }
 
-    // </editor-fold>
-
-    // check if task was deleted or updated
-    private val editTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val editTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
             val taskDeleted = result.data?.getBooleanExtra("taskDeleted", false) ?: false
             if (taskDeleted) {
@@ -253,9 +192,9 @@ class TaskInfoFragment : Fragment() {
             } else {
                 // Task was updated, refresh the UI
                 taskId?.let { id ->
-                    taskViewModel.getTaskById(id) { task ->
-                        if (task != null) {
-                            currentTask = task
+                    firebaseManager.fetchTasks { tasks ->
+                        currentTask = tasks.find { it.id == id }
+                        currentTask?.let { task ->
                             populateUI(task)
                         }
                     }
@@ -270,16 +209,16 @@ class TaskInfoFragment : Fragment() {
         editTaskLauncher.launch(intent)
     }
 
-    // <editor-fold desc="Archive/Un-Archive">
-
     private fun archiveTask() {
         currentTask?.let { task ->
             task.isArchived = true
-            taskViewModel.updateTask(task) {
-                // Notify the user
-                Toast.makeText(requireContext(), "Task archived", Toast.LENGTH_SHORT).show()
-                // Close TaskInfoFragment
-                parentFragmentManager.popBackStack()
+            firebaseManager.updateTask(task) { success, message ->
+                if (success) {
+                    Toast.makeText(requireContext(), "Task archived", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                } else {
+                    Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -287,14 +226,16 @@ class TaskInfoFragment : Fragment() {
     private fun unarchiveTask() {
         currentTask?.let { task ->
             task.isArchived = false
-            taskViewModel.updateTask(task) {
-                Toast.makeText(requireContext(), "Task unarchived", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
+            firebaseManager.updateTask(task) { success, message ->
+                if (success) {
+                    Toast.makeText(requireContext(), "Task unarchived", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                } else {
+                    Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
-
-    // </editor-fold>
 
     private fun setupRecyclerView() {
         sessionAdapter = TaskSessionAdapter()
@@ -313,7 +254,6 @@ class TaskInfoFragment : Fragment() {
     }
 
     private fun applyFilters() {
-
         if (binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)) {
             // Filters are off, show all sessions
             showAllSessions()
@@ -358,4 +298,8 @@ class TaskInfoFragment : Fragment() {
         sessionAdapter.submitList(currentTask?.sessionHistory ?: emptyList())
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

@@ -1,28 +1,22 @@
 package com.example.opsc7311_sem2_2024.Tasks
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
-import com.example.opsc7311_sem2_2024.TaskClasses.TaskDatabase
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.databinding.FragmentArchivedTasksBinding
 import com.google.android.material.chip.Chip
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
 
 class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private var _binding: FragmentArchivedTasksBinding? = null
     private val binding get() = _binding!!
+    private val firebaseManager = FirebaseManager()
 
     private lateinit var archivedAdapter: TaskAdapter
 
@@ -30,28 +24,21 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private val allCategories = mutableSetOf<String>()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
         _binding = FragmentArchivedTasksBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
-
-        // Load archived tasks
-        lifecycleScope.launch {
-            loadArchivedTasksFromDatabase()
-        }
+        loadArchivedTasksFromFirebase()
 
         binding.btnGoToTasks.setOnClickListener {
-            // Open ArchiveTasksFragment
-            val TasksFragment = TasksFragment()
+            // Open TasksFragment
+            val tasksFragment = TasksFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, TasksFragment)
+                .replace(R.id.fragment_container, tasksFragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -73,7 +60,6 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
                 showAllArchivedTasks()
             }
         }
-
     }
 
     private fun setupRecyclerView() {
@@ -84,33 +70,25 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         }
     }
 
-    private suspend fun loadArchivedTasksFromDatabase() {
-        val taskDatabase = TaskDatabase.getDatabase(requireContext().applicationContext)
-        val taskDao = taskDatabase.taskItemDao()
-        val tasksFromDb = taskDao.getArchivedTasks()
+    private fun loadArchivedTasksFromFirebase() {
+        firebaseManager.fetchTasks { tasks ->
+            val tasksFromDb = tasks.filter { it.isArchived }
 
-        // Clear previous data
-        archivedTasks.clear()
-        allCategories.clear()
+            archivedTasks.clear()
+            allCategories.clear()
 
-        for (task in tasksFromDb) {
-            archivedTasks.add(task)
+            for (task in tasksFromDb) {
+                archivedTasks.add(task)
+                val categories = task.category.split(",").map { it.trim() }
+                allCategories.addAll(categories)
+            }
 
-            // Collect categories
-            val categories = task.category.split(",").map { it.trim() }
-            allCategories.addAll(categories)
-        }
-
-        withContext(Dispatchers.Main) {
-            // Populate category chips
-            populateCategoryChips()
-
-            // Initially show all archived tasks
-            showAllArchivedTasks()
+            activity?.runOnUiThread {
+                populateCategoryChips()
+                showAllArchivedTasks()
+            }
         }
     }
-
-    // <editor-fold desc="Filter Functions">
 
     private fun populateCategoryChips() {
         binding.chipGroupCategoryFilter.removeAllViews()
@@ -158,8 +136,6 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         archivedAdapter.submitList(ArrayList(archivedTasks))
     }
 
-    // </editor-fold>
-
     override fun onTaskLongPressed(task: TaskItem) {
         // Open TaskInfoFragment for the archived task
         val bundle = Bundle().apply {
@@ -178,16 +154,15 @@ class ArchivedTasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     }
 
     override fun onStartButtonClicked(task: TaskItem) {
-        Toast.makeText(requireContext(),"Un-Archive Task First",Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), "Un-Archive Task First", Toast.LENGTH_LONG).show()
     }
 
     override fun onStopButtonClicked(task: TaskItem) {
-        Toast.makeText(requireContext(),"Un-Archive Task First",Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), "Un-Archive Task First", Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
 }

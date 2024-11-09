@@ -33,10 +33,16 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // <editor-fold desc="Initialize Shared Preferences && Check if the user is already logged in">
+
+        // Initialize Shared Preferences
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-        // Pre-fill email if "Remember Me" was checked
         val rememberMe = sharedPreferences.getBoolean("remember_me", false)
+        if (!rememberMe) {
+            FirebaseAuth.getInstance().signOut()
+        }
+
+        // Pre-fill email if "Remember Me" was checked
         if (rememberMe) {
             val savedEmail = sharedPreferences.getString("user_email", "")
             binding.etEmail.setText(savedEmail)
@@ -45,6 +51,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Check if the user is already logged in
         checkLoginStatus()
+
         // </editor-fold>
 
         //Receive email from SignInActivity
@@ -52,7 +59,6 @@ class LoginActivity : AppCompatActivity() {
         if (!emailFromSignUp.isNullOrEmpty()) {
             binding.etEmail.setText(emailFromSignUp)
         }
-
 
         // <editor-fold desc="Forgot Password Click Listener">
         binding.tvForgotPassword.setOnClickListener {
@@ -79,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
                 val password = binding.etPassword.text.toString()
                 val rememberMe = binding.cbRemeberMe.isChecked
 
-                firebaseManager.loginUser(email, password) { success, message ->
+                firebaseManager.loginUser(email, password) { success, _ ->
                     binding.btnLogIn.text = getString(R.string.log_in)
                     binding.btnLogIn.isEnabled = true
                     if (success) {
@@ -94,6 +100,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // <editor-fold desc="Validate Inputs">
+
     private fun validateInputs(): Boolean {
         val isEmailValid = validationManager.validateEmail(binding.tilEmail)
         val isPasswordValid = binding.etPassword.text.toString().isNotEmpty()
@@ -106,21 +113,28 @@ class LoginActivity : AppCompatActivity() {
 
         return isEmailValid && isPasswordValid
     }
+
     // </editor-fold>
 
     // <editor-fold desc="Check Login Status">
+
     private fun checkLoginStatus() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null && currentUser.isEmailVerified) {
-            // User is signed in and email is verified
-            val intent = Intent(this, MainScreen::class.java)
-            startActivity(intent)
-            finish()
+        val rememberMe = sharedPreferences.getBoolean("remember_me", false)
+        if (rememberMe) {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null && currentUser.isEmailVerified) {
+                // User is signed in and email is verified
+                val intent = Intent(this, MainScreen::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
     }
+
     // </editor-fold>
 
     // <editor-fold desc="Save Login State">
+
     private fun saveLoginState(rememberMe: Boolean, userEmail: String) {
         val editor = sharedPreferences.edit()
         editor.putBoolean("remember_me", rememberMe)
@@ -131,27 +145,25 @@ class LoginActivity : AppCompatActivity() {
         }
         editor.apply()
     }
+
     // </editor-fold>
 
     // <editor-fold desc="Fetch Info">
+
     private fun fetchUserInfoAndProceed(rememberMe: Boolean) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-        val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+        firebaseManager.getUserEmail { userEmail ->
+            if (userEmail != null) {
+                saveLoginState(rememberMe, userEmail)
 
-        databaseRef.get().addOnSuccessListener { dataSnapshot ->
-            val userName = dataSnapshot.child("name").getValue(String::class.java) ?: "User Name"
-            val userEmail = dataSnapshot.child("email").getValue(String::class.java) ?: "user@example.com"
-
-            saveLoginState(rememberMe, userEmail)
-
-            val intent = Intent(this, MainScreen::class.java)
-            startActivity(intent)
-            finish()
-        }.addOnFailureListener { exception ->
-            Toast.makeText(this, "Failed to retrieve user info.", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, MainScreen::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this, "Failed to retrieve user email.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
+
     // </editor-fold>
 
 }
