@@ -3,7 +3,7 @@
     <string name="appName">TimeFlow</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="don_t_have_an_account">DON\'T HAVE AN ACCOUNT?</string>
+    <string name="don_t_have_an_account">DONT HAVE AN ACCOUNT?</string>
     <string name="register">REGISTER</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="slogan">Let’s make every minute count.</string>
@@ -50,7 +50,7 @@
     <string name="task_history">Task History</string>
     <string name="placeholder">placeHolder</string>
     <string name="save">Save</string>
-    <string name="title">title</string>
+    <string name="title">Title</string>
     <string name="disable">disable\n</string>
     <string name="chip">chip</string>
     <string name="enable">enable</string>
@@ -78,6 +78,7 @@
     <string name="pause">Pause</string>
     <string name="new_note">New note</string>
     <string name="add_note">Add note</string>
+    <string name="task_duration">Task Duration</string>
 
 
 </resources>

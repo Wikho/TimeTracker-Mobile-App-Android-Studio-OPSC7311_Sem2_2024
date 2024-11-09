@@ -152,8 +152,25 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         upcomingTasks.clear()
         allCategories.clear()
 
-        val currentDate = getCurrentDate()
-        val currentWeekRange = getCurrentWeekRange()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        // Get start of today
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfToday = calendar.time
+
+        // Get start of the week
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+        val startOfWeek = calendar.time
+
+        // Get end of the week
+        val endOfWeekCalendar = calendar.clone() as Calendar
+        endOfWeekCalendar.add(Calendar.WEEK_OF_YEAR, 1)
+        endOfWeekCalendar.add(Calendar.MILLISECOND, -1)
+        val endOfWeek = endOfWeekCalendar.time
 
         for (task in tasks) {
             if (task.isArchived) continue  // Skip archived tasks
@@ -164,12 +181,18 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             val categories = task.category.split(",").map { it.trim() }
             allCategories.addAll(categories)
 
-            val taskDate = task.startDate
+            val taskDateStr = task.startDate
+            val taskDate = dateFormat.parse(taskDateStr)
+            if (taskDate == null) continue // Skip invalid dates
 
             when {
-                taskDate == currentDate -> todayTasks.add(task)
-                taskDate in currentWeekRange -> thisWeekTasks.add(task)
-                taskDate > currentWeekRange.last() -> upcomingTasks.add(task)
+                isSameDay(taskDate, startOfToday) -> todayTasks.add(task)
+                (taskDate.after(startOfWeek) || isSameDay(taskDate, startOfWeek)) &&
+                        (taskDate.before(endOfWeek) || isSameDay(taskDate, endOfWeek)) -> thisWeekTasks.add(task)
+                taskDate.after(endOfWeek) -> upcomingTasks.add(task)
+                else -> {
+                    // Task is before start of week, can't happen
+                }
             }
         }
 
@@ -181,6 +204,16 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             // Initially show all tasks
             showAllTasks()
         }
+    }
+
+    // Helper function to check if two dates are on the same day
+    private fun isSameDay(date1: Date, date2: Date): Boolean {
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+        cal1.time = date1
+        cal2.time = date2
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 
     private fun populateCategoryChips() {
@@ -234,9 +267,19 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     }
 
     private fun showAllTasks() {
-        todayAdapter.submitList(ArrayList(todayTasks))  // Create new lists to prevent issues
+        todayAdapter.submitList(ArrayList(todayTasks))
         thisWeekAdapter.submitList(ArrayList(thisWeekTasks))
         upcomingAdapter.submitList(ArrayList(upcomingTasks))
+
+        // Set visibility of sections based on whether they have tasks
+        binding.tvToday.visibility = if (todayTasks.isEmpty()) View.GONE else View.VISIBLE
+        binding.rvToday.visibility = if (todayTasks.isEmpty()) View.GONE else View.VISIBLE
+
+        binding.tvThisWeek.visibility = if (thisWeekTasks.isEmpty()) View.GONE else View.VISIBLE
+        binding.rvThisWeek.visibility = if (thisWeekTasks.isEmpty()) View.GONE else View.VISIBLE
+
+        binding.tvUpcoming.visibility = if (upcomingTasks.isEmpty()) View.GONE else View.VISIBLE
+        binding.rvUpcoming.visibility = if (upcomingTasks.isEmpty()) View.GONE else View.VISIBLE
     }
 
     // </editor-fold>

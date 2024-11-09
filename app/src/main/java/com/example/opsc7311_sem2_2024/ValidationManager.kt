@@ -3,6 +3,10 @@ package com.example.opsc7311_sem2_2024
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class ValidationManager {
 
@@ -181,5 +185,32 @@ class ValidationManager {
             inputLayout.error = null  // Clear the error if there is at least one chip
             true
         }
+    }
+
+    fun validateTaskDate(editText: TextInputEditText, textInputLayout: TextInputLayout): Boolean {
+        val dateStr = editText.text.toString()
+        if (dateStr.isEmpty()) {
+            textInputLayout.error = "Date cannot be empty"
+            return false
+        }
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        dateFormat.isLenient = false
+        try {
+            val selectedDate = dateFormat.parse(dateStr)
+            val today = Calendar.getInstance()
+            today.set(Calendar.HOUR_OF_DAY, 0)
+            today.set(Calendar.MINUTE, 0)
+            today.set(Calendar.SECOND, 0)
+            today.set(Calendar.MILLISECOND, 0)
+            if (selectedDate.before(today.time)) {
+                textInputLayout.error = "Date cannot be in the past"
+                return false
+            }
+        } catch (e: ParseException) {
+            textInputLayout.error = "Invalid date format"
+            return false
+        }
+        textInputLayout.error = null
+        return true
     }
 }

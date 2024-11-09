@@ -2,6 +2,7 @@ package com.example.opsc7311_sem2_2024.Tasks
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -43,6 +44,10 @@ class TaskCreationFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        binding.etDatePicker.setOnClickListener {
+            showDatePicker()
+        }
 
         binding.etTaskTime.setOnClickListener {
             showTimePicker { selectedTime ->
@@ -96,15 +101,6 @@ class TaskCreationFragment : Fragment() {
             }
         }
 
-
-        // Initialize DatePicker to current date
-        val calendar = Calendar.getInstance()
-        binding.datePicker.init(
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH),
-            null
-        )
 
         // Create Task button
         binding.btnCreateTaskPage.setOnClickListener {
@@ -175,17 +171,13 @@ class TaskCreationFragment : Fragment() {
         val isMinHoursValid = validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
         val isMaxHoursValid = validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
         val isTaskTimeValid = validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
+        val isDateValid = validationManager.validateTaskDate(binding.etDatePicker, binding.tilDatePicker)
 
-        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid) {
+        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid && isDateValid) {
             val taskId = UUID.randomUUID().toString()
             val taskTitle = binding.etTaskTitle.text.toString()
             val categories = selectedCategories.joinToString(",")
-
-            val day = binding.datePicker.dayOfMonth
-            val month = binding.datePicker.month
-            val year = binding.datePicker.year
-            val selectedDate = "$year-${month + 1}-$day"
-
+            val selectedDate = binding.etDatePicker.text.toString()
             val taskTime = binding.etTaskTime.text.toString()
             val minTargetHours = binding.etMinHours.text.toString().toInt()
             val maxTargetHours = binding.etMaxHours.text.toString().toInt()
@@ -207,8 +199,6 @@ class TaskCreationFragment : Fragment() {
             firebaseManager.saveTask(task) { success, message ->
                 if (success) {
                     Toast.makeText(requireContext(), "Task created successfully", Toast.LENGTH_SHORT).show()
-                    // Save categories under user
-                    firebaseManager.saveCategories(selectedCategories.toList())
                     // Notify parent fragment
                     parentFragmentManager.setFragmentResult("taskCreated", Bundle())
                     // Close fragment
@@ -220,8 +210,30 @@ class TaskCreationFragment : Fragment() {
         }
     }
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val dateStr = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                binding.etDatePicker.setText(dateStr)
+                binding.tilDatePicker.error = null // Clear any previous errors
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // Set the minimum date to today
+        datePickerDialog.datePicker.minDate = calendar.timeInMillis
+
+        datePickerDialog.show()
+    }
+
 }

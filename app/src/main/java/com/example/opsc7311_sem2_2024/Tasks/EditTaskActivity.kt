@@ -192,15 +192,21 @@ class EditTaskActivity : AppCompatActivity() {
         val datePickerDialog = DatePickerDialog(
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
-                val dateStr = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                val dateStr = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
                 binding.etDatePicker.setText(dateStr)
+                binding.tilDatePicker.error = null // Clear any previous errors
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
+
+        // Set the minimum date to today
+        datePickerDialog.datePicker.minDate = calendar.timeInMillis
+
         datePickerDialog.show()
     }
+
 
     private fun showTimePicker(onTimeSelected: (String) -> Unit) {
         // Inflate the dialog's custom view
@@ -247,13 +253,15 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun saveTask() {
         // Validate inputs
+        // Validate inputs
         val isTitleValid = validationManager.isTextNotEmpty(binding.etTaskTitleEdit, binding.tilTaskTitleEdit)
         val isCategoryValid = validationManager.isChipGroupNotEmpty(binding.chipGroupCategory, binding.tilAddChip)
         val isMinHoursValid = validationManager.validateMinHours(binding.etMinHours, binding.tilMinHours, binding.etMaxHours)
         val isMaxHoursValid = validationManager.validateMaxHours(binding.etMaxHours, binding.tilMaxHours, binding.etMinHours)
         val isTaskTimeValid = validationManager.validateTaskTime(binding.etTaskTime, binding.tilTaskTime)
+        val isDateValid = validationManager.validateTaskDate(binding.etDatePicker, binding.tilDatePicker)
 
-        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid) {
+        if (isTitleValid && isCategoryValid && isMinHoursValid && isMaxHoursValid && isTaskTimeValid && isDateValid) {
             // Get updated task data from UI elements
             val title = binding.etTaskTitleEdit.text.toString()
             val category = selectedCategories.joinToString(",")

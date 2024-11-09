@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="0dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:paddingTop="10dp"
-    android:paddingRight="5dp"
-    android:paddingLeft="5dp"
+    android:paddingTop="8dp"
+    android:paddingRight="8dp"
+    android:paddingLeft="8dp"
+    android:paddingBottom="8dp"
     android:background="@drawable/rounded_background_gray"
-    android:padding="16dp"
+
     android:gravity="center">
 
     <!-- LinearLayout for Task Title and FAB -->
@@ -66,6 +67,14 @@
             android:padding="10dp"
             android:background="@drawable/rounded_background_white">
 
+            <!-- Title Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/title"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <!-- Task Title using TextInputLayout -->
             <com.google.android.material.textfield.TextInputLayout
@@ -73,7 +82,7 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+
                 android:hint="@string/task_title"
                 app:endIconMode="clear_text">
 
@@ -170,11 +179,27 @@
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
-            <DatePicker
-                android:id="@+id/datePicker"
+            <!-- Add the new TextInputLayout for Task Date -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDatePicker"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_gravity="center"
+                android:hint="@string/task_date"
+                app:endIconMode="clear_text"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDatePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_date"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:inputType="none"
+                    tools:ignore="DuplicateSpeakableTextCheck,TextContrastCheck,VisualLintTextFieldSize" />
+            </com.google.android.material.textfield.TextInputLayout>
 
 
 
@@ -185,6 +210,16 @@
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
                 android:layout_marginTop="10dp">
+
+                <!-- Task Duration Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/task_duration"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
 
                 <!-- Task Time using TextInputLayout -->
                 <com.google.android.material.textfield.TextInputLayout
@@ -215,46 +250,81 @@
                     android:gravity="center_horizontal"
                     android:layout_marginTop="10dp">
 
-                    <!-- Minimum Targeted Hours using TextInputLayout -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilMinHours"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/min_hours"
-                        app:endIconMode="clear_text">
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginTop="10dp">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etMinHours"
-                            android:layout_width="match_parent"
+                        <!-- Min Hours Label -->
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:hint="@string/min_hours" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_gravity="center"
+                            android:text="@string/min_hours"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <!-- Minimum Targeted Hours using TextInputLayout -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilMinHours"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/min_hours"
+                            app:endIconMode="clear_text">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMinHours"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:hint="@string/min_hours" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
 
                     <!-- Space between Min and Max Hours -->
                     <Space
-                        android:layout_width="5dp"
+                        android:layout_width="25dp"
                         android:layout_height="16dp" />
 
-                    <!-- Maximum Targeted Hours using TextInputLayout -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilMaxHours"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/max_hours"
-                        app:endIconMode="clear_text">
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginTop="10dp">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etMaxHours"
-                            android:layout_width="match_parent"
+                        <!-- Max Hours Label -->
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:hint="@string/max_hours" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                            android:layout_gravity="center"
+                            android:text="@string/max_hours"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
 
+                        <!-- Maximum Targeted Hours using TextInputLayout -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilMaxHours"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/max_hours"
+                            app:endIconMode="clear_text">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMaxHours"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:hint="@string/max_hours" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+               </LinearLayout>
             </LinearLayout>
 
 
@@ -267,7 +337,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:backgroundTint="@color/black"
         android:text="@string/create_task"
         android:textColor="@color/white"
