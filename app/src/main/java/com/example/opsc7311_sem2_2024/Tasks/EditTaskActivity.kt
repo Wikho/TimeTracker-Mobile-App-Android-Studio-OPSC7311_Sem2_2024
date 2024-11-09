@@ -55,6 +55,8 @@ class EditTaskActivity : AppCompatActivity() {
 
         // Set up listeners and validations
         setupListeners()
+
+
     }
 
     private fun setupListeners() {
@@ -97,13 +99,18 @@ class EditTaskActivity : AppCompatActivity() {
 
         // Add Chip Button
         binding.btnAddChip.setOnClickListener {
-            val tagText = binding.etAddChip.text.toString().trim()
+            val tagText = binding.etAddChip.text.toString().trim().uppercase()
             if (tagText.isNotEmpty()) {
-                addChipToGroup(tagText, binding.chipGroupCategory)
-                binding.etAddChip.text?.clear()
-                selectedCategories.add(tagText)
-                // Save new category under the user
-                firebaseManager.saveCategories(selectedCategories.toList())
+                if (!selectedCategories.contains(tagText)) {
+                    addChipToGroup(tagText, binding.chipGroupCategory)
+                    binding.etAddChip.text?.clear()
+                    selectedCategories.add(tagText)
+                    // Save new category under the user
+                    firebaseManager.saveCategories(selectedCategories.toList())
+                } else {
+                    Toast.makeText(this, "Category already exists", Toast.LENGTH_SHORT).show()
+                    binding.etAddChip.text?.clear()
+                }
             }
         }
 
@@ -123,24 +130,13 @@ class EditTaskActivity : AppCompatActivity() {
                 deleteTask()
             }
         }
+
     }
 
     // Function to populate UI with task data
     private fun populateUI(task: TaskItem) {
         // Set task title
         binding.etTaskTitleEdit.setText(task.title)
-
-        // Fetch categories for this task
-        firebaseManager.fetchCategoriesByTaskId(task.id) { categories ->
-            runOnUiThread {
-                // Populate category chips
-                binding.chipGroupCategory.removeAllViews()
-                categories.forEach { category ->
-                    addChipToGroup(category, binding.chipGroupCategory)
-                    selectedCategories.add(category)
-                }
-            }
-        }
 
         // Set task date
         binding.etDatePicker.setText(task.startDate)
@@ -152,17 +148,40 @@ class EditTaskActivity : AppCompatActivity() {
         // Set min and max target hours
         binding.etMinHours.setText(task.minTargetHours.toString())
         binding.etMaxHours.setText(task.maxTargetHours.toString())
+
+        // Fetch user's categories
+        firebaseManager.fetchCategories { userCategories ->
+            val userCategoriesSet = userCategories.map { it.uppercase() }.toSet()
+
+            // Fetch categories for this task
+            firebaseManager.fetchCategoriesByTaskId(task.id) { taskCategories ->
+                runOnUiThread {
+                    // Populate category chips
+                    binding.chipGroupCategory.removeAllViews()
+                    taskCategories.forEach { category ->
+                        val categoryUpper = category.uppercase()
+                        val categoryToDisplay = if (userCategoriesSet.contains(categoryUpper)) {
+                            categoryUpper
+                        } else {
+                            "UNDEFINED"
+                        }
+                        addChipToGroup(categoryToDisplay, binding.chipGroupCategory)
+                        selectedCategories.add(categoryToDisplay)
+                    }
+                }
+            }
+        }
     }
 
     // Function to create and add a new Chip to the ChipGroup
-    private fun addChipToGroup(tagText: String, chipGroup: ChipGroup) {
+    private fun addChipToGroup(text: String, chipGroup: ChipGroup) {
         val chip = Chip(this).apply {
-            text = tagText
-            isCloseIconVisible = true  // Show a close icon to allow removal
+            this.text = text.uppercase()
+            isCloseIconVisible = true
             setOnCloseIconClickListener {
                 chipGroup.removeView(this)
-                selectedCategories.remove(tagText)
-            }  // Remove chip on close icon click
+                selectedCategories.remove(text.uppercase())
+            }
         }
         chipGroup.addView(chip)
     }

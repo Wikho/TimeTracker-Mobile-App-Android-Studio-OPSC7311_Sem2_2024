@@ -38,7 +38,7 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
         fun bind(task: TaskItem) {
             // Bind data to the views
             binding.tvTaskTileTitle.text = task.title
-            binding.tvTaskTileTag.text = task.category
+            binding.tvTaskTileTag.text = task.category.uppercase()
 
             // Set button states
             binding.btnTaskTileStart.isEnabled = !task.isStarted

@@ -199,7 +199,6 @@ class FirebaseManager{
     // <editor-fold desc="Categories Functions">
 
     // Save Categories under the current user
-
     fun saveCategories(categories: List<String>) {
         val userId = auth.currentUser?.uid ?: return
         val categoriesRef = database.getReference("Users").child(userId).child("Categories")
@@ -208,7 +207,7 @@ class FirebaseManager{
                 val existingCategories = currentData.value as? Map<String, Any?> ?: emptyMap()
                 val updatedCategories = existingCategories.toMutableMap()
                 for (category in categories) {
-                    updatedCategories[category] = true
+                    updatedCategories[category.uppercase()] = true
                 }
                 currentData.value = updatedCategories
                 return Transaction.success(currentData)
@@ -232,7 +231,7 @@ class FirebaseManager{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val categories = mutableListOf<String>()
                 for (childSnapshot in snapshot.children) {
-                    val category = childSnapshot.key
+                    val category = childSnapshot.key?.uppercase()
                     category?.let {
                         categories.add(it)
                     }
@@ -255,12 +254,12 @@ class FirebaseManager{
         taskRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val task = snapshot.getValue(TaskItem::class.java)
-                val categories = task?.category?.split(",")?.map { it.trim() } ?: listOf("Undefined")
+                val categories = task?.category?.split(",")?.map { it.trim().uppercase() } ?: listOf("UNDEFINED")
                 onResult(categories)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                onResult(listOf("Undefined"))
+                onResult(listOf("UNDEFINED"))
             }
         })
     }

@@ -68,13 +68,18 @@ class TaskCreationFragment : Fragment() {
 
         // Add Chip button
         binding.btnAddChip.setOnClickListener {
-            val categoryText = binding.etAddChip.text.toString().trim()
+            val categoryText = binding.etAddChip.text.toString().trim().uppercase()
             if (categoryText.isNotEmpty()) {
-                addChipToGroup(categoryText, binding.chipGroupCategory)
-                binding.etAddChip.text?.clear()
-                selectedCategories.add(categoryText)
-                // Save all selected categories under the user
-                firebaseManager.saveCategories(selectedCategories.toList())
+                if (!selectedCategories.contains(categoryText)) {
+                    addChipToGroup(categoryText, binding.chipGroupCategory)
+                    binding.etAddChip.text?.clear()
+                    selectedCategories.add(categoryText)
+                    // Save all selected categories under the user
+                    firebaseManager.saveCategories(selectedCategories.toList())
+                } else {
+                    Toast.makeText(requireContext(), "Category already exists", Toast.LENGTH_SHORT).show()
+                    binding.etAddChip.text?.clear()
+                }
             }
         }
 
@@ -82,11 +87,15 @@ class TaskCreationFragment : Fragment() {
         firebaseManager.fetchCategories { categories ->
             activity?.runOnUiThread {
                 categories.forEach { category ->
-                    addChipToGroup(category, binding.chipGroupCategory)
-                    selectedCategories.add(category)
+                    val categoryUpper = category.uppercase()
+                    if (!selectedCategories.contains(categoryUpper)) {
+                        addChipToGroup(categoryUpper, binding.chipGroupCategory)
+                        selectedCategories.add(categoryUpper)
+                    }
                 }
             }
         }
+
 
         // Initialize DatePicker to current date
         val calendar = Calendar.getInstance()
@@ -110,11 +119,11 @@ class TaskCreationFragment : Fragment() {
 
     private fun addChipToGroup(text: String, chipGroup: ChipGroup) {
         val chip = Chip(requireContext()).apply {
-            this.text = text
+            this.text = text.uppercase()
             isCloseIconVisible = true
             setOnCloseIconClickListener {
                 chipGroup.removeView(this)
-                selectedCategories.remove(text)
+                selectedCategories.remove(text.uppercase())
             }
         }
         chipGroup.addView(chip)
