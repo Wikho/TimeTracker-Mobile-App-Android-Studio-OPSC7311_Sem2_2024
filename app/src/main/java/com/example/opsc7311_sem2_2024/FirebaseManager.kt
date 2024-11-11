@@ -265,6 +265,23 @@ class FirebaseManager{
         })
     }
 
+    // Function to fetch a Task with a specific ID
+    fun getTaskById(taskId: String, onComplete: (TaskItem?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        val taskRef = database.getReference("Users").child(userId).child("tasks").child(taskId)
+
+        taskRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val task = snapshot.getValue(TaskItem::class.java)
+                onComplete(task)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onComplete(null)
+            }
+        })
+    }
+
 
     // </editor-fold>
 

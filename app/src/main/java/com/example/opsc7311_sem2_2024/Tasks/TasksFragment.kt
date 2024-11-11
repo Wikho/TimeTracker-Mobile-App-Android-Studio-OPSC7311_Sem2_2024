@@ -1,6 +1,7 @@
 package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
+import com.example.opsc7311_sem2_2024.Session.SessionStartedActivity
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
@@ -56,20 +58,12 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         }
 
         binding.fabAddTask.setOnClickListener {
-            // Create an instance of TaskCreationFragment
+            // Open TaskCreationFragment
             val taskCreationFragment = TaskCreationFragment()
-
-            // Get the FragmentManager and begin a transaction
-            val transaction = parentFragmentManager.beginTransaction()
-
-            // Use add or replace to overlay the fragment
-            transaction.add(R.id.fragment_container, taskCreationFragment)
-
-            // Add the transaction to the back stack so the user can navigate back
-            transaction.addToBackStack(null)
-
-            // Commit the transaction
-            transaction.commit()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, taskCreationFragment)
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.btnToggleCategoryFilter.setOnClickListener {
@@ -124,8 +118,44 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private fun loadTasksFromFirebase() {
         firebaseManager.fetchTasks { tasks ->
-            if (tasks.isNotEmpty()) {
-                processTasks(tasks)
+            if (tasks != null && tasks.isNotEmpty()) {
+                val tasksToArchive = mutableListOf<TaskItem>()
+                val today = getStartOfToday()
+
+                tasks.forEach { task ->
+                    try {
+                        val taskDateStr = task.startDate
+                        if (!taskDateStr.isNullOrEmpty()) {
+                            val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(taskDateStr)
+                            if (taskDate != null && taskDate.before(today) && !task.isArchived) {
+                                task.isArchived = true
+                                tasksToArchive.add(task)
+                            }
+                        } else {
+                            // Handle tasks with null or empty startDate
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Handle parsing exceptions
+                    }
+                }
+
+                // Update archived tasks in Firebase
+                if (tasksToArchive.isNotEmpty()) {
+                    tasksToArchive.forEach { taskToArchive ->
+                        firebaseManager.updateTask(taskToArchive) { success, message ->
+                            if (!success) {
+                                activity?.runOnUiThread {
+                                    Toast.makeText(requireContext(), "Error archiving task: $message", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                activity?.runOnUiThread {
+                    processTasks(tasks.filter { !it.isArchived })
+                }
             } else {
                 activity?.runOnUiThread {
                     Toast.makeText(requireContext(), "No tasks found", Toast.LENGTH_SHORT).show()
@@ -158,27 +188,32 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         val startOfWeek = getStartOfWeek()
         val endOfWeek = getEndOfWeek()
 
-        for (task in tasks) {
-            if (task.isArchived) continue  // Skip archived tasks
+        tasks.forEach { task ->
+            if (task.isArchived) return@forEach  // Skip archived tasks
 
             allTasks.add(task)
 
             // Collect categories
-            val categories = task.category.split(",").map { it.trim() }
+            val categories = task.category?.split(",")?.map { it.trim() } ?: emptyList()
             allCategories.addAll(categories)
 
             val taskDateStr = task.startDate
-            val taskDate = dateFormat.parse(taskDateStr)
-            if (taskDate == null) continue // Skip invalid dates
-
-
-            when {
-                isSameDay(taskDate, startOfToday) -> todayTasks.add(task)
-                isDateBetween(taskDate, startOfToday, endOfWeek) -> thisWeekTasks.add(task)
-                taskDate.after(endOfWeek) -> upcomingTasks.add(task)
-                else -> {
-                    // Task is before today
-                    // Handle if needed
+            if (!taskDateStr.isNullOrEmpty()) {
+                try {
+                    val taskDate = dateFormat.parse(taskDateStr)
+                    if (taskDate != null) {
+                        when {
+                            isSameDay(taskDate, startOfToday) -> todayTasks.add(task)
+                            isDateBetween(taskDate, startOfToday, endOfWeek) -> thisWeekTasks.add(task)
+                            taskDate.after(endOfWeek) -> upcomingTasks.add(task)
+                            else -> {
+                                // Task is before today
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Handle parsing exceptions
                 }
             }
         }
@@ -192,6 +227,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             showAllTasks()
         }
     }
+
 
     // <editor-fold desc="Helper function for RecyclerViews Setup">
 
@@ -365,20 +401,16 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         showSessionDialog(task)
     }
 
-    override fun onStopButtonClicked(task: TaskItem) {
-        stopSession(task)
-    }
-
     private fun showSessionDialog(task: TaskItem) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_description, null)
         val etSessionDescription = dialogView.findViewById<EditText>(R.id.etSessionDescription)
         val btnSelectPhoto = dialogView.findViewById<Button>(R.id.btnSelectPhoto)
         val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelSession)
-        val btnDone = dialogView.findViewById<Button>(R.id.btnDoneSession)
+        val btnStart = dialogView.findViewById<Button>(R.id.btnStartSession)
 
         // Set the dialog title with the task name
-        tvDialogTitle.text = "${task.title} - Description for Next Session"
+        tvDialogTitle.text = "Start ${task.title} session"
 
         // Handle Select Photo button
         btnSelectPhoto.setOnClickListener {
@@ -396,9 +428,13 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             dialog.dismiss()
         }
 
-        // Handle Done button
-        btnDone.setOnClickListener {
-            val description = etSessionDescription.text.toString()
+        // Handle Start button
+        btnStart.setOnClickListener {
+            val description = etSessionDescription.text.toString().trim()
+            if (description.isEmpty()) {
+                etSessionDescription.error = "Description cannot be empty"
+                return@setOnClickListener
+            }
             startSession(task, description, selectedImagePath)
             dialog.dismiss()
         }
@@ -410,9 +446,10 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private fun startSession(task: TaskItem, description: String, imagePath: String?) {
         val currentTime = System.currentTimeMillis()
         val sessionStartDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTime))
-        val startTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentTime))
+        val startTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(currentTime))
 
         val newSession = TaskSession(
+            sessionId = UUID.randomUUID().toString(),
             sessionDescription = description,
             sessionStartDate = sessionStartDate,
             startTime = startTime,
@@ -426,78 +463,15 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         // Update the task in Firebase
         firebaseManager.updateTask(task) { success, message ->
             if (success) {
-                // Refresh the list
-                loadTasksFromFirebase()
+                // Open SessionStartedActivity
+                val intent = Intent(requireContext(), SessionStartedActivity::class.java)
+                intent.putExtra("taskId", task.id)
+                intent.putExtra("sessionId", newSession.sessionId)
+                startActivity(intent)
             } else {
                 Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun stopSession(task: TaskItem) {
-        val currentTime = System.currentTimeMillis()
-        val endTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(currentTime))
-
-        // Find the active session
-        val activeSession = task.sessionHistory.lastOrNull { it.endTime == null }
-        if (activeSession != null) {
-            activeSession.endTime = endTime
-            // Calculate session duration
-            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val startDate = format.parse(activeSession.startTime)
-            val endDate = format.parse(endTime)
-            val difference = endDate.time - startDate.time
-            val minutes = (difference / (1000 * 60)).toInt()
-            val hours = minutes / 60
-            val remainingMinutes = minutes % 60
-            activeSession.sessionDuration = String.format("%d:%02d", hours, remainingMinutes)
-
-            task.isStarted = false
-
-            // Update the task in Firebase
-            firebaseManager.updateTask(task) { success, message ->
-                if (success) {
-                    // Refresh the list
-                    loadTasksFromFirebase()
-
-                    // Show session info dialog
-                    showSessionInfoDialog(task, activeSession)
-                } else {
-                    Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun showSessionInfoDialog(task: TaskItem, session: TaskSession) {
-        val sessionDurationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
-        val sessionDurationStr = session.sessionDuration
-
-        val minTargetMinutes = task.minTargetHours * 60
-        val maxTargetMinutes = task.maxTargetHours * 60
-
-        val message = StringBuilder()
-        message.append("You worked $sessionDurationStr total on the project.\n")
-
-        if (sessionDurationMinutes >= minTargetMinutes) {
-            message.append("Well done! You completed your minimum daily goal hours in this session.")
-        } else {
-            message.append("You didn't meet your minimum daily goal hours.")
-        }
-
-        if (sessionDurationMinutes > maxTargetMinutes) {
-            message.append("\nYou went over your maximum daily goal hours.")
-        }
-
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Session Info")
-            .setMessage(message.toString())
-            .setPositiveButton("OK") { dialogInterface, _ ->
-                dialogInterface.dismiss()
-            }
-            .create()
-
-        dialog.show()
     }
 
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -510,24 +484,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         selectImageLauncher.launch("image/*")
     }
 
-    private fun updateCategoryStats(task: TaskItem, session: TaskSession) {
-        val categories = task.category.split(",").map { it.trim() }
-        val sessionDurationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
 
-        // Implement logic to update category statistics in Firebase if needed
-    }
-
-    private fun calculateSessionDurationInMinutes(sessionDuration: String?): Int {
-        sessionDuration?.let {
-            val parts = it.split(":")
-            if (parts.size == 2) {
-                val hours = parts[0].toIntOrNull() ?: 0
-                val minutes = parts[1].toIntOrNull() ?: 0
-                return hours * 60 + minutes
-            }
-        }
-        return 0
-    }
 
     // </editor-fold>
 

@@ -17,7 +17,7 @@ class NotesAdapter(
 
     // <editor-fold desc="NoteItemListener Interface">
     interface NoteItemListener {
-        fun onNoteChecked(note: Note)
+        fun onNoteChecked(note: Note, isChecked: Boolean)
         fun onNoteLongPressed(note: Note)
     }
     // </editor-fold>
@@ -27,6 +27,8 @@ class NotesAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(note: Note) {
+            binding.cbNoteCompleted.setOnCheckedChangeListener(null) // Reset listener
+
             binding.cbNoteCompleted.isChecked = note.isCompleted
             binding.tvNoteTitle.text = note.title
 
@@ -49,8 +51,7 @@ class NotesAdapter(
 
             // Checkbox change listener
             binding.cbNoteCompleted.setOnCheckedChangeListener { _, isChecked ->
-                note.isCompleted = isChecked
-                listener.onNoteChecked(note)
+                listener.onNoteChecked(note, isChecked)
             }
 
             // Long press to show options

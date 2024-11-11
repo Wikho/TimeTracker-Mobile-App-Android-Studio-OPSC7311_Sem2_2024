@@ -9,9 +9,11 @@ import com.bumptech.glide.Glide
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.databinding.SessionItemLayoutBinding // Update the package path
 
-private val sessionList = mutableListOf<TaskSession>()
+
 
 class TaskSessionAdapter : RecyclerView.Adapter<TaskSessionAdapter.SessionViewHolder>()  {
+
+    private val sessionList = mutableListOf<TaskSession>()
 
     class SessionViewHolder(val binding: SessionItemLayoutBinding) : RecyclerView.ViewHolder(binding.root)
 

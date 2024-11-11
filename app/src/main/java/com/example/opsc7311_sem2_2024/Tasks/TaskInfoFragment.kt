@@ -97,7 +97,7 @@ class TaskInfoFragment : Fragment() {
             binding.etFromDate.text?.clear()
             binding.etToDate.text?.clear()
             binding.seekBarMinDuration.progress = 0
-            binding.seekBarMaxDuration.progress = 24
+            binding.seekBarMaxDuration.progress = 9
             applyFilters()
         }
 

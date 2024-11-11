@@ -16,23 +16,7 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        // Use the correct binding class: TaskItemLayoutBinding
-        val binding = TaskItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TaskViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        val task = taskList[position]
-        holder.bind(task)
-
-
-    }
-
-    override fun getItemCount(): Int {
-        return taskList.size
-    }
-
+    // <editor-fold desc="TaskViewHolder Class">
     inner class TaskViewHolder(private val binding: TaskItemLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(task: TaskItem) {
@@ -41,8 +25,7 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
             binding.tvTaskTileTag.text = task.category.uppercase()
 
             // Set button states
-            binding.btnTaskTileStart.isEnabled = !task.isStarted
-            binding.btnTaskTileStop.isEnabled = task.isStarted
+            //binding.btnTaskTileStart.isEnabled = !task.isStarted
 
             // Extract the task time and session duration
             val taskTime = task.time
@@ -61,18 +44,31 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
                 listener.onStartButtonClicked(task)
             }
 
-            // Handle Stop button click
-            binding.btnTaskTileStop.setOnClickListener {
-                listener.onStopButtonClicked(task)
-            }
+
 
         }
     }
+    // </editor-fold>
+
+    // <editor-fold desc="RecyclerView.Adapter Overrides">
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
+        // Use the correct binding class: TaskItemLayoutBinding
+        val binding = TaskItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return TaskViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
+        val task = taskList[position]
+        holder.bind(task)
+
+    }
+
+    override fun getItemCount(): Int = taskList.size
+    // </editor-fold>
 
     interface TaskActionListener {
         fun onTaskLongPressed(task: TaskItem)
         fun onStartButtonClicked(task: TaskItem)
-        fun onStopButtonClicked(task: TaskItem)
 
     }
 

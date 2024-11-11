@@ -15,24 +15,34 @@
         <activity
             android:name=".Tasks.EditTaskActivity"
             android:exported="false" />
+
         <activity
             android:name=".LogSignIn.ForgotPassword"
             android:exported="false" />
+
         <activity
             android:name=".MainScreen"
             android:exported="false" />
+
         <activity
             android:name=".LogSignIn.SignInActivity"
             android:exported="false" />
+
         <activity
             android:name=".LogSignIn.LoginActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".Session.SessionStartedActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

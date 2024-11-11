@@ -402,12 +402,16 @@ class NotesFragment : Fragment(), NotesAdapter.NoteItemListener {
     // </editor-fold>
 
     // <editor-fold desc="NoteItemListener Implementation">
-    override fun onNoteChecked(note: Note) {
-        // Update note in Firebase
+    override fun onNoteChecked(note: Note, isChecked: Boolean) {
+        note.isCompleted = isChecked
         selectedTask?.let { task ->
             firebaseManager.saveNote(task.id, note) { success, message ->
                 if (success) {
-                    filterNotesByMode()
+                    val index = notesList.indexOfFirst { it.id == note.id }
+                    if (index != -1) {
+                        notesList[index] = note
+                        filterNotesByMode()
+                    }
                 } else {
                     Toast.makeText(requireContext(), "Error: $message", Toast.LENGTH_SHORT).show()
                 }
