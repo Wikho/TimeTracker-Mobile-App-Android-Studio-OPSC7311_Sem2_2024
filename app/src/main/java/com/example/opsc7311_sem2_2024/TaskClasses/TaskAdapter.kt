@@ -72,4 +72,6 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
 
     }
 
+
+
 }

@@ -2,16 +2,23 @@ package com.example.opsc7311_sem2_2024.Tasks
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.opsc7311_sem2_2024.FirebaseManager
+import android.Manifest
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.Session.SessionStartedActivity
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskAdapter
@@ -19,6 +26,8 @@ import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
 import com.example.opsc7311_sem2_2024.databinding.FragmentTasksBinding
 import com.google.android.material.chip.Chip
+import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,7 +47,34 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
     private val upcomingTasks = mutableListOf<TaskItem>()
     private val allCategories = mutableSetOf<String>()
 
-    private var selectedImagePath: String? = null
+    private var selectedImagePath: Uri? = null
+
+    private var currentPhotoPath: String? = null
+
+    private var imageUri: Uri? = null
+    private lateinit var takePhotoLauncher: ActivityResultLauncher<Uri>
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize the image picker launcher
+        takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                selectedImagePath = imageUri
+            } else {
+                Toast.makeText(requireContext(), "Failed to capture image.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                capturePhoto()
+            } else {
+                Toast.makeText(requireContext(), "Camera permission is needed to take a photo", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -353,31 +389,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     // </editor-fold>
 
-    // <editor-fold desc="Task Press & Functions">
 
-    // Get today's date in "yyyy-MM-dd" format
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(Date())
-    }
-
-    // Get the date range for the current week
-    private fun getCurrentWeekRange(): List<String> {
-        val calendar = Calendar.getInstance()
-        // Adjust the calendar to the start of the week (Sunday or Monday based on locale)
-        calendar.firstDayOfWeek = Calendar.MONDAY
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val weekRange = mutableListOf<String>()
-
-        for (i in 0..6) {
-            weekRange.add(dateFormat.format(calendar.time))
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-        }
-
-        return weekRange
-    }
 
     override fun onTaskLongPressed(task: TaskItem) {
         // Create a bundle to pass task ID
@@ -414,7 +426,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
         // Handle Select Photo button
         btnSelectPhoto.setOnClickListener {
-            selectImageFromGallery()
+            checkCameraPermission()
         }
 
         // Create the AlertDialog
@@ -443,7 +455,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         dialog.show()
     }
 
-    private fun startSession(task: TaskItem, description: String, imagePath: String?) {
+    private fun startSession(task: TaskItem, description: String, imageUri: Uri?) {
         val currentTime = System.currentTimeMillis()
         val sessionStartDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(currentTime))
         val startTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(currentTime))
@@ -452,16 +464,13 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
             sessionId = UUID.randomUUID().toString(),
             sessionDescription = description,
             sessionStartDate = sessionStartDate,
-            startTime = startTime,
-            imagePath = imagePath
+            startTime = startTime
         )
 
-        // Update the task
-        task.sessionHistory.add(newSession)
         task.isStarted = true
 
-        // Update the task in Firebase
-        firebaseManager.updateTask(task) { success, message ->
+        // Save the task session with image
+        firebaseManager.saveTaskSession(task, newSession, imageUri) { success, message ->
             if (success) {
                 // Open SessionStartedActivity
                 val intent = Intent(requireContext(), SessionStartedActivity::class.java)
@@ -476,7 +485,7 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
 
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            selectedImagePath = it.toString()
+            selectedImagePath = it
         }
     }
 
@@ -484,7 +493,49 @@ class TasksFragment : Fragment(), TaskAdapter.TaskActionListener {
         selectImageLauncher.launch("image/*")
     }
 
+    private fun checkCameraPermission() {
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                capturePhoto()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
 
+    private fun capturePhoto() {
+        val photoFile = createImageFile()
+        photoFile?.let {
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                it
+            )
+            imageUri = uri
+            takePhotoLauncher.launch(uri)
+        }
+    }
+
+    private fun createImageFile(): File? {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return try {
+            val file = File.createTempFile(
+                "JPEG_${timestamp}_",
+                ".jpg",
+                storageDir
+            )
+            currentPhotoPath = file.absolutePath
+            file
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     // </editor-fold>
 

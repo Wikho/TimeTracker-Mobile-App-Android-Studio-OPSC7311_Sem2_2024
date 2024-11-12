@@ -1,15 +1,22 @@
 package com.example.opsc7311_sem2_2024
 
+import android.net.Uri
 import com.example.opsc7311_sem2_2024.Notes.Note
+import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroBreak
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.database.*
+import java.io.File
+
 
 class FirebaseManager{
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance()
+    private val storage = FirebaseStorage.getInstance()
 
     // <editor-fold desc="Get User Info">
 
@@ -195,6 +202,50 @@ class FirebaseManager{
         }
     }
 
+    // Save TaskSession with Image
+    fun saveTaskSession(
+        task: TaskItem,
+        session: TaskSession,
+        imageUri: Uri?,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val taskRef = database.getReference("Users").child(userId).child("tasks").child(task.id)
+
+        if (imageUri != null) {
+            val imageRef = storage.reference.child("Users/$userId/tasks/${task.id}/sessions/${session.sessionId}/image.jpg")
+            imageRef.putFile(imageUri).addOnSuccessListener {
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    session.imagePath = uri.toString()
+                    // Update the session in the task
+                    task.sessionHistory.add(session)
+                    // Save the task
+                    taskRef.setValue(task).addOnCompleteListener { taskResult ->
+                        if (taskResult.isSuccessful) {
+                            onComplete(true, null)
+                        } else {
+                            onComplete(false, taskResult.exception?.message)
+                        }
+                    }
+                }.addOnFailureListener { exception ->
+                    onComplete(false, exception.message)
+                }
+            }.addOnFailureListener { exception ->
+                onComplete(false, exception.message)
+            }
+        } else {
+            // No image, proceed to save session
+            task.sessionHistory.add(session)
+            taskRef.setValue(task).addOnCompleteListener { taskResult ->
+                if (taskResult.isSuccessful) {
+                    onComplete(true, null)
+                } else {
+                    onComplete(false, taskResult.exception?.message)
+                }
+            }
+        }
+    }
+
     // </editor-fold>
 
     // <editor-fold desc="Categories Functions">
@@ -282,6 +333,27 @@ class FirebaseManager{
         })
     }
 
+    // Update Category Stats
+    fun updateCategoryStats(categoryNames: List<String>, durationInSeconds: Long) {
+        val userId = auth.currentUser?.uid ?: return
+        val statsRef = database.getReference("Users").child(userId).child("CategoryStats")
+
+        for (category in categoryNames) {
+            val categoryRef = statsRef.child(category)
+            categoryRef.runTransaction(object : Transaction.Handler {
+                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                    var totalDuration = currentData.getValue(Long::class.java) ?: 0L
+                    totalDuration += durationInSeconds
+                    currentData.value = totalDuration
+                    return Transaction.success(currentData)
+                }
+
+                override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
+                    // Handle completion if necessary
+                }
+            })
+        }
+    }
 
     // </editor-fold>
 
@@ -361,6 +433,78 @@ class FirebaseManager{
         }
     }
 
+
+    // </editor-fold>
+
+    // <editor-fold desc="Pomodoro Functions">
+
+    fun savePomodoroBreak(
+        pomodoroBreak: PomodoroBreak,
+        imageUri: Uri?,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val path = if (pomodoroBreak.taskId != null) {
+            "Users/$userId/Pomodoro/${pomodoroBreak.taskId}/${pomodoroBreak.breakId}"
+        } else {
+            "Users/$userId/Pomodoro/Unspecified/${pomodoroBreak.breakId}"
+        }
+
+        if (imageUri != null) {
+            val imageRef = storage.reference.child("$path/image.jpg")
+            imageRef.putFile(imageUri).addOnSuccessListener {
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    pomodoroBreak.imagePath = uri.toString()
+                    // Save pomodoroBreak data
+                    savePomodoroBreakData(path, pomodoroBreak, onComplete)
+                }.addOnFailureListener { exception ->
+                    onComplete(false, exception.message)
+                }
+            }.addOnFailureListener { exception ->
+                onComplete(false, exception.message)
+            }
+        } else {
+            // Save pomodoroBreak data without image
+            savePomodoroBreakData(path, pomodoroBreak, onComplete)
+        }
+    }
+
+    private fun savePomodoroBreakData(
+        path: String,
+        pomodoroBreak: PomodoroBreak,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val breakRef = database.getReference(path)
+        breakRef.setValue(pomodoroBreak).addOnCompleteListener { taskResult ->
+            if (taskResult.isSuccessful) {
+                onComplete(true, null)
+            } else {
+                onComplete(false, taskResult.exception?.message)
+            }
+        }
+    }
+
+    fun updatePomodoroBreak(
+    pomodoroBreakId: String,
+    pomodoroBreak: PomodoroBreak,
+    onComplete: (Boolean, String?) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val path = if (pomodoroBreak.taskId != null) {
+            "Users/$userId/Pomodoro/${pomodoroBreak.taskId}/$pomodoroBreakId"
+        } else {
+            "Users/$userId/Pomodoro/Unspecified/$pomodoroBreakId"
+        }
+
+        val breakRef = database.getReference(path)
+        breakRef.setValue(pomodoroBreak).addOnCompleteListener { taskResult ->
+            if (taskResult.isSuccessful) {
+                onComplete(true, null)
+            } else {
+                onComplete(false, taskResult.exception?.message)
+            }
+        }
+    }
 
     // </editor-fold>
 }

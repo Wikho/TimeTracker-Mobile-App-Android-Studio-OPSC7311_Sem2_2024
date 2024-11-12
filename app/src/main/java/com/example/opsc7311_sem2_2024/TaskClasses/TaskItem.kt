@@ -1,6 +1,9 @@
 package com.example.opsc7311_sem2_2024.TaskClasses
 
 import com.google.firebase.database.IgnoreExtraProperties
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @IgnoreExtraProperties
 data class TaskItem(
@@ -32,15 +35,18 @@ data class TaskItem(
         return String.format("%02d:%02d", hours, minutes)
     }
 
-    fun getTotalWorkedMinutes(): Int {
+    fun getTotalWorkedMinutesToday(): Int {
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         var totalMinutes = 0
         for (session in sessionHistory) {
-            session.sessionDuration?.let {
-                val parts = it.split(":")
-                if (parts.size >= 2) {
-                    val hours = parts[0].toIntOrNull() ?: 0
-                    val minutes = parts[1].toIntOrNull() ?: 0
-                    totalMinutes += hours * 60 + minutes
+            if (session.sessionStartDate == todayDate) {
+                session.sessionDuration?.let {
+                    val parts = it.split(":")
+                    if (parts.size >= 2) {
+                        val hours = parts[0].toIntOrNull() ?: 0
+                        val minutes = parts[1].toIntOrNull() ?: 0
+                        totalMinutes += hours * 60 + minutes
+                    }
                 }
             }
         }

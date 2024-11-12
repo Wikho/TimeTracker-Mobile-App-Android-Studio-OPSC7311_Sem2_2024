@@ -62,5 +62,6 @@ dependencies {
     //kapt (libs.androidx.room.compiler)
     implementation (libs.glide)
     annotationProcessor (libs.compiler)
+    implementation (libs.firebase.storage)
 
 }

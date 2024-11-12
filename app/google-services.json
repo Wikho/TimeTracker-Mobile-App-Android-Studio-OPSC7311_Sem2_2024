@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "987197125676",
     "project_id": "opsc7311-poe-group2",
-    "storage_bucket": "opsc7311-poe-group2.appspot.com"
+    "storage_bucket": "opsc7311-poe-group2.firebasestorage.app"
   },
   "client": [
     {

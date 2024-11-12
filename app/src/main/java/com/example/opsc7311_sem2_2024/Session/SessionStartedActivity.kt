@@ -1,13 +1,27 @@
 // SessionStartedActivity.kt
 package com.example.opsc7311_sem2_2024.Session
 
+import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.example.opsc7311_sem2_2024.FirebaseManager
+import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroActivity
+import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
@@ -29,10 +43,14 @@ class SessionStartedActivity : AppCompatActivity() {
     private var task: TaskItem? = null
     private var session: TaskSession? = null
 
-    private var timer: CountDownTimer? = null
-    private var isBreak = false
     private var totalBreakTime = 0L
     private var breakCount = 0
+
+    private var timeElapsed: Long = 0L
+    private var sessionStartTime: Long = 0L
+
+    private var timer: CountDownTimer? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,20 +74,26 @@ class SessionStartedActivity : AppCompatActivity() {
 
         // Button listeners
         btnBreak.setOnClickListener {
-            if (isBreak) {
-                endBreak()
-            } else {
-                startBreak()
-            }
+            showBreakPrompt()
         }
 
         btnStop.setOnClickListener {
-            stopSession()
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Stop Session")
+            builder.setMessage("Are you sure you want to stop the session?")
+            builder.setPositiveButton("Yes") { _, _ ->
+                stopSession()
+            }
+            builder.setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            builder.create().show()
         }
 
         btnNotes.setOnClickListener {
             // Open Notes activity or fragment
         }
+
     }
 
     private fun loadTaskAndSession() {
@@ -99,7 +123,7 @@ class SessionStartedActivity : AppCompatActivity() {
 
         // Time left to reach min goal
         val minGoalMinutes = task?.minTargetHours?.times(60) ?: 0
-        val workedMinutes = task?.getTotalWorkedMinutes() ?: 0
+        val workedMinutes = task?.getTotalWorkedMinutesToday() ?: 0
         val timeLeftMinutes = minGoalMinutes - workedMinutes
 
         if (timeLeftMinutes > 0) {
@@ -110,31 +134,87 @@ class SessionStartedActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        // Implement timer logic if needed
+        sessionStartTime = System.currentTimeMillis() - timeElapsed
+        timer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                timeElapsed = System.currentTimeMillis() - sessionStartTime
+                updateTimerUI()
+            }
+
+            override fun onFinish() {
+                // Not used since we're counting up
+            }
+        }.start()
     }
 
-    private fun startBreak() {
-        isBreak = true
-        breakCount++
-        btnBreak.text = "End Break"
-        // Pause timer if you have one
+    private fun updateTimerUI() {
+        val totalSeconds = timeElapsed / 1000
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+
+        val timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        tvTaskTime.text = timeFormatted
+
+        // Calculate time left to reach minimum goal
+        val minGoalMinutes = task?.minTargetHours?.times(60) ?: 0
+        val workedMinutes = task?.getTotalWorkedMinutesToday() ?: 0
+        val sessionMinutes = (timeElapsed / 60000).toInt()
+        val totalWorkedMinutes = workedMinutes + sessionMinutes
+
+        val timeLeftMinutes = minGoalMinutes - totalWorkedMinutes
+
+        if (timeLeftMinutes > 0) {
+            tvTimeLeft.text = "You have $timeLeftMinutes minutes left to reach your minimum goal."
+        } else {
+            tvTimeLeft.text = "You have reached your minimum goal!"
+        }
     }
 
-    private fun endBreak() {
-        isBreak = false
-        btnBreak.text = "Break"
-        // Resume timer if you have one
+    private fun showBreakPrompt() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Take a Break")
+        builder.setMessage("Do you want to take a break?")
+        builder.setPositiveButton("Yes") { _, _ ->
+            openPomodoroFragment()
+        }
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
+    }
+
+    private fun openPomodoroFragment() {
+        val intent = Intent(this, PomodoroActivity::class.java)
+        intent.putExtra("taskId", taskId)
+        intent.putExtra("isTaskStarted", true)
+        breakLauncher.launch(intent)
+    }
+
+    private val breakLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val breakDuration = result.data?.getLongExtra("breakDuration", 0L) ?: 0L
+            totalBreakTime += breakDuration
+            breakCount += 1
+        }
+    }
+
+    private fun formatDuration(totalSeconds: Long): String {
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     private fun stopSession() {
         val currentTime = System.currentTimeMillis()
         val endTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(currentTime))
 
-        session?.let {
-            it.endTime = endTime
-            it.sessionDuration = calculateDuration(it.startTime, endTime)
-            it.breakCount = breakCount
-            it.totalBreakTime = totalBreakTime
+        session?.let { currentSession ->
+            currentSession.endTime = endTime
+            currentSession.sessionDuration = calculateDuration(currentSession.startTime, endTime)
+            currentSession.breakCount = breakCount
+            currentSession.totalBreakTime = formatDuration(totalBreakTime).toLong()
 
             task?.isStarted = false
 
@@ -142,7 +222,11 @@ class SessionStartedActivity : AppCompatActivity() {
             task?.let { taskItem ->
                 firebaseManager.updateTask(taskItem) { success, message ->
                     if (success) {
-                        showSessionSummaryDialog(it)
+                        // Update category stats
+                        val durationInSeconds = calculateDurationInSeconds(currentSession.sessionDuration)
+                        val categories = taskItem.category.split(",").map { it.trim().uppercase() }
+                        firebaseManager.updateCategoryStats(categories, durationInSeconds)
+                        showSessionSummaryDialog(currentSession)
                     } else {
                         finish()
                     }
@@ -208,4 +292,28 @@ class SessionStartedActivity : AppCompatActivity() {
         }
         return 0
     }
+
+    private fun calculateDurationInSeconds(duration: String?): Long {
+        duration?.let {
+            val parts = it.split(":")
+            if (parts.size == 3) {
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                val seconds = parts[2].toIntOrNull() ?: 0
+                return (hours * 3600 + minutes * 60 + seconds).toLong()
+            }
+        }
+        return 0L
+    }
+
+    override fun onPause() {
+        super.onPause()
+        timer?.cancel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startTimer()
+    }
+
 }

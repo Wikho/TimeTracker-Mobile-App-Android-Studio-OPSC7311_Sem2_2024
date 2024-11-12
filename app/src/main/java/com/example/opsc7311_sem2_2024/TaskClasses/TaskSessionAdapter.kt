@@ -28,17 +28,15 @@ class TaskSessionAdapter : RecyclerView.Adapter<TaskSessionAdapter.SessionViewHo
 
         // Bind data using the binding object
         holder.binding.tvSessionStartDate.text = "Date: ${session.sessionStartDate}"
-        holder.binding.tvStartTime.text = "Time Started: ${session.startTime}"
-        holder.binding.tvEndTime.text = "Time Ended: ${session.endTime}"
-        holder.binding.tvSessionDuration.text = "Session Duration: ${session.sessionDuration}"
+        holder.binding.tvStartTime.text = "Started: ${session.startTime}"
+        holder.binding.tvEndTime.text = "Ended: ${session.endTime}"
+        holder.binding.tvSessionDuration.text = "Duration: ${session.sessionDuration}"
         holder.binding.tvSessionDescription.text = "Description: ${session.sessionDescription}"
 
-        val imagePath = session.imagePath
-
-        if (imagePath != null && imagePath != "default_image_path") {
-            // Load image using Glide
+        // Load image using Glide
+        if (!session.imagePath.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
-                .load(imagePath)
+                .load(session.imagePath)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(holder.binding.ivSessionImage)
         } else {

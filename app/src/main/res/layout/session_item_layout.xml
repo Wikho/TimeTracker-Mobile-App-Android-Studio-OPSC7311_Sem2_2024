@@ -3,53 +3,64 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="8dp"
     android:background="@drawable/rounded_background_gray"
     android:layout_marginBottom="8dp">
+
+    <TextView
+        android:id="@+id/tv_SessionStartDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Date: --/--/----"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:layout_gravity="center">
+
 
     <!-- Vertical layout for the text information -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight="1"
+        android:layout_weight="40"
         android:layout_gravity="center">
 
-        <TextView
-            android:id="@+id/tv_SessionStartDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date: --/--/----"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+
 
         <TextView
             android:id="@+id/tv_StartTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Time Started: --:--"
+            android:text="Started: --:--"
             android:textSize="17sp"/>
 
         <TextView
             android:id="@+id/tv_EndTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Time Ended: --:--"
+            android:text="Ended: --:--"
             android:textSize="17sp"/>
 
         <TextView
             android:id="@+id/tv_SessionDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Session Duration: --:--"
+            android:text="Duration: --:--"
             android:textSize="17sp"/>
 
         <TextView
             android:id="@+id/tv_SessionDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Session Duration: Word word word word word word word word word word word"
+            android:text="Description: Word word word word word word word word word word word"
             android:textSize="15sp"
             android:textStyle="italic"/>
     </LinearLayout>
@@ -61,6 +72,9 @@
         android:layout_height="120dp"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src="@drawable/image"/>
+        android:src="@drawable/image"
+        android:layout_weight="1"/>
+
+    </LinearLayout>
 
 </LinearLayout>
