@@ -19,20 +19,21 @@ data class TaskItem(
     var sessionHistory: MutableList<TaskSession> = mutableListOf()
 ) {
     fun getTotalSessionDuration(): String {
-        var totalMinutes = 0
+        var totalSeconds = 0L
         for (session in sessionHistory) {
-            session.sessionDuration?.let {
-                val parts = it.split(":")
-                if (parts.size >= 2) {
-                    val hours = parts[0].toIntOrNull() ?: 0
-                    val minutes = parts[1].toIntOrNull() ?: 0
-                    totalMinutes += hours * 60 + minutes
-                }
+            val duration = session.sessionDuration ?: continue
+            val parts = duration.split(":")
+            if (parts.size == 3) {
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                val seconds = parts[2].toIntOrNull() ?: 0
+                totalSeconds += hours * 3600 + minutes * 60 + seconds
             }
         }
-        val hours = totalMinutes / 60
-        val minutes = totalMinutes % 60
-        return String.format("%02d:%02d", hours, minutes)
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     fun getTotalWorkedMinutesToday(): Int {

@@ -29,9 +29,9 @@ class TaskAdapter(private val listener: TaskActionListener) : RecyclerView.Adapt
 
             // Extract the task time and session duration
             val taskTime = task.time
-            //val totalSessionDuration = task.getTotalSessionDuration()
+            val totalSessionDuration = task.getTotalSessionDuration()
 
-            binding.tvTaskTileTime.text = "Time: $taskTime / test"
+            binding.tvTaskTileTime.text = "Time: $taskTime / $totalSessionDuration"
 
             // Handle long press
             binding.root.setOnLongClickListener {

@@ -14,12 +14,15 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.opsc7311_sem2_2024.FirebaseManager
+import com.example.opsc7311_sem2_2024.MainScreen
+import com.example.opsc7311_sem2_2024.Notes.NotesFragment
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroActivity
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment
 import com.example.opsc7311_sem2_2024.R
@@ -91,7 +94,10 @@ class SessionStartedActivity : AppCompatActivity() {
         }
 
         btnNotes.setOnClickListener {
-            // Open Notes activity or fragment
+            val intent = Intent(this, NotesFragment::class.java)
+            intent.putExtra("isSessionMode", true)
+            intent.putExtra("taskId", taskId)
+            startActivity(intent)
         }
 
     }
@@ -214,9 +220,17 @@ class SessionStartedActivity : AppCompatActivity() {
             currentSession.endTime = endTime
             currentSession.sessionDuration = calculateDuration(currentSession.startTime, endTime)
             currentSession.breakCount = breakCount
-            currentSession.totalBreakTime = formatDuration(totalBreakTime).toLong()
+            currentSession.totalBreakTime = totalBreakTime // Assign the Long value directly
 
             task?.isStarted = false
+
+            // Update the session in the task's sessionHistory
+            task?.sessionHistory?.find { it.sessionId == currentSession.sessionId }?.let {
+                val index = task?.sessionHistory?.indexOf(it)
+                if (index != null && index >= 0) {
+                    task?.sessionHistory?.set(index, currentSession)
+                }
+            }
 
             // Update the task in Firebase
             task?.let { taskItem ->
@@ -228,6 +242,8 @@ class SessionStartedActivity : AppCompatActivity() {
                         firebaseManager.updateCategoryStats(categories, durationInSeconds)
                         showSessionSummaryDialog(currentSession)
                     } else {
+                        // Handle error
+                        Toast.makeText(this, "Error: $message", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }
@@ -239,7 +255,7 @@ class SessionStartedActivity : AppCompatActivity() {
         val message = StringBuilder()
         message.append("Session Duration: ${session.sessionDuration}\n")
         message.append("Breaks Taken: ${session.breakCount}\n")
-        message.append("Total Break Time: ${session.totalBreakTime} seconds\n")
+        message.append("Total Break Time: ${formatDuration(session.totalBreakTime)}\n")
 
         // Check if min or max goals are achieved
         task?.let { taskItem ->
@@ -263,6 +279,10 @@ class SessionStartedActivity : AppCompatActivity() {
             .setMessage(message.toString())
             .setPositiveButton("OK") { dialogInterface, _ ->
                 dialogInterface.dismiss()
+                // Navigate to the main activity or refresh the fragment
+                val intent = Intent(this, MainScreen::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
                 finish()
             }
             .create()
