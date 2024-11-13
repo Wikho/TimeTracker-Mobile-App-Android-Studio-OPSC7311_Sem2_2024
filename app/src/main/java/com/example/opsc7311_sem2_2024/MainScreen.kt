@@ -13,7 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.opsc7311_sem2_2024.Analytics.AnalyticsFragment
-import com.example.opsc7311_sem2_2024.Calender.CalendarFragment
+import com.example.opsc7311_sem2_2024.Calendar.CalendarFragment
 import com.example.opsc7311_sem2_2024.LogSignIn.LoginActivity
 import com.example.opsc7311_sem2_2024.Notes.NotesFragment
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment

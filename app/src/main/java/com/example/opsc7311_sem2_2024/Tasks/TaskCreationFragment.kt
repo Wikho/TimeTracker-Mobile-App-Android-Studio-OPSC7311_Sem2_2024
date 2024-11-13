@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
+import com.example.opsc7311_sem2_2024.Calendar.CalendarFragment
 import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
@@ -109,7 +110,14 @@ class TaskCreationFragment : Fragment() {
 
         // Discard Draft (Back button)
         binding.fabDiscard.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            val previousFragment = parentFragmentManager.findFragmentById(R.id.fragment_container)
+            if (previousFragment is CalendarFragment) {
+                parentFragmentManager.popBackStack("CalendarFragment", 0)
+            } else if (previousFragment is TasksFragment) {
+                parentFragmentManager.popBackStack("TasksFragment", 0)
+            } else {
+                parentFragmentManager.popBackStack()
+            }
         }
     }
 
