@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settingsItemLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tvSettingTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Setting Title"
+        android:layout_weight="1"
+        android:textSize="16sp" />
+
+    <!-- For options with a switch -->
+    <Switch
+        android:id="@+id/switchSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <!-- For options with a dropdown -->
+    <Spinner
+        android:id="@+id/spinnerSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <!-- For displaying app version -->
+    <TextView
+        android:id="@+id/tvAppVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="v1.0.0"
+        android:visibility="gone" />
+
+</LinearLayout>

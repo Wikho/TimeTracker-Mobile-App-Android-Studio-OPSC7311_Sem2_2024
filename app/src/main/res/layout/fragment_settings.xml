@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".Settings.SettingsFragment">
+    android:padding="16dp">
 
     <!-- User Account Section -->
     <LinearLayout
@@ -29,29 +27,29 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:paddingStart="16dp"
-            tools:ignore="RtlSymmetry">
+            android:paddingStart="16dp">
 
             <TextView
                 android:id="@+id/tvUsername"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/user_name"
+                android:text="User Name"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnManageAccount"
+            <TextView
+                android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/manage_account" />
+                android:text="user@example.com"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/log_out" />
+            android:text="Log Out" />
     </LinearLayout>
 
     <!-- Divider -->
@@ -60,20 +58,10 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
-    <!-- General Settings Header -->
-    <TextView
-        android:id="@+id/tvGeneral"
+    <!-- Settings Options -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSettings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/general"
-        android:textSize="16sp"
-        android:textStyle="bold"
         android:paddingTop="16dp" />
-
-    <!-- RecyclerView for Settings -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvGeneralSettings"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 </LinearLayout>

@@ -55,6 +55,8 @@ class SessionStartedActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
 
+    private var breakReminderInterval: Long = 0L
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,8 +75,7 @@ class SessionStartedActivity : AppCompatActivity() {
         taskId = intent.getStringExtra("taskId")
         sessionId = intent.getStringExtra("sessionId")
 
-        // Load task and session
-        loadTaskAndSession()
+
 
         // Button listeners
         btnBreak.setOnClickListener {
@@ -100,6 +101,21 @@ class SessionStartedActivity : AppCompatActivity() {
             intent.putExtra("taskId", taskId)
             startActivity(intent)
         }
+
+        // Get break reminder interval from settings
+        val breakReminderSetting = SettingsSingleton.getSettingValue("Break Reminder") as? String ?: "Off"
+        breakReminderInterval = when (breakReminderSetting) {
+            "10" -> 10 * 60 * 1000L
+            "15" -> 15 * 60 * 1000L
+            "25" -> 25 * 60 * 1000L
+            "30" -> 30 * 60 * 1000L
+            "45" -> 45 * 60 * 1000L
+            "60" -> 60 * 60 * 1000L
+            else -> 0L
+        }
+
+        // Load task and session
+        loadTaskAndSession()
 
     }
 
@@ -146,12 +162,31 @@ class SessionStartedActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished: Long) {
                 timeElapsed = System.currentTimeMillis() - sessionStartTime
                 updateTimerUI()
+
+                if (breakReminderInterval > 0 && timeElapsed >= breakReminderInterval) {
+                    // Reset timer
+                    sessionStartTime = System.currentTimeMillis()
+                    showBreakReminder()
+                }
             }
 
             override fun onFinish() {
                 // Not used since we're counting up
             }
         }.start()
+    }
+
+    private fun showBreakReminder() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Break Reminder")
+        builder.setMessage("Do you want to take a break?")
+        builder.setPositiveButton("Yes") { _, _ ->
+            openPomodoroFragment()
+        }
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
     }
 
     private fun updateTimerUI() {

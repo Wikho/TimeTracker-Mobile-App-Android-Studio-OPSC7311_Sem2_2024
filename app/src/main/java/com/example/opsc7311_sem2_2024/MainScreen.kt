@@ -115,10 +115,6 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val tvUserName = headerView.findViewById<TextView>(R.id.tvNavHeaderUserName)
         val tvUserEmail = headerView.findViewById<TextView>(R.id.tvNavHeaderUserEmail)
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val userId = currentUser?.uid ?: return
-        val databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
-
         // Fetch and set the user's name
         firebaseManager.getUserName { userName ->
             tvUserName.text = userName ?: getString(R.string.user_name)
@@ -129,6 +125,7 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             tvUserEmail.text = userEmail ?: getString(R.string.user_email)
         }
     }
+
 
 }
 

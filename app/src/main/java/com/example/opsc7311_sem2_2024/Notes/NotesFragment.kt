@@ -395,6 +395,15 @@ class NotesFragment : Fragment(), NotesAdapter.NoteItemListener {
             }
             dialogBinding.btnCreateNote.text = "Save"
         }
+        else {
+            // Set default importance based on setting
+            val defaultPriority = SettingsSingleton.getSettingValue("Note Default Priority") as? String ?: "Medium"
+            when (defaultPriority) {
+                "High" -> dialogBinding.rgImportance.check(R.id.rbHigh)
+                "Medium" -> dialogBinding.rgImportance.check(R.id.rbMedium)
+                "Low" -> dialogBinding.rgImportance.check(R.id.rbLow)
+            }
+        }
 
         dialogBinding.btnCancelNote.setOnClickListener { dialog.dismiss() }
 
