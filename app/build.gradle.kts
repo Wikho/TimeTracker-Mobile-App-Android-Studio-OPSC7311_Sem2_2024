@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
-    //kotlin("kapt")
 }
 
 android {
@@ -56,10 +55,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation (libs.material)
     implementation (libs.gson)
-    //implementation (libs.androidx.room.runtime)
-    //implementation (libs.androidx.room.ktx)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
-    //kapt (libs.androidx.room.compiler)
     implementation (libs.glide)
     annotationProcessor (libs.compiler)
     implementation (libs.firebase.storage)

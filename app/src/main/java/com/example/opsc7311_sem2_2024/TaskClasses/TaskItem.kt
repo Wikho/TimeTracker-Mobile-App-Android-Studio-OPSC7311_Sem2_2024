@@ -53,6 +53,28 @@ data class TaskItem(
         }
         return totalMinutes
     }
+
+    fun getTotalSessionDurationInMinutes(): Int {
+        var totalMinutes = 0
+        for (session in sessionHistory) {
+            totalMinutes += calculateDurationInMinutes(session.sessionDuration)
+        }
+        return totalMinutes
+    }
+
+    // Helper function
+    private fun calculateDurationInMinutes(duration: String?): Int {
+        duration?.let {
+            val parts = it.split(":")
+            if (parts.size == 3) {
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                val seconds = parts[2].toIntOrNull() ?: 0
+                return hours * 60 + minutes + if (seconds >= 30) 1 else 0 // Round up if 30 seconds or more
+            }
+        }
+        return 0
+    }
 }
 
 // Data class for each session of a task

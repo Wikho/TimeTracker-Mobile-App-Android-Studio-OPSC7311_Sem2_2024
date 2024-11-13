@@ -1,179 +1,615 @@
-package com.example.opsc7311_sem2_2024.Analytic
+package com.example.opsc7311_sem2_2024.Analytics
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
-import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.*
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.Fragment
+import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.R
-import com.example.opsc7311_sem2_2024.databinding.FragmentAnalyticsBinding
-import com.github.mikephil.charting.animation.Easing
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.PercentFormatter
-import com.github.mikephil.charting.utils.MPPointF
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.github.mikephil.charting.charts.*
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.components.*
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
+import com.example.opsc7311_sem2_2024.TaskClasses.TaskSession
+import com.github.mikephil.charting.utils.ColorTemplate
 
 class AnalyticsFragment : Fragment() {
 
-    private var _binding: FragmentAnalyticsBinding? = null
-    private val binding get() = _binding!!
+    // <editor-fold desc="Variables and Initialization">
+    private lateinit var btnSelectMode: Button
+    private lateinit var btnInfo: ImageButton
+    private lateinit var btnToggleFilters: Button
+    private lateinit var filterContainer: LinearLayout
+    private lateinit var etFromDate: EditText
+    private lateinit var etToDate: EditText
+    private lateinit var btnDayFilter: Button
+    private lateinit var btnWeekFilter: Button
+    private lateinit var btnMonthFilter: Button
+    private lateinit var timeAllocationButtonsContainer: LinearLayout
+    private lateinit var btnCategories: Button
+    private lateinit var btnTasks: Button
 
+    private lateinit var lineChart: LineChart
+    private lateinit var barChart: BarChart
     private lateinit var pieChart: PieChart
+    private lateinit var radarChart: RadarChart
 
-    private var fromDate: String? = null
-    private var toDate: String? = null
+    private lateinit var tvStatistics: TextView
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentAnalyticsBinding.inflate(inflater, container, false)
-        val view = binding.root
+    private val firebaseManager = FirebaseManager()
 
-        pieChart = binding.pieChart
+    private var currentMode: AnalyticsMode = AnalyticsMode.GOAL_TRACKER
 
-        setupPieChart()
+    private var allTasksList = mutableListOf<TaskItem>()
 
+    private var fromDate: Date? = null
+    private var toDate: Date? = null
 
-        // Load data and update chart
-        lifecycleScope.launch {
-            val categoryData = withContext(Dispatchers.IO) {
-                aggregateCategoryData()
-            }
-            updatePieChart(categoryData)
-        }
+    enum class AnalyticsMode {
+        GOAL_TRACKER,
+        TASK_TRACKER,
+        TIME_ALLOCATION,
+        GOAL_OVERVIEW
+    }
 
-        // <editor-fold desc="Forgot Password Click Listener">
+    // </editor-fold>
 
-        binding.btnToggleFilters.setOnClickListener {
-            val isFilterOff = binding.btnToggleFilters.text == getString(R.string.filter_by_category_off)
-            if (isFilterOff) {
-                binding.filterContainer.visibility = View.VISIBLE
-                binding.btnToggleFilters.text = getString(R.string.filter_by_category_on)
-            } else {
-                binding.filterContainer.visibility = View.GONE
-                binding.btnToggleFilters.text = getString(R.string.filter_by_category_off)
-                // Reset filters
-                fromDate = null
-                toDate = null
-                loadDataAndUpdateChart()
-            }
-        }
+    // <editor-fold desc="Lifecycle Methods">
 
-        // Date Pickers
-        binding.etFromDate.setOnClickListener {
-            showDatePicker { date ->
-                fromDate = date
-                binding.etFromDate.setText(date)
-                loadDataAndUpdateChart()
-            }
-        }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_analytics, container, false)
 
-        binding.etToDate.setOnClickListener {
-            showDatePicker { date ->
-                toDate = date
-                binding.etToDate.setText(date)
-                loadDataAndUpdateChart()
-            }
-        }
+        // Initialize views
+        btnSelectMode = view.findViewById(R.id.btnSelectMode)
+        btnInfo = view.findViewById(R.id.btnInfo)
+        btnToggleFilters = view.findViewById(R.id.btnToggleFilters)
+        filterContainer = view.findViewById(R.id.filterContainer)
+        etFromDate = view.findViewById(R.id.etFromDate)
+        etToDate = view.findViewById(R.id.etToDate)
+        btnDayFilter = view.findViewById(R.id.btnDayFilter)
+        btnWeekFilter = view.findViewById(R.id.btnWeekFilter)
+        btnMonthFilter = view.findViewById(R.id.btnMonthFilter)
+        timeAllocationButtonsContainer = view.findViewById(R.id.timeAllocationButtonsContainer)
+        btnCategories = view.findViewById(R.id.btnCategories)
+        btnTasks = view.findViewById(R.id.btnTasks)
 
-        // Day, Week, Month Buttons
-        binding.btnDayFilter.setOnClickListener {
-            setDateRangeForPeriod("day")
-            loadDataAndUpdateChart()
-        }
+        lineChart = view.findViewById(R.id.lineChart)
+        barChart = view.findViewById(R.id.barChart)
+        pieChart = view.findViewById(R.id.pieChart)
+        radarChart = view.findViewById(R.id.radarChart)
 
-        binding.btnWeekFilter.setOnClickListener {
-            setDateRangeForPeriod("week")
-            loadDataAndUpdateChart()
-        }
+        tvStatistics = view.findViewById(R.id.tvStatistics)
 
-        binding.btnMonthFilter.setOnClickListener {
-            setDateRangeForPeriod("month")
-            loadDataAndUpdateChart()
-        }
+        // Set up listeners
+        setupListeners()
 
-        // </editor-fold>
+        // Load tasks
+        loadTasks()
 
         return view
     }
 
-    private fun setupPieChart() {
-        pieChart.setUsePercentValues(true)
-        pieChart.description.isEnabled = false
-        pieChart.setExtraOffsets(5f, 10f, 5f, 5f)
+    // </editor-fold>
 
-        pieChart.dragDecelerationFrictionCoef = 0.95f
+    // <editor-fold desc="Setup Listeners">
 
-        pieChart.isDrawHoleEnabled = true
-        pieChart.setHoleColor(Color.WHITE)
-        pieChart.setTransparentCircleColor(Color.WHITE)
-        pieChart.setTransparentCircleAlpha(110)
+    private fun setupListeners() {
+        btnSelectMode.setOnClickListener {
+            showModeSelectionDialog()
+        }
 
-        pieChart.holeRadius = 58f
-        pieChart.transparentCircleRadius = 61f
+        btnInfo.setOnClickListener {
+            showInfoDialog()
+        }
 
-        pieChart.setDrawCenterText(true)
-        pieChart.rotationAngle = 0f
-        pieChart.isRotationEnabled = true
-        pieChart.isHighlightPerTapEnabled = true
+        btnToggleFilters.setOnClickListener {
+            toggleFilters()
+        }
 
-        // Animation
-        pieChart.animateY(1400, Easing.EaseInOutQuad)
+        etFromDate.setOnClickListener {
+            showDatePickerDialog(true)
+        }
 
-        // Disable legend
-        pieChart.legend.isEnabled = false
+        etToDate.setOnClickListener {
+            showDatePickerDialog(false)
+        }
 
-        pieChart.setEntryLabelColor(Color.BLACK)
-        pieChart.setEntryLabelTextSize(12f)
+        btnDayFilter.setOnClickListener {
+            setDateRangeToDay()
+        }
+
+        btnWeekFilter.setOnClickListener {
+            setDateRangeToWeek()
+        }
+
+        btnMonthFilter.setOnClickListener {
+            setDateRangeToMonth()
+        }
+
+        btnCategories.setOnClickListener {
+            // Handle Categories button click
+            showTimeAllocationChart(true)
+        }
+
+        btnTasks.setOnClickListener {
+            // Handle Tasks button click
+            showTimeAllocationChart(false)
+        }
     }
 
-    private suspend fun aggregateCategoryData(): Map<String, Int> {
-        //val taskDao = taskDatabase.taskItemDao()
-        //val tasks = taskDao.getAllTasks()
-        val categoryTimeMap = mutableMapOf<String, Int>()
+    // </editor-fold>
+
+    // <editor-fold desc="Mode Selection">
+
+    private fun showModeSelectionDialog() {
+        val modes = arrayOf("Goal Tracker", "Task Tracker", "Time Allocation", "Goal Overview")
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Select Mode")
+        builder.setItems(modes) { dialog, which ->
+            when (which) {
+                0 -> {
+                    currentMode = AnalyticsMode.GOAL_TRACKER
+                    btnSelectMode.text = "Goal Tracker"
+                    timeAllocationButtonsContainer.visibility = View.GONE
+                    loadChartData()
+                }
+                1 -> {
+                    currentMode = AnalyticsMode.TASK_TRACKER
+                    btnSelectMode.text = "Task Tracker"
+                    timeAllocationButtonsContainer.visibility = View.GONE
+                    loadChartData()
+                }
+                2 -> {
+                    currentMode = AnalyticsMode.TIME_ALLOCATION
+                    btnSelectMode.text = "Time Allocation"
+                    timeAllocationButtonsContainer.visibility = View.VISIBLE
+                    loadChartData()
+                }
+                3 -> {
+                    currentMode = AnalyticsMode.GOAL_OVERVIEW
+                    btnSelectMode.text = "Goal Overview"
+                    timeAllocationButtonsContainer.visibility = View.GONE
+                    loadChartData()
+                }
+            }
+        }
+        builder.show()
+    }
+
+    private fun showInfoDialog() {
+        val message = """
+            Goal Tracker – Line Chart comparing task time spent per session with min and max work goals.
+            Task Tracker – Bar Chart comparing time spent on tasks.
+            Time Allocation – Pie Chart showing distribution of time spent on categories or tasks.
+            Goal Overview – Radar Chart showing multiple goals or comparing progress across categories at a glance.
+        """.trimIndent()
+
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Mode Information")
+        builder.setMessage(message)
+        builder.setPositiveButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Filter Toggle">
+
+    private fun toggleFilters() {
+        val isFilterOff = btnToggleFilters.text == "Filter Off"
+        if (isFilterOff) {
+            filterContainer.visibility = View.VISIBLE
+            btnToggleFilters.text = "Filter On"
+        } else {
+            filterContainer.visibility = View.GONE
+            btnToggleFilters.text = "Filter Off"
+        }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Date Picker">
+
+    private fun showDatePickerDialog(isFromDate: Boolean) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                val dateStr = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                if (isFromDate) {
+                    etFromDate.setText(dateStr)
+                    fromDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)
+                } else {
+                    etToDate.setText(dateStr)
+                    toDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)
+                }
+                loadChartData()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Date Range Setters">
+
+    private fun setDateRangeToDay() {
+        val calendar = Calendar.getInstance()
+        val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+        etFromDate.setText(dateStr)
+        etToDate.setText(dateStr)
+        fromDate = calendar.time
+        toDate = calendar.time
+        loadChartData()
+    }
+
+    private fun setDateRangeToWeek() {
+        val calendar = Calendar.getInstance()
+        // Set to the first day of the week
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+        val startOfWeek = calendar.time
+        etFromDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(startOfWeek))
+        fromDate = startOfWeek
+
+        // Set to the last day of the week
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+        val endOfWeek = calendar.time
+        etToDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(endOfWeek))
+        toDate = endOfWeek
+
+        loadChartData()
+    }
+
+    private fun setDateRangeToMonth() {
+        val calendar = Calendar.getInstance()
+        // Set to the first day of the month
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val startOfMonth = calendar.time
+        etFromDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(startOfMonth))
+        fromDate = startOfMonth
+
+        // Set to the last day of the month
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        val endOfMonth = calendar.time
+        etToDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(endOfMonth))
+        toDate = endOfMonth
+
+        loadChartData()
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Load Tasks">
+
+    private fun loadTasks() {
+        firebaseManager.fetchTasks { tasks ->
+            activity?.runOnUiThread {
+                allTasksList.clear()
+                allTasksList.addAll(tasks)
+                loadChartData()
+            }
+        }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Load Chart Data">
+
+    private fun loadChartData() {
+        when (currentMode) {
+            AnalyticsMode.GOAL_TRACKER -> {
+                showLineChart()
+            }
+            AnalyticsMode.TASK_TRACKER -> {
+                showBarChart()
+            }
+            AnalyticsMode.TIME_ALLOCATION -> {
+                // Show Pie Chart based on Categories or Tasks
+                showTimeAllocationChart(isCategory = true)
+            }
+            AnalyticsMode.GOAL_OVERVIEW -> {
+                showRadarChart()
+            }
+        }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Show Line Chart">
+
+    private fun showLineChart() {
+        // Hide other charts
+        lineChart.visibility = View.VISIBLE
+        barChart.visibility = View.GONE
+        pieChart.visibility = View.GONE
+        radarChart.visibility = View.GONE
+
+        // Prepare data
+        val entries = mutableListOf<Entry>()
+        val minEntries = mutableListOf<Entry>()
+        val maxEntries = mutableListOf<Entry>()
+
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        var index = 0f
 
-        val fromDateParsed = fromDate?.let { dateFormat.parse(it) }
-        val toDateParsed = toDate?.let { dateFormat.parse(it) }
+        val sessions = mutableListOf<Pair<TaskSession, TaskItem>>()
+        for (task in allTasksList) {
+            // Filter by date range if applicable
+            val taskDate = dateFormat.parse(task.startDate)
+            if (fromDate != null && toDate != null) {
+                if (taskDate.before(fromDate) || taskDate.after(toDate)) {
+                    continue
+                }
+            }
+            for (session in task.sessionHistory) {
+                sessions.add(Pair(session, task))
+            }
+        }
 
-       // for (task in tasks) {
-       //     for (session in task.sessionHistory) {
-       //         val sessionDate = dateFormat.parse(session.sessionStartDate)
-       //         // Apply date filters
-       //         val isAfterFromDate = fromDateParsed?.let { sessionDate >= it } ?: true
-        //        val isBeforeToDate = toDateParsed?.let { sessionDate <= it } ?: true
-//
-        //        if (isAfterFromDate && isBeforeToDate) {
-       ////             val durationMinutes = calculateSessionDurationInMinutes(session.sessionDuration)
-       //             //val categories = task.category.split(",").map { it.trim() }
-        //            //for (category in categories) {
-        //            //    val total = categoryTimeMap.getOrDefault(category, 0)
-        //           //     categoryTimeMap[category] = total + durationMinutes
-        //            //}
-        //        }
-        //    }
-        //}
+        sessions.sortBy { it.first.sessionStartDate }
 
-        return categoryTimeMap
+        for ((session, task) in sessions) {
+            val durationInMinutes = calculateDurationInMinutes(session.sessionDuration)
+            entries.add(Entry(index, durationInMinutes.toFloat()))
+            minEntries.add(Entry(index, (task.minTargetHours * 60).toFloat()))
+            maxEntries.add(Entry(index, (task.maxTargetHours * 60).toFloat()))
+            index += 1f
+        }
+
+        val dataSet = LineDataSet(entries, "Time Spent")
+        dataSet.color = ContextCompat.getColor(requireContext(), R.color.gray)
+        dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.black)
+
+        val minDataSet = LineDataSet(minEntries, "Min Goal")
+        minDataSet.color = ContextCompat.getColor(requireContext(), R.color.green)
+        minDataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.black)
+
+        val maxDataSet = LineDataSet(maxEntries, "Max Goal")
+        maxDataSet.color = ContextCompat.getColor(requireContext(), R.color.red)
+        maxDataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.black)
+
+        val lineData = LineData(dataSet, minDataSet, maxDataSet)
+        lineChart.data = lineData
+        lineChart.invalidate()
+
+        // Update statistics
+        updateStatisticsForGoalTracker(entries, minEntries, maxEntries)
     }
 
-    private fun calculateSessionDurationInMinutes(sessionDuration: String?): Int {
-        sessionDuration?.let {
+
+    // </editor-fold>
+
+    // <editor-fold desc="Show Bar Chart">
+
+    private fun showBarChart() {
+        // Hide other charts
+        lineChart.visibility = View.GONE
+        barChart.visibility = View.VISIBLE
+        pieChart.visibility = View.GONE
+        radarChart.visibility = View.GONE
+
+        // Prepare data
+        val entries = mutableListOf<BarEntry>()
+        val labels = mutableListOf<String>()
+        var index = 0f
+
+        for (task in allTasksList) {
+            // Filter by date range if applicable
+            val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.startDate)
+            if (fromDate != null && toDate != null) {
+                if (taskDate.before(fromDate) || taskDate.after(toDate)) {
+                    continue
+                }
+            }
+            val totalDuration = task.getTotalSessionDurationInMinutes().toFloat()
+            entries.add(BarEntry(index, totalDuration))
+            labels.add(task.title)
+            index += 1f
+        }
+
+        val dataSet = BarDataSet(entries, "Tasks")
+        dataSet.color = ContextCompat.getColor(requireContext(), R.color.blue)
+        val barData = BarData(dataSet)
+        barData.barWidth = 0.9f
+
+        barChart.data = barData
+
+        val xAxis = barChart.xAxis
+        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.granularity = 1f
+        xAxis.setDrawGridLines(false)
+
+        barChart.setFitBars(true)
+        barChart.invalidate()
+
+        // Update statistics
+        updateStatisticsForTaskTracker(entries)
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Show Pie Chart">
+
+    private fun showTimeAllocationChart(isCategory: Boolean) {
+        // Hide other charts
+        lineChart.visibility = View.GONE
+        barChart.visibility = View.GONE
+        pieChart.visibility = View.VISIBLE
+        radarChart.visibility = View.GONE
+
+        // Prepare data
+        val entries = mutableListOf<PieEntry>()
+        val dataMap = mutableMapOf<String, Float>()
+
+        if (isCategory) {
+            // Group by category
+            for (task in allTasksList) {
+                // Filter by date range if applicable
+                val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.startDate)
+                if (fromDate != null && toDate != null) {
+                    if (taskDate.before(fromDate) || taskDate.after(toDate)) {
+                        continue
+                    }
+                }
+                val categories = task.category.split(",").map { it.trim() }
+                val totalDuration = task.getTotalSessionDurationInMinutes().toFloat()
+                for (category in categories) {
+                    dataMap[category] = dataMap.getOrDefault(category, 0f) + totalDuration
+                }
+            }
+        } else {
+            // Group by tasks
+            for (task in allTasksList) {
+                // Filter by date range if applicable
+                val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.startDate)
+                if (fromDate != null && toDate != null) {
+                    if (taskDate.before(fromDate) || taskDate.after(toDate)) {
+                        continue
+                    }
+                }
+                val totalDuration = task.getTotalSessionDurationInMinutes().toFloat()
+                dataMap[task.title] = dataMap.getOrDefault(task.title, 0f) + totalDuration
+            }
+        }
+
+        for ((key, value) in dataMap) {
+            entries.add(PieEntry(value, key))
+        }
+
+        val dataSet = PieDataSet(entries, "")
+        dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
+        val pieData = PieData(dataSet)
+        pieData.setValueTextSize(12f)
+        pieChart.data = pieData
+        pieChart.invalidate()
+
+        // Update statistics
+        updateStatisticsForTimeAllocation(dataMap)
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Show Radar Chart">
+
+    private fun showRadarChart() {
+        // Hide other charts
+        lineChart.visibility = View.GONE
+        barChart.visibility = View.GONE
+        pieChart.visibility = View.GONE
+        radarChart.visibility = View.VISIBLE
+
+        // Prepare data
+        val entries = mutableListOf<RadarEntry>()
+        val labels = mutableListOf<String>()
+
+        for (task in allTasksList) {
+            // Filter by date range if applicable
+            val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.startDate)
+            if (fromDate != null && toDate != null) {
+                if (taskDate.before(fromDate) || taskDate.after(toDate)) {
+                    continue
+                }
+            }
+            val totalDuration = task.getTotalSessionDurationInMinutes().toFloat()
+            entries.add(RadarEntry(totalDuration))
+            labels.add(task.title)
+        }
+
+        val dataSet = RadarDataSet(entries, "Tasks")
+        dataSet.color = ContextCompat.getColor(requireContext(), R.color.purple)
+        dataSet.fillColor = ContextCompat.getColor(requireContext(), R.color.blue)
+        dataSet.setDrawFilled(true)
+        val radarData = RadarData(dataSet)
+
+        val xAxis = radarChart.xAxis
+        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+
+        radarChart.data = radarData
+        radarChart.invalidate()
+
+        // Update statistics
+        updateStatisticsForGoalOverview(entries)
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Update Statistics">
+
+    private fun updateStatisticsForGoalTracker(
+        entries: List<Entry>,
+        minEntries: List<Entry>,
+        maxEntries: List<Entry>
+    ) {
+        val avgTimeSpent = entries.map { it.y.toDouble() }.average()
+        val avgMinGoal = minEntries.map { it.y.toDouble() }.average()
+        val avgMaxGoal = maxEntries.map { it.y.toDouble() }.average()
+
+        val statsText = """
+        Average Time Spent: ${formatMinutes(avgTimeSpent.toFloat())}
+        Average Min Goal: ${formatMinutes(avgMinGoal.toFloat())}
+        Average Max Goal: ${formatMinutes(avgMaxGoal.toFloat())}
+    """.trimIndent()
+
+        tvStatistics.text = statsText
+    }
+
+    private fun updateStatisticsForTaskTracker(entries: List<BarEntry>) {
+        val totalTime = entries.map { it.y }.sum()
+        val avgTime = entries.map { it.y }.average()
+        val minTime = entries.map { it.y }.minOrNull() ?: 0f
+        val maxTime = entries.map { it.y }.maxOrNull() ?: 0f
+
+        val statsText = """
+            Total Time Tracked: ${formatMinutes(totalTime)}
+            Average Task Duration: ${formatMinutes(avgTime.toFloat())}
+            Minimum Task Duration: ${formatMinutes(minTime)}
+            Maximum Task Duration: ${formatMinutes(maxTime)}
+        """.trimIndent()
+
+        tvStatistics.text = statsText
+    }
+
+    private fun updateStatisticsForTimeAllocation(dataMap: Map<String, Float>) {
+        val totalTime = dataMap.values.sum()
+        val statsText = "Total Time Allocated: ${formatMinutes(totalTime)}"
+        tvStatistics.text = statsText
+    }
+
+    private fun updateStatisticsForGoalOverview(entries: List<RadarEntry>) {
+        val avgTime = entries.map { it.value }.average()
+        val minTime = entries.map { it.value }.minOrNull() ?: 0f
+        val maxTime = entries.map { it.value }.maxOrNull() ?: 0f
+
+        val statsText = """
+            Average Time: ${formatMinutes(avgTime.toFloat())}
+            Minimum Time: ${formatMinutes(minTime)}
+            Maximum Time: ${formatMinutes(maxTime)}
+        """.trimIndent()
+
+        tvStatistics.text = statsText
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Helper Functions">
+
+    private fun calculateDurationInMinutes(duration: String?): Int {
+        duration?.let {
             val parts = it.split(":")
-            if (parts.size == 2) {
+            if (parts.size == 3) {
                 val hours = parts[0].toIntOrNull() ?: 0
                 val minutes = parts[1].toIntOrNull() ?: 0
                 return hours * 60 + minutes
@@ -182,139 +618,11 @@ class AnalyticsFragment : Fragment() {
         return 0
     }
 
-    private fun updatePieChart(categoryData: Map<String, Int>) {
-        val entries = ArrayList<PieEntry>()
-        for ((category, totalMinutes) in categoryData) {
-            if (totalMinutes > 0) {
-                val timeStr = formatMinutesToHoursAndMinutes(totalMinutes)
-                val label = "$category: $timeStr"
-                entries.add(PieEntry(totalMinutes.toFloat(), label))
-            }
-        }
-
-        if (entries.isEmpty()) {
-            // No data available
-            pieChart.clear()
-            pieChart.setNoDataText("No data available")
-            pieChart.invalidate()
-            return
-        }
-
-        val dataSet = PieDataSet(entries, "Task Categories")
-        dataSet.setDrawIcons(false)
-        dataSet.sliceSpace = 3f
-        dataSet.iconsOffset = MPPointF(0f, 40f)
-        dataSet.selectionShift = 5f
-
-        // Set colors for the chart slices
-        val colors: ArrayList<Int> = ArrayList()
-        val colorTemplates = listOf(
-            R.color.purple,
-            R.color.green,
-            R.color.red,
-            R.color.blue,
-            R.color.orange,
-            R.color.yellow,
-            R.color.teal
-        )
-
-        for (colorRes in colorTemplates) {
-            colors.add(ContextCompat.getColor(requireContext(), colorRes))
-        }
-
-        dataSet.colors = colors
-
-        val data = PieData(dataSet)
-        data.setValueFormatter(PercentFormatter(pieChart))
-        data.setValueTextSize(15f)
-        data.setValueTypeface(Typeface.DEFAULT_BOLD)
-        data.setValueTextColor(Color.WHITE)
-
-        pieChart.data = data
-        pieChart.highlightValues(null)
-        pieChart.invalidate()
+    private fun formatMinutes(minutes: Float): String {
+        val hrs = (minutes / 60).toInt()
+        val mins = (minutes % 60).toInt()
+        return String.format("%02d:%02d", hrs, mins)
     }
 
-    private fun formatMinutesToHoursAndMinutes(totalMinutes: Int): String {
-        val hours = totalMinutes / 60
-        val minutes = totalMinutes % 60
-        return if (hours > 0) {
-            String.format("%d:%02d", hours, minutes)
-        } else {
-            String.format("%d min", minutes)
-        }
-    }
-
-    private fun showDatePicker(onDateSelected: (String) -> Unit) {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        val datePickerDialog = DatePickerDialog(
-            requireContext(),
-            { _, selectedYear, selectedMonth, selectedDay ->
-                val dateStr = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
-                onDateSelected(dateStr)
-            },
-            year,
-            month,
-            day
-        )
-        datePickerDialog.show()
-    }
-
-    private fun setDateRangeForPeriod(period: String) {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-        val today = dateFormat.format(calendar.time)
-
-        when (period) {
-            "day" -> {
-                fromDate = today
-                toDate = today
-            }
-            "week" -> {
-                calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-                fromDate = dateFormat.format(calendar.time)
-                calendar.add(Calendar.DAY_OF_WEEK, 6)
-                toDate = dateFormat.format(calendar.time)
-            }
-            "month" -> {
-                calendar.set(Calendar.DAY_OF_MONTH, 1)
-                fromDate = dateFormat.format(calendar.time)
-                calendar.add(Calendar.MONTH, 1)
-                calendar.add(Calendar.DAY_OF_MONTH, -1)
-                toDate = dateFormat.format(calendar.time)
-            }
-        }
-        binding.etFromDate.setText(fromDate)
-        binding.etToDate.setText(toDate)
-    }
-
-    private fun loadDataAndUpdateChart() {
-        lifecycleScope.launch {
-            val categoryData = withContext(Dispatchers.IO) {
-                aggregateCategoryData()
-            }
-            updatePieChart(categoryData)
-            updateStatistics(categoryData)
-        }
-    }
-
-    private fun updateStatistics(categoryData: Map<String, Int>) {
-        // Calculate and update Task Completed, Time Tracked, etc.
-        // For example:
-        val totalTimeTracked = categoryData.values.sum()
-        val totalHours = totalTimeTracked / 60
-        val totalMinutes = totalTimeTracked % 60
-        binding.tvTimeTracked.text = String.format("%d:%02d", totalHours, totalMinutes)
-        // Implement calculations for other statistics similarly
-    }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    // </editor-fold>
 }

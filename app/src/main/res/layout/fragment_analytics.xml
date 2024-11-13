@@ -9,14 +9,40 @@
     android:paddingVertical="16dp"
     android:gravity="center">
 
-    <!-- Toggle Filters Button -->
+    <!-- Mode Selection Button and Info Icon -->
+    <LinearLayout
+        android:id="@+id/modeSelectionContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/btnSelectMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Mode" />
+
+        <ImageButton
+            android:id="@+id/btnInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_dialog_info"
+            android:contentDescription="Info"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Filter Toggle Button -->
     <Button
         android:id="@+id/btnToggleFilters"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/filter_by_category_off"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true" />
+        android:text="Filter Off"
+        android:layout_below="@id/modeSelectionContainer"
+        android:layout_marginTop="8dp"
+        android:layout_centerHorizontal="true" />
 
     <!-- Filters Container -->
     <LinearLayout
@@ -55,10 +81,12 @@
 
         <!-- Buttons for Day, Week, Month -->
         <LinearLayout
+            android:id="@+id/dateRangeButtonsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:layout_marginTop="8dp">
 
             <Button
                 android:id="@+id/btnDayFilter"
@@ -81,160 +109,82 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="6dp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- NestedScrollView containing the rest of the content -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/filterContainer"
-        android:fillViewport="true">
-
+        <!-- Additional Buttons for Time Allocation Mode -->
         <LinearLayout
+            android:id="@+id/timeAllocationButtonsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
 
-            <!-- Pie Chart -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:layout_marginTop="40dp" />
-            </LinearLayout>
-
-            <View
+            <Button
+                android:id="@+id/btnCategories"
+                android:text="Categories"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp" />
-
-            <!-- Statistics -->
-            <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="6dp" />
 
-                <!-- Tasks Completed -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="250dp"
-                        android:layout_height="match_parent"
-                        android:text="TASKS COMPLETED"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvTasksCompleted"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="-/-"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Time Tracked -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="250dp"
-                        android:layout_height="match_parent"
-                        android:text="TIME TRACKED"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvTimeTracked"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="--:--:--"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Average Task Duration -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="250dp"
-                        android:layout_height="match_parent"
-                        android:text="AVERAGE TASK DURATION"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvAverageTaskDuration"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="--:--:--"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Minimum Task Duration -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="250dp"
-                        android:layout_height="match_parent"
-                        android:text="MINIMUM TASK DURATION"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvMinTaskDuration"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="--:--:--"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Maximum Task Duration -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="250dp"
-                        android:layout_height="match_parent"
-                        android:text="MAXIMUM TASK DURATION"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvMaxTaskDuration"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="--:--:--"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
+            <Button
+                android:id="@+id/btnTasks"
+                android:text="Tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp" />
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+    <!-- Chart Container -->
+    <FrameLayout
+        android:id="@+id/chartContainer"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_below="@id/filterContainer"
+        android:layout_marginTop="16dp">
+
+        <!-- LineChart for Goal Tracker -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- BarChart for Task Tracker -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- PieChart for Time Allocation -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!-- RadarChart for Goal Overview -->
+        <com.github.mikephil.charting.charts.RadarChart
+            android:id="@+id/radarChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- Statistics Text View -->
+    <TextView
+        android:id="@+id/tvStatistics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Statistics"
+        android:layout_below="@id/chartContainer"
+        android:layout_marginTop="16dp"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:padding="8dp" />
+
 </RelativeLayout>
