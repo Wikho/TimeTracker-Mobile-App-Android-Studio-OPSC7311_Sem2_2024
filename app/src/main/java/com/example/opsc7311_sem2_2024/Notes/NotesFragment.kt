@@ -48,7 +48,18 @@ class NotesFragment : Fragment(), NotesAdapter.NoteItemListener {
     private val filteredTasksList = mutableListOf<TaskItem>()
     private val allCategoriesSet = mutableSetOf<String>()
     private var selectedTask: TaskItem? = null
+
+    private var isSessionMode: Boolean = false
+    private var taskId: String? = null
     // </editor-fold>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            isSessionMode = it.getBoolean("isSessionMode", false)
+            taskId = it.getString("taskId")
+        }
+    }
 
     // <editor-fold desc="Lifecycle Methods">
     override fun onCreateView(
@@ -74,46 +85,85 @@ class NotesFragment : Fragment(), NotesAdapter.NoteItemListener {
         binding.rvNotes.layoutManager = LinearLayoutManager(requireContext())
         binding.rvNotes.adapter = notesAdapter
 
-        // Toggle Filter Button
-        binding.btnToggleFilter.setOnClickListener {
-            val isFilterOff = binding.btnToggleFilter.text == "Filter Off"
-            if (isFilterOff) {
-                binding.filterContainer.visibility = View.VISIBLE
-                binding.btnToggleFilter.text = "Filter On"
-            } else {
-                binding.filterContainer.visibility = View.GONE
-                binding.btnToggleFilter.text = "Filter Off"
-                binding.etSearchTask.text?.clear()
-                binding.etFromDate.text?.clear()
-                binding.etToDate.text?.clear()
-                binding.chipGroupCategories.clearCheck()
-                loadTasks() // Reload tasks without filters
+
+        if (isSessionMode) {
+            // Hide llFilterAndSpinner
+            binding.llFilterAndSpinner.visibility = View.GONE
+            // Show tvTaskName and back button
+            binding.tvTaskName.visibility = View.VISIBLE
+            binding.btnBack.visibility = View.VISIBLE
+
+            // Set task name
+            taskId?.let { id ->
+                firebaseManager.getTaskById(id) { taskItem ->
+                    activity?.runOnUiThread {
+                        binding.tvTaskName.text = taskItem?.title ?: "Task"
+                    }
+                }
             }
+
+            // Load notes for the task
+            taskId?.let { id ->
+                firebaseManager.getTaskById(id) { taskItem ->
+                    selectedTask = taskItem
+                    if (selectedTask != null) {
+                        loadNotesForTask(selectedTask!!)
+                    }
+                }
+            }
+
+            // Set back button listener
+            binding.btnBack.setOnClickListener {
+                requireActivity().onBackPressed()
+            }
+        } else {
+            // Normal mode
+            binding.llFilterAndSpinner.visibility = View.VISIBLE
+            binding.tvTaskName.visibility = View.GONE
+            binding.btnBack.visibility = View.GONE
+
+            // Toggle Filter Button
+            binding.btnToggleFilter.setOnClickListener {
+                val isFilterOff = binding.btnToggleFilter.text == "Filter Off"
+                if (isFilterOff) {
+                    binding.filterContainer.visibility = View.VISIBLE
+                    binding.btnToggleFilter.text = "Filter On"
+                } else {
+                    binding.filterContainer.visibility = View.GONE
+                    binding.btnToggleFilter.text = "Filter Off"
+                    binding.etSearchTask.text?.clear()
+                    binding.etFromDate.text?.clear()
+                    binding.etToDate.text?.clear()
+                    binding.chipGroupCategories.clearCheck()
+                    loadTasks() // Reload tasks without filters
+                }
+            }
+
+            // Date Pickers
+            binding.etFromDate.setOnClickListener { showDatePicker(binding.etFromDate) }
+            binding.etToDate.setOnClickListener { showDatePicker(binding.etToDate) }
+
+            // Text Change Listener for Search
+            binding.etSearchTask.addTextChangedListener(object : TextWatcher {
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // Call filter function when text changes
+                    applyFilters()
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    // No action needed here
+                }
+                override fun afterTextChanged(s: Editable?) {
+                    // No action needed here
+                }
+            })
+
+            // Setup Category Chips
+            setupCategoryChips()
+
+            // Load tasks
+            loadTasks()
+
         }
-
-        // Date Pickers
-        binding.etFromDate.setOnClickListener { showDatePicker(binding.etFromDate) }
-        binding.etToDate.setOnClickListener { showDatePicker(binding.etToDate) }
-
-        // Text Change Listener for Search
-        binding.etSearchTask.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Call filter function when text changes
-                applyFilters()
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // No action needed here
-            }
-            override fun afterTextChanged(s: Editable?) {
-                // No action needed here
-            }
-        })
-
-        // Setup Category Chips
-        setupCategoryChips()
-
-        // Load tasks
-        loadTasks()
 
         // Mode Button Setup
         binding.btnMode.setOnClickListener {

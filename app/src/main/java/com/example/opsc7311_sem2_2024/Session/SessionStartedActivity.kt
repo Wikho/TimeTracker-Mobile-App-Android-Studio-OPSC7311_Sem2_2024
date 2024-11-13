@@ -22,6 +22,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.opsc7311_sem2_2024.FirebaseManager
 import com.example.opsc7311_sem2_2024.MainScreen
+import com.example.opsc7311_sem2_2024.Notes.NotesActivity
 import com.example.opsc7311_sem2_2024.Notes.NotesFragment
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroActivity
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroFragment
@@ -94,7 +95,7 @@ class SessionStartedActivity : AppCompatActivity() {
         }
 
         btnNotes.setOnClickListener {
-            val intent = Intent(this, NotesFragment::class.java)
+            val intent = Intent(this, NotesActivity::class.java)
             intent.putExtra("isSessionMode", true)
             intent.putExtra("taskId", taskId)
             startActivity(intent)

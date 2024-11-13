@@ -163,7 +163,22 @@ class PomodoroFragment : Fragment() {
 
         // Regular setup
         playButton.setOnClickListener {
-            promptForReasonAndStartTimer()
+            if (isTimerRunning) {
+                // Timer is already running, do nothing
+            } else if (timeLeftInMillis != 0L) {
+                // Resume the timer
+                if (timeLeftInMillis > 0L) {
+                    startTimer()
+                } else {
+                    // Resume negative timer
+                    startNegativeTimer()
+                }
+                playButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+            } else {
+                // Start a new timer
+                promptForReasonAndStartTimer()
+            }
         }
 
         pauseButton.setOnClickListener {
