@@ -368,9 +368,8 @@ class FirebaseManager{
         val userId = auth.currentUser?.uid ?: return
         val noteRef = database.getReference("Users")
             .child(userId)
-            .child("tasks")
-            .child(taskId)
             .child("Notes")
+            .child(taskId)
             .child(note.id)
 
         noteRef.setValue(note).addOnCompleteListener { taskResult ->
@@ -390,9 +389,8 @@ class FirebaseManager{
         val userId = auth.currentUser?.uid ?: return
         val notesRef = database.getReference("Users")
             .child(userId)
-            .child("tasks")
-            .child(taskId)
             .child("Notes")
+            .child(taskId)
 
         notesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -419,9 +417,8 @@ class FirebaseManager{
         val userId = auth.currentUser?.uid ?: return
         val noteRef = database.getReference("Users")
             .child(userId)
-            .child("tasks")
-            .child(taskId)
             .child("Notes")
+            .child(taskId)
             .child(noteId)
 
         noteRef.removeValue().addOnCompleteListener { taskResult ->
