@@ -108,7 +108,23 @@ class PomodoroFragment : Fragment() {
         }
 
         cancelButton.setOnClickListener {
-            handleBackOrCancel()
+
+            val endTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            val startTime = pomodoroBreak?.startTime ?: endTime
+            val duration = calculateDuration(startTime, endTime)
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("End Break")
+                .setMessage("Are you sure you want to end the break? Break duration: $duration")
+                .setPositiveButton("Yes") { dialog, which ->
+                    endBreak()
+                }
+                .setNegativeButton("No") { dialog, which ->
+                    dialog.dismiss()
+                    Log.d("PomodoroFragment", "Break end canceled by user.")
+                }
+                .create()
+                .show()
         }
 
         breakInfoButton.setOnClickListener {
@@ -123,7 +139,6 @@ class PomodoroFragment : Fragment() {
     }
 
     private fun setupForTask() {
-        // Hide unnecessary UI elements
 
         // Display the task title
         tvTaskTitle.visibility = View.VISIBLE
@@ -160,22 +175,35 @@ class PomodoroFragment : Fragment() {
             pauseTimer()
         }
 
-        cancelButton.setOnClickListener {
-            endBreak()
-            requireActivity().finish()
-        }
-
         // Show the back button
         backButton.visibility = View.VISIBLE
         backButton.setOnClickListener {
-            endBreak()
-            requireActivity().finish()
+
+            if (!isTimerRunning) {
+                //No session started, navigate back
+                requireActivity().finish()
+            }
+
+            val endTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            val startTime = pomodoroBreak?.startTime ?: endTime
+            val duration = calculateDuration(startTime, endTime)
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("End Break")
+                .setMessage("Are you sure you want to end the break? Break duration: $duration")
+                .setPositiveButton("Yes") { dialog, which ->
+                    endBreak()
+                }
+                .setNegativeButton("No") { dialog, which ->
+                    dialog.dismiss()
+                    Log.d("PomodoroFragment", "Break end canceled by user.")
+                }
+                .create()
+                .show()
         }
     }
 
     private fun setupForGeneralUse() {
-        // Show navigation menu
-
         // Hide task title
         tvTaskTitle.visibility = View.GONE
         backButton.visibility = View.GONE
@@ -205,10 +233,7 @@ class PomodoroFragment : Fragment() {
             pauseTimer()
         }
 
-        cancelButton.setOnClickListener {
-            endBreak()
-            requireActivity().finish()
-        }
+
     }
 
     private fun promptForReasonAndStartTimer() {
@@ -307,7 +332,7 @@ class PomodoroFragment : Fragment() {
                     Log.d("PomodoroFragment", "Break started and saved successfully: $currentBreak")
                 } else {
                     Toast.makeText(requireContext(), "Error saving break: $message", Toast.LENGTH_SHORT).show()
-                    Log.e("PomodoroFragment", "Error saving break: $message")
+
                 }
             }
         }
@@ -358,6 +383,10 @@ class PomodoroFragment : Fragment() {
         pauseButton.visibility = View.GONE
     }
 
+    private fun isTimerStarted(): Boolean {
+        return isTimerRunning && pomodoroBreak != null
+    }
+
     private fun endBreak() {
         timer?.cancel()
         isTimerRunning = false
@@ -373,9 +402,6 @@ class PomodoroFragment : Fragment() {
             currentBreak.endTime = endTime
             currentBreak.duration = duration
 
-            // **Logging for Debugging**
-            Log.d("PomodoroFragment", "Ending break: breakId=${currentBreak.breakId}, endTime: $endTime, duration: $duration")
-
             // Update only endTime and duration in Firebase
             firebaseManager.updateBreakEndTimeAndDuration(
                 breakId = currentBreak.breakId,
@@ -385,9 +411,7 @@ class PomodoroFragment : Fragment() {
             ) { success, message ->
                 if (!success) {
                     Toast.makeText(requireContext(), "Error updating break: $message", Toast.LENGTH_SHORT).show()
-                    Log.e("PomodoroFragment", "Error updating break: $message")
                 } else {
-                    Log.d("PomodoroFragment", "Break updated successfully with duration: $duration")
                     // Update category stats if associated with a task
                     if (!currentBreak.taskId.isNullOrEmpty()) {
                         firebaseManager.getTaskById(currentBreak.taskId!!) { taskItem ->
@@ -395,26 +419,27 @@ class PomodoroFragment : Fragment() {
                                 val durationInSeconds = calculateDurationInSeconds(duration)
                                 val categories = task.category.split(",").map { it.trim().uppercase() }
                                 firebaseManager.updateCategoryStats(categories, durationInSeconds)
-                                Log.d("PomodoroFragment", "Category stats updated for categories: $categories")
                             }
                         }
                     }
-                    // Now, finish the activity inside the success callback
+
+                    // Reset UI
                     resetTimerUI()
-                    val durationInSeconds = calculateDurationInSeconds(duration)
-                    val resultIntent = Intent().apply {
-                        putExtra("breakDuration", durationInSeconds)
+
+                    if (isTaskStarted && taskId != null) {
+                        val durationInSeconds = calculateDurationInSeconds(duration)
+                        val resultIntent = Intent().apply {
+                            putExtra("breakDuration", durationInSeconds)
+                        }
+                        requireActivity().setResult(Activity.RESULT_OK, resultIntent)
+                        requireActivity().finish()
                     }
-                    requireActivity().setResult(Activity.RESULT_OK, resultIntent)
-                    requireActivity().finish()
-                    Log.d("PomodoroFragment", "Activity finished after successful update.")
+
                 }
             }
         } ?: run {
             // If pomodoroBreak is null, just reset UI and finish
             resetTimerUI()
-            requireActivity().finish()
-            Log.e("PomodoroFragment", "pomodoroBreak is null. Activity finished without updating Firebase.")
         }
     }
 
@@ -490,7 +515,7 @@ class PomodoroFragment : Fragment() {
     private fun resetTimerUI() {
         timeLeftInMillis = 0L
         timerValueText.setTextColor(Color.BLACK)
-        timerValueText.text = "00:00"
+        timerValueText.text = "00:00:00"
         playButton.visibility = View.VISIBLE
         pauseButton.visibility = View.GONE
         cancelButton.visibility = View.GONE

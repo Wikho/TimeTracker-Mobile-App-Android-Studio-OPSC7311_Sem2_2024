@@ -15,7 +15,6 @@ class TaskBreakAdapter(
 ) : RecyclerView.Adapter<TaskBreakAdapter.TaskViewHolder>() {
 
     inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val ivTaskImage: ImageView = itemView.findViewById(R.id.ivTaskImage)
         val tvTaskName: TextView = itemView.findViewById(R.id.tvTaskName)
         val tvTaskCategories: TextView = itemView.findViewById(R.id.tvTaskCategories)
 
@@ -36,8 +35,6 @@ class TaskBreakAdapter(
         holder.tvTaskName.text = task.title
         holder.tvTaskCategories.text = task.category
 
-        // Load image if available
-        holder.ivTaskImage.setImageResource(R.drawable.ic_launcher_background)
     }
 
     override fun getItemCount(): Int = taskList.size
