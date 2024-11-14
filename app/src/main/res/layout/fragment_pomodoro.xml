@@ -86,9 +86,14 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@color/purple"
         android:padding="16dp"
- android:layout_marginTop="75dp"
+        android:layout_marginTop="75dp"
         android:src="@drawable/back"
         android:visibility="visible"
         tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/btnBreakInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </FrameLayout>

@@ -119,6 +119,12 @@ class TaskCreationFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
         }
+
+        // Check if a date was passed from CalendarFragment
+        val selectedDateFromCalendar = arguments?.getString("selectedDate")
+        selectedDateFromCalendar?.let {
+            binding.etDatePicker.setText(it)
+        }
     }
 
     private fun addChipToGroup(text: String, chipGroup: ChipGroup) {

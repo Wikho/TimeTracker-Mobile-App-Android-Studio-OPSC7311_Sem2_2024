@@ -28,7 +28,7 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -66,32 +66,39 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
         }
 
         // Initialize settings list
-        settingsList.apply {
-            add(SettingsDataClass(
-                settingsTitle = "Note Default Priority",
-                selectedOption = "Medium",
-                type = SettingType.DROPDOWN
-            ))
-            add(SettingsDataClass(
-                settingsTitle = "Break Reminder",
-                selectedOption = "25",
-                type = SettingType.DROPDOWN
-            ))
-            add(SettingsDataClass(
-                settingsTitle = "Sound",
-                isEnabled = true,
-                type = SettingType.SWITCH
-            ))
-            add(SettingsDataClass(
-                settingsTitle = "Notification",
-                isEnabled = true,
-                type = SettingType.SWITCH
-            ))
-            add(SettingsDataClass(
-                settingsTitle = "App Version",
-                selectedOption = getAppVersion(),
-                type = SettingType.TEXT
-            ))
+        SettingsSingleton.loadSettings {
+            // Initialize settings list with loaded values
+            settingsList.apply {
+                clear()
+                add(SettingsDataClass(
+                    settingsTitle = "Note Default Priority",
+                    selectedOption = SettingsSingleton.getSettingValue("Note Default Priority") as? String ?: "Medium",
+                    type = SettingType.DROPDOWN
+                ))
+                add(SettingsDataClass(
+                    settingsTitle = "Break Reminder",
+                    selectedOption = SettingsSingleton.getSettingValue("Break Reminder") as? String ?: "25",
+                    type = SettingType.DROPDOWN
+                ))
+                add(SettingsDataClass(
+                    settingsTitle = "Sound",
+                    isEnabled = SettingsSingleton.getSettingValue("Sound") as? Boolean ?: true,
+                    type = SettingType.SWITCH
+                ))
+                add(SettingsDataClass(
+                    settingsTitle = "Notification",
+                    isEnabled = SettingsSingleton.getSettingValue("Notification") as? Boolean ?: true,
+                    type = SettingType.SWITCH
+                ))
+                add(SettingsDataClass(
+                    settingsTitle = "App Version",
+                    selectedOption = getAppVersion(),
+                    type = SettingType.TEXT
+                ))
+            }
+
+            // Notify adapter of data change
+            sAdapter.notifyDataSetChanged()
         }
 
         // Set up RecyclerView
@@ -100,6 +107,9 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
             layoutManager = LinearLayoutManager(context)
             adapter = sAdapter
         }
+
+
+
     }
 
     override fun onSettingsChanged(setting: SettingsDataClass) {

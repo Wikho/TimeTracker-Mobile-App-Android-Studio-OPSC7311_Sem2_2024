@@ -216,10 +216,10 @@ class CalendarFragment : Fragment(), TaskAdapter.TaskActionListener {
         bundle.putString("selectedDate", selectedDate)
         fragment.arguments = bundle
 
-        fragmentManager?.beginTransaction()
-            ?.replace(R.id.fragment_container, fragment)
-            ?.addToBackStack("CalendarFragment")
-            ?.commit()
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack("CalendarFragment")
+            .commit()
     }
 
     // TaskAdapter.TaskActionListener implementation

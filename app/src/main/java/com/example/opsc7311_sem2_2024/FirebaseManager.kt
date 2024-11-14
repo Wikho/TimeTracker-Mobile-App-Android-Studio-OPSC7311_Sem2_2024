@@ -18,7 +18,7 @@ class FirebaseManager{
     private val database = FirebaseDatabase.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    // <editor-fold desc="Get User Info">
+    // <editor-fold desc="User Info">
 
     // Function to get the user's name
     fun getUserName(onResult: (String?) -> Unit) {
@@ -59,6 +59,7 @@ class FirebaseManager{
             onResult(null)
         }
     }
+
 
 
     // </editor-fold>
@@ -501,6 +502,41 @@ class FirebaseManager{
                 onComplete(false, taskResult.exception?.message)
             }
         }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Settings Functions">
+
+    // Save Settings for the current user
+    fun saveUserSettings(settings: Map<String, Any>, onComplete: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        val settingsRef = database.getReference("Users").child(userId).child("Settings")
+
+        settingsRef.setValue(settings).addOnCompleteListener { taskResult ->
+            if (taskResult.isSuccessful) {
+                onComplete(true, null)
+            } else {
+                onComplete(false, taskResult.exception?.message)
+            }
+        }
+    }
+
+    // Fetch Settings for the current user
+    fun fetchUserSettings(onComplete: (Map<String, Any>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        val settingsRef = database.getReference("Users").child(userId).child("Settings")
+
+        settingsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val settings = snapshot.value as? Map<String, Any> ?: emptyMap()
+                onComplete(settings)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onComplete(emptyMap())
+            }
+        })
     }
 
     // </editor-fold>
