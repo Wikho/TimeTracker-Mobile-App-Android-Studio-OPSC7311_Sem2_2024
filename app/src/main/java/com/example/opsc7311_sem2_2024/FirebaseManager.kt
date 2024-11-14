@@ -1,6 +1,7 @@
 package com.example.opsc7311_sem2_2024
 
 import android.net.Uri
+import android.util.Log
 import com.example.opsc7311_sem2_2024.Notes.Note
 import com.example.opsc7311_sem2_2024.Pomodoro.PomodoroBreak
 import com.example.opsc7311_sem2_2024.TaskClasses.TaskItem
@@ -184,8 +185,22 @@ class FirebaseManager{
     }
 
     // Update Task
-    fun updateTask(task: TaskItem, onComplete: (Boolean, String?) -> Unit) {
-        saveTask(task, onComplete)
+    fun updateTask(taskItem: TaskItem, onComplete: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(false, "User not authenticated.")
+            return
+        }
+        val taskRef = database.getReference("Users").child(userId).child("tasks").child(taskItem.id)
+
+        taskRef.setValue(taskItem)
+            .addOnSuccessListener {
+                Log.d("FirebaseManager", "Task updated successfully: $taskItem")
+                onComplete(true, null)
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseManager", "Failed to update Task: ${e.message}")
+                onComplete(false, e.message)
+            }
     }
 
     // Delete Task
@@ -319,7 +334,10 @@ class FirebaseManager{
 
     // Function to fetch a Task with a specific ID
     fun getTaskById(taskId: String, onComplete: (TaskItem?) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(null)
+            return
+        }
         val taskRef = database.getReference("Users").child(userId).child("tasks").child(taskId)
 
         taskRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -329,28 +347,30 @@ class FirebaseManager{
             }
 
             override fun onCancelled(error: DatabaseError) {
+                Log.e("FirebaseManager", "Failed to fetch task: ${error.message}")
                 onComplete(null)
             }
         })
     }
 
     // Update Category Stats
-    fun updateCategoryStats(categoryNames: List<String>, durationInSeconds: Long) {
+    fun updateCategoryStats(categories: List<String>, durationInSeconds: Long) {
         val userId = auth.currentUser?.uid ?: return
-        val statsRef = database.getReference("Users").child(userId).child("CategoryStats")
-
-        for (category in categoryNames) {
-            val categoryRef = statsRef.child(category)
+        categories.forEach { category ->
+            val categoryRef = database.getReference("Users").child(userId).child("CategoryStats").child(category)
             categoryRef.runTransaction(object : Transaction.Handler {
                 override fun doTransaction(currentData: MutableData): Transaction.Result {
-                    var totalDuration = currentData.getValue(Long::class.java) ?: 0L
-                    totalDuration += durationInSeconds
-                    currentData.value = totalDuration
+                    val currentValue = currentData.getValue(Int::class.java) ?: 0
+                    currentData.value = currentValue + durationInSeconds.toInt()
                     return Transaction.success(currentData)
                 }
 
                 override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
-                    // Handle completion if necessary
+                    if (committed) {
+                        Log.d("FirebaseManager", "CategoryStats updated for $category")
+                    } else {
+                        Log.e("FirebaseManager", "Failed to update CategoryStats for $category: ${error?.message}")
+                    }
                 }
             })
         }
@@ -436,72 +456,200 @@ class FirebaseManager{
 
     // <editor-fold desc="Pomodoro Functions">
 
-    fun savePomodoroBreak(
-        pomodoroBreak: PomodoroBreak,
-        imageUri: Uri?,
-        onComplete: (Boolean, String?) -> Unit
-    ) {
-        val userId = auth.currentUser?.uid ?: return
-        val path = if (pomodoroBreak.taskId != null) {
-            "Users/$userId/Pomodoro/${pomodoroBreak.taskId}/${pomodoroBreak.breakId}"
+    fun savePomodoroBreak(pomodoroBreak: PomodoroBreak, imageUri: Uri?, onComplete: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(false, "User not authenticated.")
+            return
+        }
+
+        val breakRef: DatabaseReference = if (!pomodoroBreak.taskId.isNullOrEmpty()) {
+            // Specified break associated with a task
+            database.getReference("Users")
+                .child(userId)
+                .child("Pomodoro")
+                .child(pomodoroBreak.taskId!!)
+                .child(pomodoroBreak.breakId)
         } else {
-            "Users/$userId/Pomodoro/Unspecified/${pomodoroBreak.breakId}"
+            // Unspecified break
+            database.getReference("Users")
+                .child(userId)
+                .child("PomodoroUnspecified")
+                .child(pomodoroBreak.breakId)
         }
 
         if (imageUri != null) {
-            val imageRef = storage.reference.child("$path/image.jpg")
-            imageRef.putFile(imageUri).addOnSuccessListener {
-                imageRef.downloadUrl.addOnSuccessListener { uri ->
-                    pomodoroBreak.imagePath = uri.toString()
-                    // Save pomodoroBreak data
-                    savePomodoroBreakData(path, pomodoroBreak, onComplete)
-                }.addOnFailureListener { exception ->
-                    onComplete(false, exception.message)
+            // Upload image to Firebase Storage
+            val storageRef = storage.reference.child("Users/$userId/Pomodoro/${pomodoroBreak.taskId ?: "Unspecified"}/${pomodoroBreak.breakId}/image.jpg")
+            storageRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                        pomodoroBreak.imagePath = uri.toString()
+                        breakRef.setValue(pomodoroBreak)
+                            .addOnSuccessListener {
+                                Log.d("FirebaseManager", "PomodoroBreak saved successfully: $pomodoroBreak")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("FirebaseManager", "Failed to save PomodoroBreak: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    }
                 }
-            }.addOnFailureListener { exception ->
-                onComplete(false, exception.message)
-            }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseManager", "Image upload failed: ${e.message}")
+                    onComplete(false, e.message)
+                }
         } else {
-            // Save pomodoroBreak data without image
-            savePomodoroBreakData(path, pomodoroBreak, onComplete)
+            // No image to upload, directly save break
+            breakRef.setValue(pomodoroBreak)
+                .addOnSuccessListener {
+                    Log.d("FirebaseManager", "PomodoroBreak saved successfully: $pomodoroBreak")
+                    onComplete(true, null)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirebaseManager", "Failed to save PomodoroBreak: ${e.message}")
+                    onComplete(false, e.message)
+                }
         }
     }
 
-    private fun savePomodoroBreakData(
-        path: String,
-        pomodoroBreak: PomodoroBreak,
+    fun updatePomodoroBreak(pomodoroBreak: PomodoroBreak, onComplete: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(false, "User not authenticated.")
+            return
+        }
+
+        val breakRef: DatabaseReference = if (!pomodoroBreak.taskId.isNullOrEmpty()) {
+            // Specified break associated with a task
+            database.getReference("Users")
+                .child(userId)
+                .child("Pomodoro")
+                .child(pomodoroBreak.taskId!!)
+                .child(pomodoroBreak.breakId)
+        } else {
+            // Unspecified break
+            database.getReference("Users")
+                .child(userId)
+                .child("PomodoroUnspecified")
+                .child(pomodoroBreak.breakId)
+        }
+
+        breakRef.setValue(pomodoroBreak)
+            .addOnSuccessListener {
+                Log.d("FirebaseManager", "PomodoroBreak updated successfully: $pomodoroBreak")
+                onComplete(true, null)
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseManager", "Failed to update PomodoroBreak: ${e.message}")
+                onComplete(false, e.message)
+            }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold desc="Break Functions">
+
+    // Fetch breaks for a specific task and session
+    fun fetchBreaksForSession(taskId: String, sessionId: String, onComplete: (List<PomodoroBreak>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(emptyList())
+            return
+        }
+        val breaksRef = database.getReference("Users").child(userId).child("Pomodoro").child(taskId)
+
+        breaksRef.orderByChild("sessionId").equalTo(sessionId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val breaks = mutableListOf<PomodoroBreak>()
+                    snapshot.children.forEach { breakSnapshot ->
+                        val pomodoroBreak = breakSnapshot.getValue(PomodoroBreak::class.java)
+                        pomodoroBreak?.let {
+                            breaks.add(it)
+                            Log.d("FirebaseManager", "Fetched break: $it")
+                        }
+                    }
+                    onComplete(breaks)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseManager", "Failed to fetch breaks: ${error.message}")
+                    onComplete(emptyList())
+                }
+            })
+    }
+
+    // Fetch unspecified breaks
+    fun fetchUnspecifiedBreaks(onComplete: (List<PomodoroBreak>) -> Unit) {
+        val userId = auth.currentUser?.uid ?: run {
+            onComplete(emptyList())
+            return
+        }
+        val breaksRef = database.getReference("Users").child(userId).child("PomodoroUnspecified")
+
+        breaksRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val breaks = mutableListOf<PomodoroBreak>()
+                snapshot.children.forEach { breakSnapshot ->
+                    val pomodoroBreak = breakSnapshot.getValue(PomodoroBreak::class.java)
+                    pomodoroBreak?.let {
+                        breaks.add(it)
+                        Log.d("FirebaseManager", "Fetched unspecified break: $it")
+                    }
+                }
+                onComplete(breaks)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("FirebaseManager", "Failed to fetch unspecified breaks: ${error.message}")
+                onComplete(emptyList())
+            }
+        })
+    }
+
+    fun updateBreakEndTimeAndDuration(
+        breakId: String,
+        taskId: String?,
+        endTime: String,
+        duration: String,
         onComplete: (Boolean, String?) -> Unit
     ) {
-        val breakRef = database.getReference(path)
-        breakRef.setValue(pomodoroBreak).addOnCompleteListener { taskResult ->
-            if (taskResult.isSuccessful) {
-                onComplete(true, null)
-            } else {
-                onComplete(false, taskResult.exception?.message)
-            }
+        val userId = auth.currentUser?.uid ?: run {
+            Log.e("FirebaseManager", "User not authenticated.")
+            onComplete(false, "User not authenticated.")
+            return
         }
-    }
 
-    fun updatePomodoroBreak(
-    pomodoroBreakId: String,
-    pomodoroBreak: PomodoroBreak,
-    onComplete: (Boolean, String?) -> Unit
-    ) {
-        val userId = auth.currentUser?.uid ?: return
-        val path = if (pomodoroBreak.taskId != null) {
-            "Users/$userId/Pomodoro/${pomodoroBreak.taskId}/$pomodoroBreakId"
+        val breakRef: DatabaseReference = if (!taskId.isNullOrEmpty()) {
+            // Specified break associated with a task
+            database.getReference("Users")
+                .child(userId)
+                .child("Pomodoro")
+                .child(taskId)
+                .child(breakId)
         } else {
-            "Users/$userId/Pomodoro/Unspecified/$pomodoroBreakId"
+            // Unspecified break
+            database.getReference("Users")
+                .child(userId)
+                .child("PomodoroUnspecified")
+                .child(breakId)
         }
 
-        val breakRef = database.getReference(path)
-        breakRef.setValue(pomodoroBreak).addOnCompleteListener { taskResult ->
-            if (taskResult.isSuccessful) {
+        Log.d("FirebaseManager", "Updating break: breakId=$breakId, taskId=$taskId, endTime=$endTime, duration=$duration")
+
+        val updates = mapOf(
+            "endTime" to endTime,
+            "duration" to duration
+        )
+
+        breakRef.updateChildren(updates)
+            .addOnSuccessListener {
+                Log.d("FirebaseManager", "Break updated successfully: breakId=$breakId")
                 onComplete(true, null)
-            } else {
-                onComplete(false, taskResult.exception?.message)
             }
-        }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseManager", "Failed to update break: ${e.message}")
+                onComplete(false, e.message)
+            }
     }
 
     // </editor-fold>

@@ -79,4 +79,14 @@
         android:textSize="15sp"
         android:textStyle="italic"/>
 
+    <!-- "See Break Logs" Button -->
+    <Button
+        android:id="@+id/btnSeeBreakLogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="See Break Logs"
+        android:layout_below="@id/tv_SessionDescription"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="end"/>
+
 </LinearLayout>

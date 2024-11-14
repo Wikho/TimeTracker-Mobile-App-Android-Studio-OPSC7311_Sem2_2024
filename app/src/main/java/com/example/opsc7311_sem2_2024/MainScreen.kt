@@ -82,8 +82,8 @@ class MainScreen : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             R.id.nvAnalytics -> replaceFragment(AnalyticsFragment())
             R.id.nvArchivedTasks -> replaceFragment(ArchivedTasksFragment())
             R.id.nvNotes -> replaceFragment(NotesFragment())
-            R.id.nvSettings -> replaceFragment(SettingsFragment())
             R.id.nvPomodoro -> replaceFragment(PomodoroFragment())
+            R.id.nvSettings -> replaceFragment(SettingsFragment())
             R.id.nvLogout -> logOutUser()
         }
 

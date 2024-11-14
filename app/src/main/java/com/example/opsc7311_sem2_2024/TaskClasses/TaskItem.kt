@@ -81,6 +81,7 @@ data class TaskItem(
 @IgnoreExtraProperties
 data class TaskSession(
     var sessionId: String = "",
+    var taskId: String = "",
     var sessionDescription: String = "",
     var sessionStartDate: String = "",
     var startTime: String = "",
@@ -89,4 +90,5 @@ data class TaskSession(
     var imagePath: String? = null,
     var breakCount: Int = 0,
     var totalBreakTime: Long = 0L
+
 )

@@ -117,6 +117,7 @@ class SessionStartedActivity : AppCompatActivity() {
         // Load task and session
         loadTaskAndSession()
 
+
     }
 
     private fun loadTaskAndSession() {
@@ -229,6 +230,7 @@ class SessionStartedActivity : AppCompatActivity() {
     private fun openPomodoroFragment() {
         val intent = Intent(this, PomodoroActivity::class.java)
         intent.putExtra("taskId", taskId)
+        intent.putExtra("sessionId", sessionId)
         intent.putExtra("isTaskStarted", true)
         breakLauncher.launch(intent)
     }
@@ -257,6 +259,9 @@ class SessionStartedActivity : AppCompatActivity() {
             currentSession.sessionDuration = calculateDuration(currentSession.startTime, endTime)
             currentSession.breakCount = breakCount
             currentSession.totalBreakTime = totalBreakTime // Assign the Long value directly
+
+            // **Set the correct taskId here**
+            currentSession.taskId = task?.id ?: ""
 
             task?.isStarted = false
 

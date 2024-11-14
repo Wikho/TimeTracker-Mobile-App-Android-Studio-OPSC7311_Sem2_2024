@@ -6,6 +6,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 data class PomodoroBreak(
     var breakId: String = "",
     var taskId: String? = null,
+    var sessionId: String? = null,
     var reason: String = "",
     var date: String = "",
     var startTime: String = "",

@@ -94,6 +94,9 @@
     <Button
         android:id="@+id/btnBreakInfo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Break Info"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp" />
 
 </FrameLayout>
