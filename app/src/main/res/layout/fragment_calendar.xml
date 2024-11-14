@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:text="Filter Off"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textStyle="bold" />
+        android:layout_centerHorizontal="true" />
 
     <!-- Filter Container -->
     <LinearLayout
@@ -84,5 +83,6 @@
         android:layout_height="wrap_content"
         android:text="Create Task"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/lightTeal"/>
 </RelativeLayout>

@@ -5,14 +5,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="10dp">
 
     <!-- Header with Back Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/mainGray">
 
         <TextView
             android:id="@+id/tvBreakInfoTitle"
@@ -21,7 +23,8 @@
             android:text="Break Info"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:textColor="@color/white"/>
 
         <Button
             android:id="@+id/btnBack"
@@ -30,13 +33,41 @@
             android:text="Back"/>
     </LinearLayout>
 
-    <!-- Filter Toggle Button -->
-    <Button
-        android:id="@+id/btnFilterToggle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Filter Off"
-        android:layout_marginTop="8dp"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <!-- Filter Toggle Button -->
+        <Button
+            android:id="@+id/btnFilterToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter Off"
+            android:layout_weight="1"
+            android:layout_margin="2dp"/>
+
+        <Button
+            android:id="@+id/btnTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Task"
+            android:layout_weight="1"
+            android:layout_margin="2dp"/>
+
+        <Button
+            android:id="@+id/btnNoTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Task"
+            android:layout_weight="1"
+            android:layout_margin="2dp"/>
+
+
+    </LinearLayout>
+
+
 
     <!-- Filter Container -->
     <LinearLayout
@@ -80,26 +111,15 @@
     </LinearLayout>
 
     <!-- Task and No Task Buttons -->
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
-
-        <Button
-            android:id="@+id/btnTask"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Task"
-            android:layout_weight="1"/>
-
-        <Button
-            android:id="@+id/btnNoTask"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="No Task"
-            android:layout_weight="1"/>
-    </LinearLayout>
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/lightGray">
 
     <!-- Previous Button -->
     <Button
@@ -117,4 +137,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="8dp"/>
+
+    </LinearLayout>
 </LinearLayout>

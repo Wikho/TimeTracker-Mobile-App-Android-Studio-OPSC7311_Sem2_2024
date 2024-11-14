@@ -97,6 +97,7 @@
         android:layout_height="wrap_content"
         android:text="Break Info"
         android:layout_gravity="bottom"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/lightTeal"/>
 
 </FrameLayout>

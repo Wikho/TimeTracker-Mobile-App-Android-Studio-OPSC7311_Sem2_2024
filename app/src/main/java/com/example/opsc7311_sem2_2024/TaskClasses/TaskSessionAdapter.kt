@@ -38,10 +38,10 @@ class TaskSessionAdapter : RecyclerView.Adapter<TaskSessionAdapter.SessionViewHo
         if (!session.imagePath.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(session.imagePath)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.image)
                 .into(holder.binding.ivSessionImage)
         } else {
-            holder.binding.ivSessionImage.setImageResource(R.drawable.ic_launcher_background)
+            holder.binding.ivSessionImage.setImageResource(R.drawable.image)
         }
 
         // Set click listener for "See Break Logs" button

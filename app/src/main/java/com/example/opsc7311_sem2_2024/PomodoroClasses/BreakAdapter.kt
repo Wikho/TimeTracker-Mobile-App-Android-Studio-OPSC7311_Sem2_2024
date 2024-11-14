@@ -52,10 +52,10 @@ class BreakAdapter(
         if (!pomodoroBreak.imagePath.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(pomodoroBreak.imagePath)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.image)
                 .into(holder.ivBreakImage)
         } else {
-            holder.ivBreakImage.setImageResource(R.drawable.ic_launcher_background)
+            holder.ivBreakImage.setImageResource(R.drawable.image)
         }
     }
 

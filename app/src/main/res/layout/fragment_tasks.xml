@@ -116,13 +116,11 @@
      android:layout_width="match_parent"
      android:layout_height="wrap_content"
      android:layout_alignParentBottom="true"
-
      android:text="@string/archived_tasks"
      android:textColor="@color/black"
-     android:textStyle="bold"
      tools:ignore="TextContrastCheck,VisualLintButtonSize"
      android:gravity="center"
-     android:backgroundTint="@color/red"/>
+     android:backgroundTint="@color/lightTeal"/>
 
  <!-- Floating Action Button -->
  <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -4,30 +4,43 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp">
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_margin="5dp"
+    android:background="@drawable/rounded_background_white"
+    android:backgroundTint="@color/gray">
+
+    <TextView
+        android:id="@+id/tvSessionDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Session Date"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/mainGray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/ivSessionImage"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/image"
+        android:layout_weight="1"
         android:contentDescription="Session Image"
         android:layout_marginEnd="8dp"/>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="10"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvSessionDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Session Date"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/tvSessionDescription"
@@ -52,4 +65,5 @@
             android:textSize="14sp"/>
 
     </LinearLayout>
+   </LinearLayout>
 </LinearLayout>

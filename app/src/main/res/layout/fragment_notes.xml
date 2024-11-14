@@ -43,7 +43,8 @@
             android:id="@+id/llFilterAndSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="visible">
 
                 <!-- Filter Toggle Button -->
                 <Button
@@ -51,7 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Filter Off"
-                    android:backgroundTint="@color/black"
+                    android:backgroundTint="@color/purple"
                     android:textColor="@color/white"
                     android:layout_marginEnd="8dp" />
 
@@ -143,8 +144,8 @@
             android:id="@+id/btnMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mode: To Do"
-            android:backgroundTint="@color/black"
+            android:text="Category: To Do"
+            android:backgroundTint="@color/purple"
             android:textColor="@color/white"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"/>
@@ -163,7 +164,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/add_new_note"
-            android:backgroundTint="@color/black"
-            android:textColor="@color/white"/>
+            android:backgroundTint="@color/lightTeal"
+            android:textColor="@color/black"/>
 
 </LinearLayout>

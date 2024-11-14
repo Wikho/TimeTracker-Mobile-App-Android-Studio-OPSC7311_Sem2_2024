@@ -22,16 +22,17 @@
             android:id="@+id/btnSelectMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Mode" />
+            android:text="Graph Select" />
 
         <ImageButton
             android:id="@+id/btnInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_dialog_info"
+            android:src="@drawable/baseline_info_24"
             android:contentDescription="Info"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_marginStart="8dp" />
+            android:layout_marginStart="8dp"
+            />
     </LinearLayout>
 
     <!-- Filter Toggle Button -->

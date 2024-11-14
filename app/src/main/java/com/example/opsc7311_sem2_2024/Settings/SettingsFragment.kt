@@ -50,20 +50,6 @@ class SettingsFragment : Fragment(), SettingsAdapter.SettingsListener {
             binding.tvEmail.text = userEmail ?: getString(R.string.user_email)
         }
 
-        binding.btnLogout.setOnClickListener {
-
-            val editor = sharedPreferences.edit()
-            editor.clear()
-            editor.apply()
-
-            // Sign out from FirebaseAuth
-            FirebaseAuth.getInstance().signOut()
-
-            // Redirect to LoginActivity
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            startActivity(intent)
-            requireActivity().finish()
-        }
 
         // Initialize settings list
         SettingsSingleton.loadSettings {

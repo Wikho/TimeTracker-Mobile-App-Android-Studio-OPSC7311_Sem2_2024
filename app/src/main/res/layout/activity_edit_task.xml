@@ -3,13 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingTop="10dp"
-    android:paddingRight="5dp"
-    android:paddingLeft="5dp"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
+    android:paddingBottom="5dp"
     android:background="@drawable/rounded_background_white"
-    android:padding="16dp"
     android:gravity="center">
 
 
@@ -20,8 +19,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="8dp"
-        android:background="@drawable/rounded_background_gray">
+        android:paddingTop="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="5dp"
+        android:background="@drawable/rounded_background_gray"
+        android:backgroundTint="@color/mainGray">
 
         <!-- Back Button -->
         <ImageButton
@@ -29,6 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/back"
+            android:backgroundTint="@color/purple"
+            android:layout_weight="1"
             tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
         <!-- Task Title Text-->
@@ -36,7 +41,7 @@
             android:id="@+id/tilTaskTitleEdit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="200"
             android:hint="@string/task_title"
             app:endIconMode="clear_text"
             android:background="@drawable/rounded_background_white">
@@ -55,6 +60,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/delete"
+            android:backgroundTint="@color/purple"
+            android:layout_weight="1"
             tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     </LinearLayout>
@@ -148,7 +155,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:text="@string/add"
-                        android:backgroundTint="@color/black"
+                        android:backgroundTint="@color/teal"
                         android:textColor="@color/white"/>
                 </LinearLayout>
             </LinearLayout>
@@ -156,7 +163,7 @@
             <!-- Space -->
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="16dp" />
+                android:layout_height="5dp" />
 
             <!-- Date Section -->
 
@@ -272,8 +279,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/green"
+        android:layout_marginBottom="5dp"
+        android:backgroundTint="@color/lightTeal"
         android:text="@string/save"
         android:textColor="@color/black"
         tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />

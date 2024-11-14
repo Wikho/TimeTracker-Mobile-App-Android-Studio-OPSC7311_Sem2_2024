@@ -3,13 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingTop="10dp"
-    android:paddingRight="5dp"
-    android:paddingLeft="5dp"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
+    android:paddingBottom="5dp"
     android:background="@drawable/rounded_background_white"
-    android:padding="16dp"
     android:gravity="center">
 
     <!-- Title Layout with Back Button and Edit Button -->
@@ -20,7 +19,8 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="8dp"
-        android:background="@drawable/rounded_background_gray">
+        android:background="@drawable/rounded_background_gray"
+        android:backgroundTint="@color/mainGray">
 
         <!-- Back Button -->
         <ImageButton
@@ -28,6 +28,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/back"
+            android:backgroundTint="@color/purple"
             tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
         <!-- Task Title Text-->
@@ -49,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/edit"
+            android:backgroundTint="@color/purple"
             tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
     </LinearLayout>
 
@@ -94,7 +96,9 @@
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rounded_background_gray"
                 app:singleSelection="false"
-                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck"></com.google.android.material.chip.ChipGroup>
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck">
+
+            </com.google.android.material.chip.ChipGroup>
 
         </LinearLayout>
 
@@ -252,6 +256,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/rounded_background_white"
+                android:backgroundTint="@color/mainGray"
                 android:layout_marginTop="8dp"
                 android:padding="2dp">
 
@@ -260,7 +265,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="10dp"
+                    android:paddingBottom="5dp">
 
                     <Button
                         android:id="@+id/btnToggleFilters"
@@ -414,8 +420,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/red"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@color/lightTeal"
         android:text="@string/archive_task"
         android:textColor="@color/black"
         tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />

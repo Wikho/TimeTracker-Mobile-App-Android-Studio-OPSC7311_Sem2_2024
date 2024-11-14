@@ -47,10 +47,10 @@ class TaskSessionBreakAdapter(
         if (!session.imagePath.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(session.imagePath)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.image)
                 .into(holder.ivSessionImage)
         } else {
-            holder.ivSessionImage.setImageResource(R.drawable.ic_launcher_background)
+            holder.ivSessionImage.setImageResource(R.drawable.image)
         }
 
         // Fetch breaks for this session

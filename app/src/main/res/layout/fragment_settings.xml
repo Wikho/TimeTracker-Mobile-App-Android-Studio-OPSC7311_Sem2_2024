@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="10dp">
 
     <!-- User Account Section -->
     <LinearLayout
@@ -13,7 +13,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/mainGray">
 
         <ImageView
             android:id="@+id/ivUserIcon"
@@ -35,21 +37,18 @@
                 android:layout_height="wrap_content"
                 android:text="User Name"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/white"/>
 
             <TextView
                 android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="user@example.com"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Log Out" />
     </LinearLayout>
 
     <!-- Divider -->
