@@ -4,25 +4,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/calendarLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="10dp">
 
-    <!-- Filter Toggle Button -->
-    <Button
-        android:id="@+id/btnToggleFilter"
+    <!-- Horizontal LinearLayout containing btnToggleFilter and btnToggleCalendar -->
+
+    <!-- Filter Container below buttonContainer -->
+
+    <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Filter Off"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="0dp"
+        android:gravity="start"
+        android:orientation="horizontal">
 
-    <!-- Filter Container -->
+        <!-- Filter Toggle Button -->
+
+        <!-- Toggle Calendar Visibility Button -->
+        <Button
+            android:id="@+id/btnToggleFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Filter Off" />
+
+        <Button
+            android:id="@+id/btnToggleCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hide Calendar" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/filterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        android:layout_below="@id/btnToggleFilter"
+        android:layout_below="@id/buttonContainer"
         android:padding="8dp">
 
         <!-- Search Task Input -->
@@ -30,7 +51,6 @@
             android:id="@+id/etSearchTask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Task"
             android:padding="8dp"
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="8dp" />
@@ -40,49 +60,53 @@
             android:id="@+id/chipGroupCategories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp" />
+            android:padding="8dp"
+            app:singleSelection="false"
+            app:selectionRequired="false">
+            <!-- Example Chips (You can add dynamically in your code) -->
+            <!--
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCategory1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Work" />
+            -->
+        </com.google.android.material.chip.ChipGroup>
     </LinearLayout>
 
-    <!-- Expandable Calendar View -->
-    <LinearLayout
-        android:id="@+id/calendarContainer"
+    <!-- Calendar View below filterContainer -->
+    <CalendarView
+        android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_below="@id/filterContainer">
+        android:layout_below="@id/filterContainer"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/lightGray"
+        android:padding="8dp" />
 
-        <!-- Toggle Calendar Visibility -->
-        <Button
-            android:id="@+id/btnToggleCalendar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hide Calendar"
-            android:layout_gravity="center_horizontal" />
-
-        <!-- Calendar View -->
-        <CalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
-    </LinearLayout>
-
-    <!-- RecyclerView for Tasks -->
+    <!-- RecyclerView for Tasks below calendarView, above btnCreateTask -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTasks"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/calendarContainer"
-        android:layout_above="@+id/btnCreateTask"
-        android:layout_marginTop="8dp" />
+        android:layout_below="@id/calendarView"
+        android:layout_above="@id/btnCreateTask"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:scrollbars="vertical"
+        android:background="@drawable/rounded_background_gray"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    <!-- Create Task Button -->
+    <!-- Create Task Button at the bottom -->
     <Button
         android:id="@+id/btnCreateTask"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create Task"
+        android:text="@string/create_task"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        android:backgroundTint="@color/lightTeal"/>
+        android:layout_margin="5dp"
+        android:backgroundTint="@color/lightTeal"
+        android:textColor="@color/black" />
+
 </RelativeLayout>
