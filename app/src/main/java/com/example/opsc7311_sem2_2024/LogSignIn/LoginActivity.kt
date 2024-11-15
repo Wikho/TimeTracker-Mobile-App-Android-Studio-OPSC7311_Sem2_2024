@@ -81,8 +81,8 @@ class LoginActivity : AppCompatActivity() {
             if (validateInputs()) {
                 binding.btnLogIn.text = getString(R.string.loading)
                 binding.btnLogIn.isEnabled = false
-                val email = binding.etEmail.text.toString()
-                val password = binding.etPassword.text.toString()
+                val email = binding.etEmail.text.toString().trim()
+                val password = binding.etPassword.text.toString().trim()
                 val rememberMe = binding.cbRemeberMe.isChecked
 
                 firebaseManager.loginUser(email, password) { success, _ ->

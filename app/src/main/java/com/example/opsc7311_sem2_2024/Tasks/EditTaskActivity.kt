@@ -267,7 +267,7 @@ class EditTaskActivity : AppCompatActivity() {
             val category = selectedCategories.joinToString(",")
 
             val startDate = binding.etDatePicker.text.toString()
-            val taskTime = "Time: " + binding.etTaskTime.text.toString()
+            val taskTime = binding.etTaskTime.text.toString()
             val minTargetHours = binding.etMinHours.text.toString().toIntOrNull() ?: 0
             val maxTargetHours = binding.etMaxHours.text.toString().toIntOrNull() ?: 0
 

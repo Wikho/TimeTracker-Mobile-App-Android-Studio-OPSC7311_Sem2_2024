@@ -58,9 +58,9 @@ class SignInActivity : AppCompatActivity() {
                 // Disable the button to prevent multiple clicks
                 binding.btnSignUp.isEnabled = false
 
-                val name = binding.etName.text.toString()
-                val email = binding.etEmail.text.toString()
-                val password = binding.etPassword.text.toString()
+                val name = binding.etName.text.toString().trim()
+                val email = binding.etEmail.text.toString().trim()
+                val password = binding.etPassword.text.toString().trim()
 
                 firebaseManager.registerUser(name, email, password) { success, message ->
                     // Restore button text and state when task is complete
