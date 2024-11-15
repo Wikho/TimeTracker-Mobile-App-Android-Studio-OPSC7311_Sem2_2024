@@ -44,7 +44,9 @@
         android:orientation="vertical"
         android:visibility="gone"
         android:layout_below="@id/buttonContainer"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/mainGray">
 
         <!-- Search Task Input -->
         <EditText
@@ -52,7 +54,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:background="@android:drawable/edit_text"
+            android:hint="Search Task"
+            android:background="@drawable/rounded_background_white"
+            android:backgroundTint="@color/lightGray"
             android:layout_marginBottom="8dp" />
 
         <!-- Category Chips -->
@@ -61,16 +65,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
+            android:background="@drawable/rounded_background_white"
+            android:backgroundTint="@color/lightGray"
             app:singleSelection="false"
             app:selectionRequired="false">
-            <!-- Example Chips (You can add dynamically in your code) -->
-            <!--
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipCategory1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Work" />
-            -->
+
         </com.google.android.material.chip.ChipGroup>
     </LinearLayout>
 
