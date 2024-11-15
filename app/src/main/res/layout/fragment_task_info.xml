@@ -421,7 +421,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/lightTeal"
+        android:backgroundTint="@color/lightRed"
         android:text="@string/archive_task"
         android:textColor="@color/black"
         tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />

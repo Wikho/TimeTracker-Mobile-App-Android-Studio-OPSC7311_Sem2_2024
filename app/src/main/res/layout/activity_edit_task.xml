@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/delete"
-            android:backgroundTint="@color/purple"
+            android:backgroundTint="@color/red"
             android:layout_weight="1"
             tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
@@ -280,7 +280,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="5dp"
-        android:backgroundTint="@color/lightTeal"
+        android:backgroundTint="@color/lightGreen"
         android:text="@string/save"
         android:textColor="@color/black"
         tools:ignore="VisualLintButtonSize,DuplicateSpeakableTextCheck" />
