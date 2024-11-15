@@ -12,6 +12,16 @@
             android:title="@string/task"/>
 
         <item
+            android:id="@+id/nvNotes"
+            android:icon="@drawable/notes"
+            android:title="@string/notes"/>
+
+        <item
+            android:id="@+id/nvPomodoro"
+            android:icon="@drawable/pomodoro"
+            android:title="@string/pomodoro"/>
+
+        <item
             android:id="@+id/nvCalendar"
             android:icon="@drawable/calendar"
             android:title="@string/calendar"/>
@@ -25,16 +35,6 @@
             android:id="@+id/nvArchivedTasks"
             android:icon="@drawable/archive"
             android:title="@string/archived_tasks"/>
-
-        <item
-            android:id="@+id/nvNotes"
-            android:icon="@drawable/notes"
-            android:title="@string/notes"/>
-
-        <item
-            android:id="@+id/nvPomodoro"
-            android:icon="@drawable/pomodoro"
-            android:title="@string/pomodoro"/>
 
         <item
             android:id="@+id/nvSettings"
