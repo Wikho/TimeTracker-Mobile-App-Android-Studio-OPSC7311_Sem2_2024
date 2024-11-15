@@ -5,47 +5,48 @@
     android:id="@+id/analyticsLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingHorizontal="20dp"
-    android:paddingVertical="16dp"
-    android:gravity="center">
+    android:padding="10dp">
 
-    <!-- Mode Selection Button and Info Icon -->
+    <!-- Top Section: Buttons Horizontally Aligned -->
+
+    <!-- Filter Container Below Top Buttons -->
     <LinearLayout
-        android:id="@+id/modeSelectionContainer"
+        android:id="@+id/topButtonContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="start"
+        android:orientation="horizontal">
 
+        <!-- Filter Toggle Button -->
+        <Button
+            android:id="@+id/btnToggleFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Filter Off" />
+
+        <!-- Mode Selection Button -->
         <Button
             android:id="@+id/btnSelectMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:text="Graph Select" />
 
+        <!-- Info Icon Button -->
         <ImageButton
             android:id="@+id/btnInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_info_24"
-            android:contentDescription="Info"
-            android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_marginStart="8dp"
-            />
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Info"
+            android:src="@drawable/baseline_info_24" />
     </LinearLayout>
 
-    <!-- Filter Toggle Button -->
-    <Button
-        android:id="@+id/btnToggleFilters"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Filter Off"
-        android:layout_below="@id/modeSelectionContainer"
-        android:layout_marginTop="8dp"
-        android:layout_centerHorizontal="true" />
-
-    <!-- Filters Container -->
     <LinearLayout
         android:id="@+id/filterContainer"
         android:layout_width="match_parent"
@@ -53,34 +54,49 @@
         android:orientation="vertical"
         android:visibility="gone"
         android:padding="8dp"
-        android:layout_below="@id/btnToggleFilters">
+        android:layout_below="@id/topButtonContainer"
+        android:background="@drawable/rounded_background_white"
+        android:backgroundTint="@color/gray">
 
-        <!-- From and To Date Selectors -->
+        <!-- From Date Selector -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="From" />
+            android:text="From"
+            android:textSize="16sp"
+            android:textColor="@color/black" />
 
         <EditText
             android:id="@+id/etFromDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:clickable="true" />
+            android:clickable="true"
+            android:background="@android:drawable/edit_text"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:hint="Select From Date" />
 
+        <!-- To Date Selector -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="To" />
+            android:text="To"
+            android:textSize="16sp"
+            android:textColor="@color/black" />
 
         <EditText
             android:id="@+id/etToDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:clickable="true" />
+            android:clickable="true"
+            android:background="@android:drawable/edit_text"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:hint="Select To Date" />
 
-        <!-- Buttons for Day, Week, Month -->
+        <!-- Buttons for Day, Week, Month Filters -->
         <LinearLayout
             android:id="@+id/dateRangeButtonsContainer"
             android:layout_width="match_parent"
@@ -91,27 +107,27 @@
 
             <Button
                 android:id="@+id/btnDayFilter"
-                android:text="Day"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Day"
                 android:layout_marginHorizontal="6dp" />
 
             <Button
                 android:id="@+id/btnWeekFilter"
-                android:text="Week"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Week"
                 android:layout_marginHorizontal="6dp" />
 
             <Button
                 android:id="@+id/btnMonthFilter"
-                android:text="Month"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Month"
                 android:layout_marginHorizontal="6dp" />
         </LinearLayout>
 
-        <!-- Additional Buttons for Time Allocation Mode -->
+        <!-- Additional Buttons for Time Allocation Mode (Initially Hidden) -->
         <LinearLayout
             android:id="@+id/timeAllocationButtonsContainer"
             android:layout_width="match_parent"
@@ -123,69 +139,83 @@
 
             <Button
                 android:id="@+id/btnCategories"
-                android:text="Categories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Categories"
                 android:layout_marginHorizontal="6dp" />
 
             <Button
                 android:id="@+id/btnTasks"
-                android:text="Tasks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Tasks"
                 android:layout_marginHorizontal="6dp" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Chart Container -->
-    <FrameLayout
-        android:id="@+id/chartContainer"
+    <!-- Chart and Statistics Container Below Filters -->
+    <LinearLayout
+        android:id="@+id/chartAndStatisticsContainer"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:layout_below="@id/filterContainer"
-        android:layout_marginTop="16dp">
-
-        <!-- LineChart for Goal Tracker -->
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <!-- BarChart for Task Tracker -->
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <!-- PieChart for Time Allocation -->
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <!-- RadarChart for Goal Overview -->
-        <com.github.mikephil.charting.charts.RadarChart
-            android:id="@+id/radarChart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-    </FrameLayout>
-
-    <!-- Statistics Text View -->
-    <TextView
-        android:id="@+id/tvStatistics"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Statistics"
-        android:layout_below="@id/chartContainer"
         android:layout_marginTop="16dp"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:padding="8dp" />
+        android:layout_marginBottom="8dp">
+
+        <!-- Chart Container -->
+        <FrameLayout
+            android:id="@+id/chartContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_background_white"
+            android:padding="8dp">
+
+            <!-- LineChart for Goal Tracker -->
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- BarChart for Task Tracker -->
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- PieChart for Time Allocation -->
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- RadarChart for Goal Overview -->
+            <com.github.mikephil.charting.charts.RadarChart
+                android:id="@+id/radarChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- Statistics Text View -->
+        <TextView
+            android:id="@+id/tvStatistics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Statistics"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textColor="@color/black"
+            android:background="@drawable/rounded_background_gray"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
 
 </RelativeLayout>
