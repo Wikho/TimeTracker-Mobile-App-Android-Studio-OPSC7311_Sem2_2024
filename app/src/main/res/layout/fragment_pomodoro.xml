@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pomodoroFragmentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Pomodoro.PomodoroFragment">
 
+    <!-- Top Section: Task Title -->
     <TextView
         android:id="@+id/tvTaskTitle"
         android:layout_width="wrap_content"
@@ -12,92 +14,138 @@
         android:text="Task Title"
         android:textSize="30sp"
         android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="top|center_horizontal"
         android:visibility="visible"
-        android:translationY="20dp" />
+        android:layout_marginTop="16dp" />
 
-
-    <ImageButton
-        android:id="@+id/PlayPTimerBtn"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:background="#00FFFFFF"
-        android:importantForAccessibility="no"
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:src="@drawable/playtimerbtn"
-        android:translationX="165dp"
-        android:translationY="575dp" />
-
-    <ImageButton
-        android:id="@+id/PausePTimerBtn"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:background="#00FFFFFF"
-        android:importantForAccessibility="no"
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:src="@drawable/pausetimerbtn"
-        android:translationX="35dp"
-        android:translationY="575dp" />
-
-    <ImageButton
-        android:id="@+id/CancelPTimerBtn"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:background="#00FFFFFF"
-        android:importantForAccessibility="no"
-        android:scaleX="2.5"
-        android:scaleY="2.5"
-        android:src="@drawable/canceltimerbtn"
-        android:translationX="300dp"
-        android:translationY="575dp" />
-
+    <!-- Middle Section: Timer Value -->
     <TextView
         android:id="@+id/TimerValueTxt"
-        android:layout_width="238dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/_00_00_00"
         android:textAlignment="center"
         android:textSize="48sp"
         android:textStyle="bold"
-        android:translationX="85dp"
-        android:translationY="300dp"
-        tools:ignore="TextSizeCheck" />
+        android:layout_gravity="center"
+        android:textColor="@android:color/black" />
 
-    <EditText
-        android:id="@+id/TimerMinuteValueTxt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/enter_pomodoro_minutes"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        android:minHeight="48dp"
-        android:textAlignment="center"
-        android:textColorHint="#78909C"
-        android:textStyle="bold"
-        android:translationX="100dp"
-        android:translationY="80dp" />
-
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/purple"
-        android:padding="16dp"
-        android:layout_marginTop="75dp"
-        android:src="@drawable/back"
-        android:visibility="visible"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <Button
-        android:id="@+id/btnBreakInfo"
+    <!-- Bottom Section: Break Info and Timer Controls -->
+    <LinearLayout
+        android:id="@+id/bottomSectionContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Break Info"
+        android:orientation="vertical"
         android:layout_gravity="bottom"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/lightTeal"/>
+        android:padding="16dp"
+        android:gravity="center_horizontal">
+
+        <!-- Timer Controls: Pause, Play, Cancel -->
+        <LinearLayout
+            android:id="@+id/timerControlsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/PausePTimerBtn"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:background="#00FFFFFF"
+                android:importantForAccessibility="no"
+                android:scaleX="2.5"
+                android:scaleY="2.5"
+                android:src="@drawable/pausetimerbtn"
+                android:contentDescription="Pause Timer"
+                android:layout_marginEnd="16dp" />
+
+            <Space
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+
+            <ImageButton
+                android:id="@+id/PlayPTimerBtn"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:background="#00FFFFFF"
+                android:importantForAccessibility="no"
+                android:scaleX="2.5"
+                android:scaleY="2.5"
+                android:src="@drawable/playtimerbtn"
+                android:contentDescription="Play Timer"
+                android:layout_marginEnd="16dp" />
+
+            <Space
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+
+            <ImageButton
+                android:id="@+id/CancelPTimerBtn"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:background="#00FFFFFF"
+                android:importantForAccessibility="no"
+                android:scaleX="2.5"
+                android:scaleY="2.5"
+                android:src="@drawable/canceltimerbtn"
+                android:contentDescription="Cancel Timer" />
+
+        </LinearLayout>
+
+        <!-- Break Info Button -->
+        <Button
+            android:id="@+id/btnBreakInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Break Info"
+            android:backgroundTint="@color/lightTeal"
+            android:textColor="@android:color/black"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <!-- Upper Section: Back Button and Timer Minute Input -->
+    <LinearLayout
+        android:id="@+id/upperSectionContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="80dp"
+        android:paddingHorizontal="5dp"
+        android:gravity="center_vertical">
+
+        <!-- Back Button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/purple"
+            android:padding="10dp"
+            android:src="@drawable/back"
+            android:contentDescription="Back Button" />
+
+        <!-- Space between Back Button and Timer Minute Input -->
+
+
+        <!-- Timer Minute Input -->
+        <EditText
+            android:id="@+id/TimerMinuteValueTxt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/enter_pomodoro_minutes"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:minHeight="48dp"
+            android:textAlignment="center"
+            android:textColorHint="#78909C"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+    </LinearLayout>
 
 </FrameLayout>

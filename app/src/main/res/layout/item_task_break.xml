@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingTop="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
@@ -30,14 +30,20 @@
             android:textStyle="bold"
             android:textColor="@color/black"/>
 
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="10dp"/>
+
 
         <TextView
             android:id="@+id/tvTaskCategories"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_background_white"
-            android:backgroundTint="@color/lightRed"
+            android:backgroundTint="@color/white"
             android:text="Categories"
             android:textSize="14sp" />
+
+
     </LinearLayout>
 </LinearLayout>

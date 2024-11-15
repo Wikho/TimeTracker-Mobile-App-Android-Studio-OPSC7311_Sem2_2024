@@ -27,11 +27,6 @@
             android:title="@string/archived_tasks"/>
 
         <item
-            android:id="@+id/nvSettings"
-            android:icon="@drawable/settings"
-            android:title="@string/settings"/>
-
-        <item
             android:id="@+id/nvNotes"
             android:icon="@drawable/notes"
             android:title="@string/notes"/>
@@ -40,6 +35,11 @@
             android:id="@+id/nvPomodoro"
             android:icon="@drawable/pomodoro"
             android:title="@string/pomodoro"/>
+
+        <item
+            android:id="@+id/nvSettings"
+            android:icon="@drawable/settings"
+            android:title="@string/settings"/>
 
 
 
