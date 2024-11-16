@@ -294,6 +294,9 @@ class PomodoroFragment : Fragment() {
     }
 
     private fun startTimerWithReason(reason: String) {
+
+        breakInfoButton.visibility = View.GONE
+
         val minutesInput = timerMinuteValueEditText.text.toString().toIntOrNull()
         if (minutesInput == null || minutesInput <= 0) {
             Toast.makeText(requireContext(), "Please enter a valid number of minutes", Toast.LENGTH_SHORT).show()
@@ -388,6 +391,8 @@ class PomodoroFragment : Fragment() {
     }
 
     private fun endBreak() {
+        breakInfoButton.visibility = View.VISIBLE
+
         timer?.cancel()
         isTimerRunning = false
         timeLeftInMillis = 0L
